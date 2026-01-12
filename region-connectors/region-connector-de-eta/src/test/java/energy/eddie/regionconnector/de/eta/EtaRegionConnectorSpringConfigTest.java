@@ -8,11 +8,15 @@ import energy.eddie.regionconnector.de.eta.config.PlainDeConfiguration;
 import energy.eddie.regionconnector.de.eta.data.needs.EtaDataNeedRuleSet;
 import energy.eddie.regionconnector.de.eta.persistence.DePermissionRequestRepository;
 import energy.eddie.regionconnector.de.eta.persistence.DePermissionEventRepository;
+import energy.eddie.regionconnector.de.eta.service.PollingService;
 import energy.eddie.regionconnector.shared.cim.v0_82.TransmissionScheduleProvider;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBus;
 import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
+import energy.eddie.regionconnector.shared.services.CommonFutureDataService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,12 +35,17 @@ class EtaRegionConnectorSpringConfigTest {
                 .withBean(DePermissionRequestRepository.class, () -> mock(DePermissionRequestRepository.class))
                 .withBean(DataNeedsService.class, () -> mock(DataNeedsService.class))
                 .withBean(EtaDataNeedRuleSet.class, EtaDataNeedRuleSet::new)
-                .withPropertyValues(
-                        "region-connector.de.eta.eligible-party-id=test-eligible-party-id",
-                        "region-connector.de.eta.api-base-url=https://test-url.de",
-                        "region-connector.de.eta.api-client-id=test-client-id",
-                        "region-connector.de.eta.api-client-secret=test-client-secret"
-                )
+                .withBean(TaskScheduler.class, SimpleAsyncTaskScheduler::new)
+                .withBean(PollingService.class, () -> mock(PollingService.class))
+                .withBean(PlainDeConfiguration.class, () -> new PlainDeConfiguration(
+                        "party-1",
+                        "https://api.eta-plus.de",
+                        "client-id",
+                        "client-secret",
+                        "/api/v1/metered-data",
+                        "/api/v1/permissions/{id}",
+                        "0 0 17 * * *"
+                ))
                 .withBean(CommonInformationModelConfiguration.class, () -> {
                     CommonInformationModelConfiguration cimConfig = mock(CommonInformationModelConfiguration.class);
                     when(cimConfig.eligiblePartyNationalCodingScheme()).thenReturn(CodingSchemeTypeList.EIC);
@@ -50,6 +59,7 @@ class EtaRegionConnectorSpringConfigTest {
                     assertThat(context).hasSingleBean(TransmissionScheduleProvider.class);
                     assertThat(context).hasSingleBean(DataNeedCalculationService.class);
                     assertThat(context).hasSingleBean(WebClient.class);
+                    assertThat(context).hasSingleBean(CommonFutureDataService.class);
                 });
     }
 }
