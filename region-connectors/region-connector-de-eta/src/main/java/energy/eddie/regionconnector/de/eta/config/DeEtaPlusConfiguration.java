@@ -14,5 +14,6 @@ public record DeEtaPlusConfiguration(
         String apiClientId,
         String apiClientSecret,
         @DefaultValue("/api/v1/metered-data") String meteredDataEndpoint,
-        @DefaultValue("/api/v1/permissions/{id}") String permissionCheckEndpoint
+        @DefaultValue("/api/v1/permissions/{id}") String permissionCheckEndpoint,
+        @DefaultValue("0 0 17 * * *") String pollingCronExpression
 ) {}
