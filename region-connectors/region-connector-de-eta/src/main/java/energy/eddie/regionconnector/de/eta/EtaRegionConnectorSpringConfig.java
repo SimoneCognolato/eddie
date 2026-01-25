@@ -13,6 +13,7 @@ import energy.eddie.regionconnector.de.eta.persistence.DePermissionEventReposito
 import energy.eddie.regionconnector.de.eta.persistence.DePermissionRequestRepository;
 import energy.eddie.regionconnector.shared.cim.v0_82.TransmissionScheduleProvider;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBus;
+import energy.eddie.regionconnector.de.eta.providers.cim.v104.DeValidatedHistoricalDataMarketDocumentProvider;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBusImpl;
 import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
 import energy.eddie.regionconnector.shared.event.sourcing.handlers.integration.ConnectionStatusMessageHandler;
@@ -22,10 +23,9 @@ import energy.eddie.regionconnector.shared.services.MeterReadingPermissionUpdate
 import energy.eddie.regionconnector.de.eta.data.needs.EtaDataNeedRuleSet;
 import energy.eddie.regionconnector.shared.services.CommonFutureDataService;
 import energy.eddie.regionconnector.shared.services.data.needs.DataNeedCalculationServiceImpl;
-import energy.eddie.regionconnector.de.eta.service.PollingService;
+import energy.eddie.api.v0.PermissionProcessStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -183,7 +183,10 @@ public class EtaRegionConnectorSpringConfig {
     ) {
         return new MeterReadingPermissionUpdateAndFulfillmentService(
                 fulfillmentService,
-                (reading, end) -> outbox.commit(new LatestMeterReadingEvent(reading.permissionId(), end))
+                (reading, end) -> outbox.commit(new LatestMeterReadingEvent(
+                        reading.permissionId(),
+                        end.atStartOfDay(java.time.ZoneId.of("UTC"))
+                ))
         );
     }
 
