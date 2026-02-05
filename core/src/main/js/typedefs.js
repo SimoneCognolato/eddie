@@ -12,7 +12,7 @@
  */
 
 /**
- * @typedef {"account" | "validated" | "inbound" | "outbound" } DataNeedType
+ * @typedef {"account" | "validated" | "inbound" | "outbound" | "energy-community" } DataNeedType
  */
 
 /**
