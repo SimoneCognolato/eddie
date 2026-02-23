@@ -69,6 +69,6 @@ For more information, see [Common Information Model Client Libraries](https://ar
 
 - Add Reference Energy Curve Min Max Operating Envelope Market Document Schema v1.12
 
-## 3.4.1 - 2026-02-20
+## 3.5.0 - 2026-02-20
 
 - Add Acknowledgement Document Schema v1.12
