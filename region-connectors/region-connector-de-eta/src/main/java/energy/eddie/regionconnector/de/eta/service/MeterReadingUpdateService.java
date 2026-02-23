@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-
 /**
  * Service responsible for handling meter reading updates.
  * Subscribes to the ValidatedHistoricalDataStream and emits LatestMeterReadingEvents
@@ -45,4 +44,3 @@ public class MeterReadingUpdateService {
         ));
     }
 }
-
