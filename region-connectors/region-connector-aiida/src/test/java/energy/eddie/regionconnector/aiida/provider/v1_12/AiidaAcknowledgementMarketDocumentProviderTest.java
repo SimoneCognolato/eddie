@@ -3,7 +3,7 @@
 
 package energy.eddie.regionconnector.aiida.provider.v1_12;
 
-import energy.eddie.cim.v1_12.rtd.RTDEnvelope;
+import energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope;
 import energy.eddie.regionconnector.aiida.streams.IdentifiableStreams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,24 +15,24 @@ import reactor.test.StepVerifier;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AiidaNearRealTimeDataMarketDocumentProviderTest {
+class AiidaAcknowledgementMarketDocumentProviderTest {
     @Mock
     IdentifiableStreams streams;
 
     @Test
-    void getNearRealTimeDataMarketDocumentsStream_emitsUnderlyingFlux() {
-        var msg1 = mock(RTDEnvelope.class);
-        var msg2 = mock(RTDEnvelope.class);
-        when(streams.nearRealTimeDataCimV112Flux()).thenReturn(Flux.just(msg1, msg2));
+    void getAcknowledgementDataMarketDocumentsStream_emitsUnderlyingFlux() {
+        var msg1 = mock(AcknowledgementEnvelope.class);
+        var msg2 = mock(AcknowledgementEnvelope.class);
+        when(streams.acknowledgementCimFlux()).thenReturn(Flux.just(msg1, msg2));
 
-        var provider = new AiidaNearRealTimeDataMarketDocumentProvider(streams);
+        var provider = new AiidaAcknowledgementMarketDocumentProvider(streams);
 
-        StepVerifier.create(provider.getNearRealTimeDataMarketDocumentsStream())
+        StepVerifier.create(provider.getAcknowledgementDataMarketDocumentsStream())
                     .expectNext(msg1, msg2)
                     .thenCancel()
                     .verify();
 
-        verify(streams).nearRealTimeDataCimV112Flux();
+        verify(streams).acknowledgementCimFlux();
         verifyNoMoreInteractions(streams);
     }
 }
