@@ -127,8 +127,10 @@ class PermissionRequestCreationAndValidationServiceTest {
                                                     Set.of(),
                                                     new Timeframe(LocalDate.now(AT_ZONE_ID),
                                                                   LocalDate.now(AT_ZONE_ID))));
-        var pr = new PermissionRequestForCreation("cid", "AT0000000699900000000000206868100",
-                                                  "dnid", "AT000000");
+        var pr = new PermissionRequestForCreation("cid",
+                                                  "AT0000000699900000000000206868100",
+                                                  List.of("dnid"),
+                                                  "AT000000");
 
         // When, Then
         assertThrows(UnsupportedDataNeedException.class, () -> creationService.createAndValidatePermissionRequest(pr));
