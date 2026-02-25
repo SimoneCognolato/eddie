@@ -32,96 +32,98 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PermissionRequestCreationServiceTest {
 
-        private static final String CONNECTION_ID = "conn-1";
+    private static final String CONNECTION_ID = "conn-1";
 
-        @Mock
-        private DataNeedCalculationService<energy.eddie.dataneeds.needs.DataNeed> dataNeedCalculationService;
+    @Mock
+    private DataNeedCalculationService<energy.eddie.dataneeds.needs.DataNeed> dataNeedCalculationService;
 
-        @Mock
-        private Outbox outbox;
+    @Mock
+    private Outbox outbox;
 
-        @Mock
-        private DeEtaPlusConfiguration configuration;
+    @Mock
+    private DeEtaPlusConfiguration configuration;
 
-        private PermissionRequestCreationService service;
+    private PermissionRequestCreationService service;
 
-        @BeforeEach
-        void setUp() {
-                service = new PermissionRequestCreationService(dataNeedCalculationService, outbox, configuration);
-        }
+    @BeforeEach
+    void setUp() {
+        service = new PermissionRequestCreationService(dataNeedCalculationService, outbox, configuration);
+    }
 
-        @Test
-        void createPermissionRequestWhenDataNeedIsValidatedShouldReturnCreatedPermissionRequest() throws Exception {
-                PermissionRequestForCreation request = new PermissionRequestForCreation(CONNECTION_ID, "dn-1", "mp-1");
-                LocalDate start = LocalDate.now(ZoneId.systemDefault());
-                LocalDate end = LocalDate.now(ZoneId.systemDefault()).plusDays(30);
-                Timeframe timeframe = new Timeframe(start, end);
+    @Test
+    void createPermissionRequestWhenDataNeedIsValidatedShouldReturnCreatedPermissionRequest() throws Exception {
+        PermissionRequestForCreation request = new PermissionRequestForCreation(CONNECTION_ID, "dn-1", "mp-1");
+        LocalDate start = LocalDate.now(ZoneId.systemDefault());
+        LocalDate end = LocalDate.now(ZoneId.systemDefault()).plusDays(30);
+        Timeframe timeframe = new Timeframe(start, end);
 
-                ValidatedHistoricalDataDataNeedResult result = new ValidatedHistoricalDataDataNeedResult(
-                                List.of(Granularity.PT15M),
-                                timeframe,
-                                timeframe);
+        ValidatedHistoricalDataDataNeedResult result = new ValidatedHistoricalDataDataNeedResult(
+                List.of(Granularity.PT15M),
+                timeframe,
+                timeframe
+        );
 
-                when(dataNeedCalculationService.calculate(anyString())).thenReturn(result);
+        when(dataNeedCalculationService.calculate(anyString())).thenReturn(result);
 
-                DeEtaPlusConfiguration.OAuthConfig oauthConfig = new DeEtaPlusConfiguration.OAuthConfig(
-                                "client-1", "secret", "token-url", "http://auth.url", "http://redirect.uri", "scope");
-                when(configuration.oauth()).thenReturn(oauthConfig);
+        DeEtaPlusConfiguration.OAuthConfig oauthConfig = new DeEtaPlusConfiguration.OAuthConfig(
+                "client-1", "secret", "token-url", "http://auth.url", "http://redirect.uri", "scope"
+        );
+        when(configuration.oauth()).thenReturn(oauthConfig);
 
-                var response = service.createPermissionRequest(request);
+        var response = service.createPermissionRequest(request);
 
-                assertThat(response).isNotNull();
-                assertThat(response.permissionId()).isNotNull();
-                assertThat(response.redirectUri()).isNotNull();
-                assertThat(response.redirectUri()).startsWith("http://auth.url?");
+        assertThat(response).isNotNull();
+        assertThat(response.permissionId()).isNotNull();
+        assertThat(response.redirectUri()).isNotNull();
+        assertThat(response.redirectUri()).startsWith("http://auth.url?");
 
-                assertThat(response.redirectUri()).contains("response_type=code");
-                assertThat(response.redirectUri()).contains("client_id=client-1");
-                assertThat(response.redirectUri()).contains("state=" + response.permissionId());
-                assertThat(response.redirectUri()).contains("redirect_uri=http%3A%2F%2Fredirect.uri");
-                assertThat(response.redirectUri()).contains("scope=scope");
+        assertThat(response.redirectUri()).contains("response_type=code");
+        assertThat(response.redirectUri()).contains("client_id=client-1");
+        assertThat(response.redirectUri()).contains("state=" + response.permissionId());
+        assertThat(response.redirectUri()).contains("redirect_uri=http%3A%2F%2Fredirect.uri");
+        assertThat(response.redirectUri()).contains("scope=scope");
 
-                verify(outbox).commit(any(CreatedEvent.class));
-                verify(outbox).commit(any(ValidatedEvent.class));
-        }
+        verify(outbox).commit(any(CreatedEvent.class));
+        verify(outbox).commit(any(ValidatedEvent.class));
+    }
 
-        @Test
-        void createPermissionRequestWhenAccountingPointDataNeedShouldThrowUnsupportedAndCommitMalformed() {
-                PermissionRequestForCreation request = new PermissionRequestForCreation(CONNECTION_ID, "dn-1", "mp-1");
-                Timeframe timeframe = new Timeframe(LocalDate.now(ZoneId.systemDefault()),
-                                LocalDate.now(ZoneId.systemDefault()).plusDays(1));
-                when(dataNeedCalculationService.calculate(anyString()))
-                                .thenReturn(new AccountingPointDataNeedResult(timeframe));
+    @Test
+    void createPermissionRequestWhenAccountingPointDataNeedShouldThrowUnsupportedAndCommitMalformed() {
+        PermissionRequestForCreation request = new PermissionRequestForCreation(CONNECTION_ID, "dn-1", "mp-1");
+        Timeframe timeframe = new Timeframe(LocalDate.now(ZoneId.systemDefault()),
+                                            LocalDate.now(ZoneId.systemDefault()).plusDays(1));
+        when(dataNeedCalculationService.calculate(anyString()))
+                .thenReturn(new AccountingPointDataNeedResult(timeframe));
 
-                assertThatThrownBy(() -> service.createPermissionRequest(request))
-                                .isInstanceOf(UnsupportedDataNeedException.class);
+        assertThatThrownBy(() -> service.createPermissionRequest(request))
+                .isInstanceOf(UnsupportedDataNeedException.class);
 
-                verify(outbox).commit(any(CreatedEvent.class));
-                verify(outbox).commit(any(MalformedEvent.class));
-        }
+        verify(outbox).commit(any(CreatedEvent.class));
+        verify(outbox).commit(any(MalformedEvent.class));
+    }
 
-        @Test
-        void createPermissionRequestWhenDataNeedNotFoundShouldThrowNotFoundAndCommitMalformed() {
-                PermissionRequestForCreation request = new PermissionRequestForCreation("dn-1", CONNECTION_ID, "mp-1");
-                when(dataNeedCalculationService.calculate(anyString())).thenReturn(new DataNeedNotFoundResult());
+    @Test
+    void createPermissionRequestWhenDataNeedNotFoundShouldThrowNotFoundAndCommitMalformed() {
+        PermissionRequestForCreation request = new PermissionRequestForCreation("dn-1", CONNECTION_ID, "mp-1");
+        when(dataNeedCalculationService.calculate(anyString())).thenReturn(new DataNeedNotFoundResult());
 
-                assertThatThrownBy(() -> service.createPermissionRequest(request))
-                                .isInstanceOf(DataNeedNotFoundException.class);
+        assertThatThrownBy(() -> service.createPermissionRequest(request))
+                .isInstanceOf(DataNeedNotFoundException.class);
 
-                verify(outbox).commit(any(CreatedEvent.class));
-                verify(outbox).commit(any(MalformedEvent.class));
-        }
+        verify(outbox).commit(any(CreatedEvent.class));
+        verify(outbox).commit(any(MalformedEvent.class));
+    }
 
-        @Test
-        void createPermissionRequestWhenDataNeedNotSupportedShouldThrowUnsupportedAndCommitMalformed() {
-                PermissionRequestForCreation request = new PermissionRequestForCreation("dn-1", CONNECTION_ID, "mp-1");
-                when(dataNeedCalculationService.calculate(anyString()))
-                                .thenReturn(new DataNeedNotSupportedResult("Unsupported"));
+    @Test
+    void createPermissionRequestWhenDataNeedNotSupportedShouldThrowUnsupportedAndCommitMalformed() {
+        PermissionRequestForCreation request = new PermissionRequestForCreation("dn-1", CONNECTION_ID, "mp-1");
+        when(dataNeedCalculationService.calculate(anyString()))
+                .thenReturn(new DataNeedNotSupportedResult("Unsupported"));
 
-                assertThatThrownBy(() -> service.createPermissionRequest(request))
-                                .isInstanceOf(UnsupportedDataNeedException.class);
+        assertThatThrownBy(() -> service.createPermissionRequest(request))
+                .isInstanceOf(UnsupportedDataNeedException.class);
 
-                verify(outbox).commit(any(CreatedEvent.class));
-                verify(outbox).commit(any(MalformedEvent.class));
-        }
+        verify(outbox).commit(any(CreatedEvent.class));
+        verify(outbox).commit(any(MalformedEvent.class));
+    }
 }
