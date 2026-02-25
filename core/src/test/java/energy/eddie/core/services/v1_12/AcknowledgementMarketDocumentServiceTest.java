@@ -8,8 +8,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
+import reactor.test.publisher.TestPublisher;
 
 import java.time.Duration;
 
@@ -24,11 +24,11 @@ class AcknowledgementMarketDocumentServiceTest {
     void givenMultipleStreams_combinesAndEmitsAllValuesFromAllStreams() {
         // Given
         var service = new AcknowledgementMarketDocumentService();
-        Sinks.Many<AcknowledgementEnvelope> sink1 = Sinks.many().unicast().onBackpressureBuffer();
-        Sinks.Many<AcknowledgementEnvelope> sink2 = Sinks.many().unicast().onBackpressureBuffer();
+        TestPublisher<AcknowledgementEnvelope> publisher1 = TestPublisher.create();
+        TestPublisher<AcknowledgementEnvelope> publisher2 = TestPublisher.create();
 
-        service.registerProvider(sink1::asFlux);
-        service.registerProvider(sink2::asFlux);
+        service.registerProvider(publisher1::flux);
+        service.registerProvider(publisher2::flux);
 
         var one = new AcknowledgementEnvelope();
         var two = new AcknowledgementEnvelope();
@@ -38,9 +38,9 @@ class AcknowledgementMarketDocumentServiceTest {
         var flux = service.getAcknowledgementMarketDocumentStream();
         StepVerifier.create(flux)
                     .then(() -> {
-                        sink2.tryEmitNext(two);
-                        sink1.tryEmitNext(one);
-                        sink2.tryEmitNext(three);
+                        publisher2.next(two);
+                        publisher1.next(one);
+                        publisher2.next(three);
                     })
                     // Then
                     .expectNextCount(3)
@@ -52,15 +52,15 @@ class AcknowledgementMarketDocumentServiceTest {
     void givenConverter_appliesItToStream() {
         // Given
         var service = new AcknowledgementMarketDocumentService();
-        Sinks.Many<AcknowledgementEnvelope> sink = Sinks.many().unicast().onBackpressureBuffer();
+        TestPublisher<AcknowledgementEnvelope> publisher = TestPublisher.create();
 
-        service.registerProvider(sink::asFlux);
+        service.registerProvider(publisher::flux);
 
         var one = new AcknowledgementEnvelope();
         // When
         var flux = service.getAcknowledgementMarketDocumentStream();
         StepVerifier.create(flux)
-                    .then(() -> sink.tryEmitNext(one))
+                    .then(() -> publisher.next(one))
                     // Then
                     .expectNextCount(1)
                     .thenCancel()

@@ -17,12 +17,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AiidaAcknowledgementMarketDocumentProviderTest {
     @Mock
-    IdentifiableStreams streams;
+    private IdentifiableStreams streams;
 
     @Test
     void getAcknowledgementDataMarketDocumentsStream_emitsUnderlyingFlux() {
-        var msg1 = mock(AcknowledgementEnvelope.class);
-        var msg2 = mock(AcknowledgementEnvelope.class);
+        var msg1 = new AcknowledgementEnvelope();
+        var msg2 = new AcknowledgementEnvelope();
         when(streams.acknowledgementCimFlux()).thenReturn(Flux.just(msg1, msg2));
 
         var provider = new AiidaAcknowledgementMarketDocumentProvider(streams);
