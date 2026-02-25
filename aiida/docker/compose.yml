@@ -42,8 +42,6 @@ services:
         required: false
     volumes:
       - ./svgs:/container-assets/svgs
-    extra_hosts:
-      - "localhost:host-gateway" # access host machine as "localhost"
 
   emqx:
     image: emqx/emqx:5.8.6
