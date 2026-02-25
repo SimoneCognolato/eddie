@@ -4,6 +4,7 @@ import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.de.eta.config.DeEtaPlusConfiguration;
 import energy.eddie.regionconnector.de.eta.oauth.EtaOAuthService;
 import energy.eddie.regionconnector.de.eta.oauth.OAuthCallback;
+import energy.eddie.regionconnector.de.eta.oauth.OAuthTokenResponse;
 import energy.eddie.regionconnector.de.eta.permission.request.events.AcceptedEvent;
 import energy.eddie.regionconnector.de.eta.permission.request.events.SimpleEvent;
 import energy.eddie.regionconnector.de.eta.persistence.DePermissionRequestRepository;
@@ -66,26 +67,30 @@ public class PermissionRequestAuthorizationService {
         LOGGER.info("Authorization callback was successful for permission request {}", permissionId);
         oauthService.exchangeCodeForToken(callback.code().orElseThrow(), configuration.oauth().clientId())
                 .subscribe(
-                        response -> {
-                            if (response == null || !response.success()) {
-                                LOGGER.error("Token exchange failed for permission request {}", permissionId);
-                                outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));
-                                return;
-                            }
-                            var accessToken = response.getAccessToken();
-                            if (accessToken == null) {
-                                LOGGER.error("Token exchange returned null access token for permission request {}",
-                                        permissionId);
-                                outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));
-                                return;
-                            }
-                            LOGGER.info("Successfully obtained access token for permission request {}",
-                                    permissionId);
-                            outbox.commit(new AcceptedEvent(permissionId, accessToken, response.getRefreshToken()));
-                        },
-                        error -> {
-                            LOGGER.error("Error during token exchange for permission request " + permissionId, error);
-                            outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));
-                        });
+                        response -> handleTokenExchangeResponse(response, permissionId),
+                        error -> handleTokenExchangeError(error, permissionId));
+    }
+
+    private void handleTokenExchangeResponse(OAuthTokenResponse response, String permissionId) {
+        if (response == null || !response.success()) {
+            LOGGER.error("Token exchange failed for permission request {}", permissionId);
+            outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));
+            return;
+        }
+        var accessToken = response.getAccessToken();
+        if (accessToken == null) {
+            LOGGER.error("Token exchange returned null access token for permission request {}",
+                    permissionId);
+            outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));
+            return;
+        }
+        LOGGER.info("Successfully obtained access token for permission request {}",
+                permissionId);
+        outbox.commit(new AcceptedEvent(permissionId, accessToken, response.getRefreshToken()));
+    }
+
+    private void handleTokenExchangeError(Throwable error, String permissionId) {
+        LOGGER.error("Error during token exchange for permission request " + permissionId, error);
+        outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));
     }
 }

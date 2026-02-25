@@ -33,6 +33,7 @@ dependencies {
     implementation(libs.reactor.core)
     implementation(libs.opentelemetry.sdk.metrics)
     implementation(libs.jakarta.persistence.api)
+    implementation(libs.nimbus.oidc)
 
     runtimeOnly(libs.hibernate.validator)
 

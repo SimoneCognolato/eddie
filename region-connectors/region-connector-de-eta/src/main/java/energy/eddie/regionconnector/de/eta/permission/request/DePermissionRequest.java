@@ -9,6 +9,7 @@ import energy.eddie.regionconnector.de.eta.DeDataSourceInformation;
 import jakarta.persistence.*;
 
 import jakarta.annotation.Nullable;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -19,7 +20,7 @@ import java.util.Optional;
  */
 @Entity
 @Table(schema = "de_eta", name = "eta_permission_request")
-@SuppressWarnings({ "NullAway", "unused" })
+@SuppressWarnings({"NullAway", "unused"})
 public class DePermissionRequest implements MeterReadingPermissionRequest {
     @Transient
     private final DataSourceInformation dataSourceInformation = new DeDataSourceInformation();
@@ -76,7 +77,8 @@ public class DePermissionRequest implements MeterReadingPermissionRequest {
             ZonedDateTime created,
             String dataNeedId,
             @Nullable String message,
-            @Nullable String cause) {
+            @Nullable String cause
+    ) {
         this.permissionId = permissionId;
         this.connectionId = connectionId;
         this.meteringPointId = meteringPointId;

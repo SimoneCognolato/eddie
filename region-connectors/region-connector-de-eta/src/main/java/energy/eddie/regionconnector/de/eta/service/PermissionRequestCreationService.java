@@ -43,7 +43,8 @@ public class PermissionRequestCreationService {
     public PermissionRequestCreationService(
             DataNeedCalculationService<DataNeed> dataNeedCalculationService,
             Outbox outbox,
-            DeEtaPlusConfiguration configuration) {
+            DeEtaPlusConfiguration configuration
+    ) {
         this.dataNeedCalculationService = dataNeedCalculationService;
         this.outbox = outbox;
         this.configuration = configuration;
@@ -63,7 +64,7 @@ public class PermissionRequestCreationService {
         String dataNeedId = requestForCreation.dataNeedId();
 
         LOGGER.info("Creating new permission request {} for metering point {}",
-                permissionId, requestForCreation.meteringPointId());
+                    permissionId, requestForCreation.meteringPointId());
 
         outbox.commit(new CreatedEvent(
                 permissionId,
@@ -96,7 +97,9 @@ public class PermissionRequestCreationService {
                 throw new UnsupportedDataNeedException(REGION_CONNECTOR_ID, dataNeedId, message);
             }
 
-            case ValidatedHistoricalDataDataNeedResult(List<Granularity> granularities, Timeframe ignored, Timeframe energyTimeframe) -> {
+            case ValidatedHistoricalDataDataNeedResult(
+                    List<Granularity> granularities, Timeframe ignored, Timeframe energyTimeframe
+            ) -> {
                 LOGGER.info("Validated permission request {}", permissionId);
                 outbox.commit(new ValidatedEvent(
                         permissionId,
@@ -109,17 +112,18 @@ public class PermissionRequestCreationService {
     }
 
     private String buildRedirectUri(String permissionId) {
-        String queryParams = UriComponentsBuilder.newInstance()
-                .queryParam("response_type", "code")
-                .queryParam("client_id", configuration.oauth().clientId())
-                .queryParam("state", permissionId)
-                .queryParam("redirect_uri", configuration.oauth().redirectUri())
-                .queryParam("scope", configuration.oauth().scope())
-                .build()
-                .encode()
-                .getQuery();
-
-        String baseUrl = configuration.oauth().authorizationUrl();
-        return baseUrl + (baseUrl.contains("?") ? "&" : "?") + queryParams;
+        try {
+            com.nimbusds.oauth2.sdk.AuthorizationRequest request = new com.nimbusds.oauth2.sdk.AuthorizationRequest.Builder(
+                    new com.nimbusds.oauth2.sdk.ResponseType(com.nimbusds.oauth2.sdk.ResponseType.Value.CODE),
+                    new com.nimbusds.oauth2.sdk.id.ClientID(configuration.oauth().clientId()))
+                    .endpointURI(new java.net.URI(configuration.oauth().authorizationUrl()))
+                    .state(new com.nimbusds.oauth2.sdk.id.State(permissionId))
+                    .redirectionURI(new java.net.URI(configuration.oauth().redirectUri()))
+                    .scope(com.nimbusds.oauth2.sdk.Scope.parse(configuration.oauth().scope()))
+                    .build();
+            return request.toURI().toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to build authorization URI", e);
+        }
     }
 }
