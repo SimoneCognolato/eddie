@@ -11,6 +11,7 @@ plugins {
     id("java")
     `maven-publish`
     jacoco
+    id("com.vanniktech.maven.publish") version "0.36.0"
 }
 
 group = "energy.eddie"
@@ -64,33 +65,14 @@ tasks.withType<JacocoReport> {
 // Directory for generated java files
 val generatedXJCJavaDir = "${project.layout.buildDirectory.asFile.get()}/generated/sources/xjc/main/java"
 
-// Add generated sources to the main source set
-sourceSets {
-    main {
-        java {
-            srcDir(generatedXJCJavaDir)
-        }
-        resources {
-            srcDir("${projectDir}/src/main/schemas")
-        }
-    }
-    test {
-        java {
-            srcDir(generatedXJCJavaDir)
-        }
-        resources {
-            srcDir("${projectDir}/src/main/schemas")
-        }
-    }
-}
 
 @OptIn(ExperimentalPathApi::class)
-val generateCIMSchemaClasses = tasks.register("generateCIMSchemaClasses") {
+val generateCIMSchemaClasses by tasks.registering {
     description = "Generate CIM Java Classes from XSD files"
     group = "Build"
 
     // Path to XSD files
-    val cimSchemaFiles = file("src/main/schemas/cim/xsd/")
+    val cimSchemaFiles: File = file("src/main/schemas/cim/xsd/")
     // ordered schema files to prevent repeated generation of Java classes.
     val orderedSchemaFiles = setOf(
         // V0.82
@@ -120,95 +102,157 @@ val generateCIMSchemaClasses = tasks.register("generateCIMSchemaClasses") {
             from(cimSchemaFiles)
             into(temporaryDir)
         }
+        generateJavaClassesFromCimXsds(cimSchemaFiles, orderedSchemaFiles, temporaryDir)
+    }
+}
 
-        val xsdToGenerate = ArrayList<Triple<File, File, File>>()
-        // Copy all files first, so they exist in the target directory
-        for (srcFile in cimSchemaFiles.walkTopDown()) {
-            if (!srcFile.isFile || srcFile.extension != "xsd") {
-                continue
-            }
-            val xjbFileBasename = srcFile.nameWithoutExtension + ".xjb"
-
-            val tmpSrcFile = temporaryDir.resolve(srcFile.relativeTo(cimSchemaFiles))
-            val xjbFile = temporaryDir.resolve(
-                srcFile.parentFile.resolve(xjbFileBasename).relativeTo(cimSchemaFiles)
-            )
-            xsdToGenerate.add(Triple(srcFile, tmpSrcFile, xjbFile))
+// Add generated sources to the main source set
+sourceSets {
+    main {
+        java {
+            srcDir(generateCIMSchemaClasses)
         }
-        for (files in xsdToGenerate) {
-            val srcFile = files.first
-            val tmpSrcFile = files.second
-            val xjbFile = files.third
-            if (!orderedSchemaFiles.contains(srcFile)) {
-                continue
-            }
-            // generate the bindings file
-            logger.log(LogLevel.INFO, "Generating bindings for ${tmpSrcFile.name}")
-            generateBindingsFile(tmpSrcFile, xjbFile.absolutePath)
-            logger.log(LogLevel.LIFECYCLE, "Generating for ${tmpSrcFile.name}")
-            val execution = providers.exec {
-                executable(Path(System.getProperty("java.home"), "bin", "java"))
-                val classpath = jaxb.resolve().joinToString(File.pathSeparator)
-                args(
-                    "-cp", classpath, "com.sun.tools.xjc.XJCFacade",
-                    "-d", generatedXJCJavaDir,
-                    tmpSrcFile.absolutePath,
-                    "-b", xjbFile.absolutePath,
-                    "-mark-generated", "-npa", "-encoding", "UTF-8",
-                    "-extension", "-Xfluent-api", "-Xannotate"
-                )
-            }
-            val res = execution.result.get()
-            val stdOut = execution.standardOutput.asText
-            if (stdOut.isPresent) {
-                logger.log(LogLevel.LIFECYCLE, stdOut.get())
-            }
-            if (res.exitValue != 0) {
-                val stdError = execution.standardError.asText
-                if (stdError.isPresent) {
-                    logger.log(LogLevel.WARN, stdError.get())
-                }
-            }
+        resources {
+            srcDir("${projectDir}/src/main/schemas")
+        }
+    }
+    test {
+        java {
+            srcDir(generateCIMSchemaClasses)
+        }
+        resources {
+            srcDir("${projectDir}/src/main/schemas")
         }
     }
 }
 
-tasks.named("compileJava") {
+tasks.compileJava {
     // generate the classes before compiling
     dependsOn(generateCIMSchemaClasses)
 }
 
 publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/eddie-energy/eddie")
-            credentials {
-                username = project.findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")
-                password = project.findProperty("gpr.token") as String? ?: System.getenv("GPR_TOKEN")
-            }
-        }
-    }
-
     publications {
         create<MavenPublication>("cim") {
+            from(components["java"])
+            groupId = group.toString()
+            artifactId = project.name
+
             pom {
-                name = "cim"
-                artifactId = "cim"
-                version = project.version.toString()
-                description = "Generated CIM classes"
+                name = project.name
+                description = "Generated CIM classes and helpers"
                 url = "https://github.com/eddie-energy/eddie"
+
+                licenses {
+                    license {
+                        name = "Apache License, Version 2.0"
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+
                 developers {
                     developer {
                         id = "eddie-energy"
-                        name = "EDDIE Energy"
+                        name = "EDDIE Developers"
                         email = "developers@eddie.energy"
                     }
                 }
+
                 scm {
+                    connection = "scm:git:https://github.com/eddie-energy/eddie.git"
+                    developerConnection = "scm:git:ssh://github.com/eddie-energy/eddie.git"
                     url = "https://github.com/eddie-energy/eddie"
                 }
-                from(components["java"])
+            }
+        }
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+    coordinates(group.toString(), project.name, version.toString())
+
+    pom {
+        name.set(project.name)
+        description.set("Generated CIM classes and helpers")
+        inceptionYear.set("2025")
+        url.set("https://github.com/eddie-energy/eddie/")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("eddie-energy")
+                name.set("EDDIE Developers")
+                url.set("https://github.com/eddie-energy/")
+            }
+        }
+        scm {
+            url.set("https://github.com/eddie-energy/eddie/")
+            connection.set("scm:git:git://github.com/eddie-energy/eddie.git")
+            developerConnection.set("scm:git:ssh://git@github.com/eddie-energy/eddie.git")
+        }
+    }
+}
+
+tasks.withType<Javadoc>().configureEach {
+    val opt = options as StandardJavadocDocletOptions
+    // Disable linting in generated CIM classes, since XJC does not escape certain characters properly, such as quotation marks or ampersands.
+    opt.addStringOption("Xdoclint/package:-energy.eddie.cim.*", "-quiet")
+}
+
+fun generateJavaClassesFromCimXsds(originalDirectory: File, entryPointFiles: Set<File>, workDirectory: File) {
+    val xsdToGenerate = ArrayList<Triple<File, File, File>>()
+    // Copy all files first, so they exist in the target directory
+    for (srcFile in originalDirectory.walkTopDown()) {
+        if (!srcFile.isFile || srcFile.extension != "xsd") {
+            continue
+        }
+        val xjbFileBasename = srcFile.nameWithoutExtension + ".xjb"
+
+        val tmpSrcFile = workDirectory.resolve(srcFile.relativeTo(originalDirectory))
+        val xjbFile = workDirectory.resolve(
+            srcFile.parentFile.resolve(xjbFileBasename).relativeTo(originalDirectory)
+        )
+        xsdToGenerate.add(Triple(srcFile, tmpSrcFile, xjbFile))
+    }
+    for (files in xsdToGenerate) {
+        val srcFile = files.first
+        val tmpSrcFile = files.second
+        val xjbFile = files.third
+        if (!entryPointFiles.contains(srcFile)) {
+            continue
+        }
+        // generate the bindings file
+        logger.log(LogLevel.INFO, "Generating bindings for ${tmpSrcFile.name}")
+        generateBindingsFile(tmpSrcFile, xjbFile.absolutePath)
+        logger.log(LogLevel.LIFECYCLE, "Generating for ${tmpSrcFile.name}")
+        val execution = providers.exec {
+            executable(Path(System.getProperty("java.home"), "bin", "java"))
+            val classpath = jaxb.resolve().joinToString(File.pathSeparator)
+            args(
+                "-cp", classpath, "com.sun.tools.xjc.XJCFacade",
+                "-d", generatedXJCJavaDir,
+                tmpSrcFile.absolutePath,
+                "-b", xjbFile.absolutePath,
+                "-mark-generated", "-npa", "-encoding", "UTF-8",
+                "-extension", "-Xfluent-api", "-Xannotate"
+            )
+        }
+        val res = execution.result.get()
+        val stdOut = execution.standardOutput.asText
+        if (stdOut.isPresent) {
+            logger.log(LogLevel.LIFECYCLE, stdOut.get())
+        }
+        if (res.exitValue != 0) {
+            val stdError = execution.standardError.asText
+            if (stdError.isPresent) {
+                logger.log(LogLevel.WARN, stdError.get())
             }
         }
     }
