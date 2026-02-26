@@ -85,7 +85,7 @@
       "end": "P10D"
     },
     "transmissionSchedule": "*/5 * * * * *",
-    "isAcknowledgementRequired": true,
+    "isAcknowledgementRequired": false,
     "schemas": [
       "MIN-MAX-ENVELOPE-CIM-V1-12"
     ],

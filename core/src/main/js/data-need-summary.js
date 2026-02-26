@@ -112,7 +112,7 @@ class DataNeedSummary extends HTMLElement {
             : ""}
 
           <!-- For AIIDA data needs -->
-          ${isAcknowledgementRequired
+          ${isAcknowledgementRequired !== undefined
             ? /* HTML */ `
                 <dt>Acknowledgement Required</dt>
                 <dd>${isAcknowledgementRequired}</dd>

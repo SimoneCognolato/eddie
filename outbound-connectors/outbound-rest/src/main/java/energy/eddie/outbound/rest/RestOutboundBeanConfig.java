@@ -72,6 +72,7 @@ public class RestOutboundBeanConfig {
                 energy.eddie.cim.v1_04.rtd.RTDEnvelope.class,
                 // CIM v1.12
                 energy.eddie.cim.v1_12.rtd.RTDEnvelope.class,
+                energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope.class,
                 // DTOs
                 CimCollection.class,
                 ValidatedHistoricalDataMarketDocuments.class,

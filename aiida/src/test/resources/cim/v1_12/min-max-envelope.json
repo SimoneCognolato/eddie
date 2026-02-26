@@ -1,0 +1,81 @@
+{
+  "MessageDocumentHeader": {
+    "creationDateTime": "2026-02-16T10:11:58Z",
+    "MetaInformation": {
+      "connectionId": "1",
+      "requestPermissionId": "00213495-bdbf-4497-8695-5d811e45aa64",
+      "dataNeedId": "5dc71d7e-e8cd-4403-a3a8-d3c095c97a12",
+      "documentType": "min-max-envelope",
+      "finalCustomerId": "88e0fc2c-4ea7-4850-a736-8b9742757518",
+      "dataSourceId": "0743c9d8-3e5f-4575-999b-34f6f83b2075",
+      "regionConnector": "aiida",
+      "regionCountry": "AT",
+      "Asset": {
+        "type": "CONNECTION-AGREEMENT-POINT",
+        "operatorId": "AT003000",
+        "meterId": "003114735"
+      }
+    }
+  },
+  "MarketDocument": {
+    "mRID": "5dc71d7e-e8cd-4403-a3a8-d3c095c97a12",
+    "description": "Test Min-Max Envelope",
+    "revisionNumber": "1",
+    "lastModifiedDateTime": "2026-02-16T10:11:58Z",
+    "comment": "This is a test min-max envelope.",
+    "sender_MarketParticipant.mRID": {
+      "value": "AT003000",
+      "codingScheme": "NAT"
+    },
+    "sender_MarketParticipant.name": "Netz Oberösterreich GmbH",
+    "sender_MarketParticipant.marketRole.type": "CONNECTING_SYSTEM_OPERATOR",
+    "receiver_MarketParticipant.mRID": {
+      "value": "88e0fc2c-4ea7-4850-a736-8b9742757518",
+      "codingScheme": "NAT"
+    },
+    "receiver_MarketParticipant.name": "Max Mustermann",
+    "receiver_MarketParticipant.marketRole.type": "FINAL_CUSTOMER",
+    "process.processType": "MIN_MAX_ENVELOPE",
+    "period.timeInterval": {
+      "start": "2026-06-01T00:00:00Z",
+      "end": "2026-06-02T23:59:59Z"
+    },
+    "TimeSeries_Series": [
+      {
+        "mRID": "series-1",
+        "businessType": "MIN_MAX_ENVELOPE",
+        "curveType": "MIN_MAX_ENVELOPE",
+        "resourceTimeSeries.value1ScheduleType": "loadReduction",
+        "flowDirection.direction": "CONSUMPTION",
+        "registeredResource.mRID": {
+          "value": "003114735",
+          "codingScheme": "NAT"
+        },
+        "registeredResource.name": "Test Connection Point",
+        "registeredResource.description": "This is a test connection point for the min-max envelope.",
+        "Series": [
+          {
+            "Period": [
+              {
+                "resolution": "P1D",
+                "timeInterval": {
+                  "start": "2026-06-01T00:00:00Z",
+                  "end": "2026-06-02T23:59:59Z"
+                },
+                "Point": [
+                  {
+                    "position": 1,
+                    "min_Quantity.quantity": 1,
+                    "min_Quantity.quality": "1",
+                    "max_Quantity.quantity": 4,
+                    "max_Quantity.quality": "3"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

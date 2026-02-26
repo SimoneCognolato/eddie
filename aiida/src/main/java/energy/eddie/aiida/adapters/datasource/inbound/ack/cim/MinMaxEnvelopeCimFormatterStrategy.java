@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
-package energy.eddie.aiida.schemas.ack;
+package energy.eddie.aiida.adapters.datasource.inbound.ack.cim;
 
 import energy.eddie.aiida.models.datasource.mqtt.inbound.InboundDataSource;
 import energy.eddie.aiida.models.record.InboundRecord;
@@ -58,7 +58,7 @@ public class MinMaxEnvelopeCimFormatterStrategy implements CimFormatterStrategy 
         return new Asset()
                 .withType(dataSource.asset().toString())
                 .withMeterId(dataSource.meterId())
-                .withOperatorId(dataSource.meterId());
+                .withOperatorId(dataSource.operatorId());
     }
 
     private AcknowledgementMarketDocument toMarketDocument(

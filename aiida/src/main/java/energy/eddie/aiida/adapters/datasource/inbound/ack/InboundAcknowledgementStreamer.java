@@ -1,19 +1,18 @@
 // SPDX-FileCopyrightText: 2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
-package energy.eddie.aiida.adapters.datasource.inbound;
+package energy.eddie.aiida.adapters.datasource.inbound.ack;
 
+import energy.eddie.aiida.adapters.datasource.inbound.ack.cim.CimFormatterStrategyRegistry;
 import energy.eddie.aiida.errors.formatter.CimSchemaFormatterException;
 import energy.eddie.aiida.models.record.InboundRecord;
-import energy.eddie.aiida.schemas.ack.MinMaxEnvelopeCimFormatterStrategy;
 import energy.eddie.api.agnostic.aiida.AiidaSchema;
-import energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope;
 import jakarta.annotation.Nullable;
 import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Sinks;
+import reactor.core.publisher.Flux;
 import tools.jackson.databind.ObjectMapper;
 
 public class InboundAcknowledgementStreamer {
@@ -23,47 +22,50 @@ public class InboundAcknowledgementStreamer {
     private final ObjectMapper objectMapper;
     @Nullable
     private final String acknowledgementTopic;
-    private final Sinks.Many<InboundRecord> inboundRecordSink;
+    private final Flux<InboundRecord> inboundRecordFlux;
+    private final CimFormatterStrategyRegistry cimFormatterStrategyRegistry;
 
     public InboundAcknowledgementStreamer(
             ObjectMapper objectMapper,
             @Nullable String acknowledgementTopic,
-            Sinks.Many<InboundRecord> inboundRecordSink
+            Flux<InboundRecord> inboundRecordFlux
+    ) {
+        this(objectMapper, acknowledgementTopic, inboundRecordFlux, new CimFormatterStrategyRegistry());
+    }
+
+    public InboundAcknowledgementStreamer(
+            ObjectMapper objectMapper,
+            @Nullable String acknowledgementTopic,
+            Flux<InboundRecord> inboundRecordFlux,
+            CimFormatterStrategyRegistry cimFormatterStrategyRegistry
     ) {
         this.objectMapper = objectMapper;
         this.acknowledgementTopic = acknowledgementTopic;
-        this.inboundRecordSink = inboundRecordSink;
+        this.inboundRecordFlux = inboundRecordFlux;
+        this.cimFormatterStrategyRegistry = cimFormatterStrategyRegistry;
     }
 
     public void start(@Nullable IMqttAsyncClient mqttClient) {
         if (mqttClient != null && acknowledgementTopic != null) {
-            inboundRecordSink.asFlux().subscribe(record -> publishAcknowledgement(mqttClient, record));
+            LOGGER.info("Starting InboundAcknowledgementStreamer with topic {}", acknowledgementTopic);
+            inboundRecordFlux.subscribe(record -> publishAcknowledgement(mqttClient, record));
+        } else {
+            LOGGER.info("Not starting InboundAcknowledgementStreamer, because mqttClient or ackTopic is null");
         }
     }
 
     private void publishAcknowledgement(IMqttAsyncClient mqttClient, InboundRecord inboundRecord) {
         try {
-            LOGGER.info("Publishing acknowledgement for record {}", inboundRecord.id());
-
-            var acknowledgementEnvelope = createToAcknowledgementEnvelope(inboundRecord);
-            var payload = objectMapper.writeValueAsBytes(acknowledgementEnvelope);
             var topic = ACK_SCHEMA.buildTopicPath(acknowledgementTopic);
+            LOGGER.debug("Publishing acknowledgement for record {} to topic {}", inboundRecord.id(), topic);
+
+            var strategy = cimFormatterStrategyRegistry.strategyFor(inboundRecord.schema());
+            var acknowledgementEnvelope = strategy.convert(objectMapper, inboundRecord);
+            var payload = objectMapper.writeValueAsBytes(acknowledgementEnvelope);
 
             mqttClient.publish(topic, payload, 0, false);
         } catch (CimSchemaFormatterException | MqttException e) {
             LOGGER.error("Failed to publish acknowledgement for record {}", inboundRecord.id(), e);
         }
-    }
-
-    private AcknowledgementEnvelope createToAcknowledgementEnvelope(
-            InboundRecord inboundRecord
-    ) throws CimSchemaFormatterException {
-        var strategy = switch (inboundRecord.schema()) {
-            case MIN_MAX_ENVELOPE_CIM_V1_12 -> new MinMaxEnvelopeCimFormatterStrategy();
-            default -> throw new CimSchemaFormatterException(new IllegalArgumentException(
-                    "No CIM formatter strategy found for schema " + inboundRecord.schema()));
-        };
-
-        return strategy.convert(objectMapper, inboundRecord);
     }
 }

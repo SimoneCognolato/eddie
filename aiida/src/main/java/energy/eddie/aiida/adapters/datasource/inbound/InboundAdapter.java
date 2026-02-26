@@ -4,6 +4,7 @@
 package energy.eddie.aiida.adapters.datasource.inbound;
 
 import energy.eddie.aiida.adapters.datasource.MqttDataSourceAdapter;
+import energy.eddie.aiida.adapters.datasource.inbound.ack.InboundAcknowledgementStreamer;
 import energy.eddie.aiida.config.MqttConfiguration;
 import energy.eddie.aiida.models.datasource.mqtt.inbound.InboundDataSource;
 import energy.eddie.aiida.models.record.InboundRecord;
@@ -35,8 +36,16 @@ public class InboundAdapter extends MqttDataSourceAdapter<InboundDataSource> {
         super(dataSource, LOGGER, mqttConfiguration);
         inboundRecordSink = Sinks.many().multicast().onBackpressureBuffer();
 
-        var acknowledgementTopic = dataSource.acknowledgementTopic();
-        acknowledgementStreamer = new InboundAcknowledgementStreamer(mapper, acknowledgementTopic, inboundRecordSink);
+        acknowledgementStreamer = new InboundAcknowledgementStreamer(
+                mapper,
+                dataSource.acknowledgementTopic(),
+                inboundRecordSink.asFlux());
+    }
+
+    @Override
+    public void connectComplete(boolean reconnect, String serverURI) {
+        acknowledgementStreamer.start(asyncClient);
+        super.connectComplete(reconnect, serverURI);
     }
 
     /**
@@ -82,11 +91,5 @@ public class InboundAdapter extends MqttDataSourceAdapter<InboundDataSource> {
         connectOptions.setPassword(dataSource().password().getBytes(StandardCharsets.UTF_8));
 
         return connectOptions;
-    }
-
-    @Override
-    public void connectComplete(boolean reconnect, String serverURI) {
-        acknowledgementStreamer.start(asyncClient);
-        super.connectComplete(reconnect, serverURI);
     }
 }
