@@ -195,7 +195,7 @@ class PermissionCreationServiceTest {
         // Given
         var request = new PermissionRequestForCreation("cid", "token", VALID_REFRESH_TOKEN, "dnid");
         when(calculationService.calculate("dnid"))
-                .thenReturn(new EnergyCommunityDataNeedResult(LocalDate.now(DK_ZONE_ID)));
+                .thenReturn(new EnergyCommunityDataNeedResult(LocalDate.now(DK_ZONE_ID), List.of()));
         // When
         // Then
         assertThrows(UnsupportedDataNeedException.class,
