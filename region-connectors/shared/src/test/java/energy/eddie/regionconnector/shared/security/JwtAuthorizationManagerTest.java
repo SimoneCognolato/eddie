@@ -74,7 +74,8 @@ class JwtAuthorizationManagerTest {
     void givenValidJwtWithMismatchedPermissionId_headerAuthorizationManager_throwsAccessDeniedException() {
         // Given
         var mockRequest = createMockRequest("aiida");
-        var mockContext = new RequestAuthorizationContext(mockRequest, Map.of("permissionId", "invalid-pm-id"));
+        var mockContext = new RequestAuthorizationContext(mockRequest, Map.of());
+        mockRequest.addParameter("permission-id", "invalid-pm-id");
         when(mockJwtUtil.getPermissions(anyString()))
                 .thenReturn(Map.of("aiida", List.of("myTestId"), "es-datadis", List.of("foo", "bar")));
 
@@ -98,7 +99,8 @@ class JwtAuthorizationManagerTest {
     void givenValidJwtWithoutServletName_headerAuthorizationManager_throwsAccessDeniedException() {
         // Given
         var mockRequest = createMockRequest(null);
-        var mockContext = new RequestAuthorizationContext(mockRequest, Map.of("permissionId", "foo"));
+        var mockContext = new RequestAuthorizationContext(mockRequest, Map.of());
+        mockRequest.addParameter("permission-id", "foo");
         Map<String, List<String>> rcPermissions = new HashMap<>();
         rcPermissions.put("aiida", List.of("myTestId"));
         rcPermissions.put("es-datadis", List.of("foo", "bar"));
@@ -113,32 +115,13 @@ class JwtAuthorizationManagerTest {
     void givenValidJwtPermissionsInJwt_headerAuthorizationManager_throwsAccessDeniedException() {
         // Given
         var mockRequest = createMockRequest("aiida");
-        var mockContext = new RequestAuthorizationContext(mockRequest, Map.of("permissionId", "foo"));
+        var mockContext = new RequestAuthorizationContext(mockRequest, Map.of());
+        mockRequest.addParameter("permission-id", "foo");
         when(mockJwtUtil.getPermissions(anyString()))
                 .thenReturn(Map.of());
 
         // When, Then
         assertThrows(AccessDeniedException.class, () -> headerAuthManager.authorize(null, mockContext));
-    }
-
-    @Test
-    void givenValidJwtAndPermissionIdInPath_headerAuthorizationManager_returnsGranted() {
-        // Given
-        var mockRequest = createMockRequest("aiida");
-        var mockContext = new RequestAuthorizationContext(mockRequest, Map.of("permissionId", "myTestId"));
-        when(mockJwtUtil.getPermissions(anyString())).thenReturn(Map.of("aiida",
-                                                                        List.of("myTestId"),
-                                                                        "es-datadis",
-                                                                        List.of("foo", "bar")));
-
-        // When
-        var res = headerAuthManager.authorize(null, mockContext);
-
-        // Then
-        assertThat(res)
-                .isNotNull()
-                .extracting(AuthorizationResult::isGranted, InstanceOfAssertFactories.BOOLEAN)
-                .isTrue();
     }
 
     @Test
@@ -165,7 +148,8 @@ class JwtAuthorizationManagerTest {
     void givenValidJwtAndCoreDispatcherServlet_headerAuthorizationManager_returnsGranted() {
         // Given
         var mockRequest = createMockRequest("dispatcherServlet");
-        var mockContext = new RequestAuthorizationContext(mockRequest, Map.of("permissionId", "foo"));
+        var mockContext = new RequestAuthorizationContext(mockRequest, Map.of());
+        mockRequest.addParameter("permission-id", "myTestId");
         when(mockJwtUtil.getPermissions(anyString()))
                 .thenReturn(Map.of("aiida", List.of("myTestId"), "es-datadis", List.of("foo", "bar")));
 

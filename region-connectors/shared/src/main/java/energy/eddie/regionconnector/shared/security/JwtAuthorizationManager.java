@@ -55,11 +55,7 @@ public class JwtAuthorizationManager implements AuthorizationManager<RequestAuth
         String jwt = getJwtFromHeader(context.getRequest());
 
         var permissions = jwtUtil.getPermissions(jwt);
-
-        var permissionId = context.getVariables().get("permissionId");
-        String[] requestedPermissionId = permissionId == null
-                ? context.getRequest().getParameterValues("permission-id")
-                : new String[]{permissionId};
+        String[] requestedPermissionIds = context.getRequest().getParameterValues("permission-id");
         String servletName = context.getRequest().getHttpServletMapping().getServletName();
         List<String> permittedPermissionsForRequestedConnector = "dispatcherServlet".equals(servletName)
                 // For API calls to the core
@@ -70,17 +66,17 @@ public class JwtAuthorizationManager implements AuthorizationManager<RequestAuth
                 // For calls directly to the region connectors
                 : permissions.get(servletName);
 
-        if (requestedPermissionId == null || servletName == null || permittedPermissionsForRequestedConnector == null) {
+        if (requestedPermissionIds == null || servletName == null || permittedPermissionsForRequestedConnector == null) {
             LOGGER.trace(
                     "Denying authorization for request URI {} because one of the required fields is null ({} {} {})",
                     requestURI,
-                    requestedPermissionId,
+                    requestedPermissionIds,
                     servletName,
                     permittedPermissionsForRequestedConnector);
             throw new AccessDeniedException("Not authorized to access the requested resource");
         }
 
-        if (!new HashSet<>(permittedPermissionsForRequestedConnector).containsAll(Set.of(requestedPermissionId))) {
+        if (!new HashSet<>(permittedPermissionsForRequestedConnector).containsAll(Set.of(requestedPermissionIds))) {
             LOGGER.trace(
                     "Denying authorization for request URI {} because the requested permissionId is not in the JWT ({})",
                     requestURI,

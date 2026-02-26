@@ -36,7 +36,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                                // @formatter:off
                             .requestMatchers(pathPatternRequestMatcherBuilder.matcher(CONNECTION_STATUS_STREAM_BASE)).access(jwtHeaderAuthorizationManager)
-                            .requestMatchers(pathPatternRequestMatcherBuilder.matcher(CONNECTION_STATUS_STREAM_BASE + "/{permissionId}")).access(jwtHeaderAuthorizationManager)
                             .anyRequest().denyAll()
                        // @formatter
                 )
