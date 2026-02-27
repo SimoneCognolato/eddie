@@ -6,6 +6,7 @@ import energy.eddie.regionconnector.de.eta.oauth.EtaOAuthService;
 import energy.eddie.regionconnector.de.eta.oauth.OAuthCallback;
 import energy.eddie.regionconnector.de.eta.oauth.OAuthTokenResponse;
 import energy.eddie.regionconnector.de.eta.permission.request.DePermissionRequest;
+import energy.eddie.regionconnector.de.eta.permission.request.DePermissionRequestBuilder;
 import energy.eddie.regionconnector.de.eta.permission.request.events.AcceptedEvent;
 import energy.eddie.regionconnector.de.eta.permission.request.events.SimpleEvent;
 import energy.eddie.regionconnector.de.eta.persistence.DePermissionRequestRepository;
@@ -30,154 +31,173 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PermissionRequestAuthorizationServiceTest {
 
-        private static final String PERMISSION_ID = "perm-id-123";
+    private static final String PERMISSION_ID = "perm-id-123";
 
-        @Mock
-        private DePermissionRequestRepository repository;
-        @Mock
-        private Outbox outbox;
-        @Mock
-        private EtaOAuthService oauthService;
-        @Mock
-        private DePermissionRequest permissionRequest;
+    @Mock
+    private DePermissionRequestRepository repository;
+    @Mock
+    private Outbox outbox;
+    @Mock
+    private EtaOAuthService oauthService;
 
-        @Spy
-        private DeEtaPlusConfiguration configuration = new DeEtaPlusConfiguration(
-                        "test-party", "http://test-url",
-                        new DeEtaPlusConfiguration.OAuthConfig("test-client", "secret", "tokenUrl", "authUrl",
-                                        "redirectUri",
-                                        "scope"),
-                        new DeEtaPlusConfiguration.ApiConfig(
-                                        new DeEtaPlusConfiguration.ApiConfig.ClientConfig("id", "secret")));
+    @Spy
+    private DeEtaPlusConfiguration configuration = new DeEtaPlusConfiguration(
+            "test-party", "http://test-url",
+            new DeEtaPlusConfiguration.OAuthConfig("test-client", "secret", "tokenUrl", "authUrl",
+                                                   "redirectUri",
+                                                   "scope"),
+            new DeEtaPlusConfiguration.ApiConfig(
+                    new DeEtaPlusConfiguration.ApiConfig.ClientConfig("id", "secret")));
 
-        @InjectMocks
-        private PermissionRequestAuthorizationService service;
+    @InjectMocks
+    private PermissionRequestAuthorizationService service;
 
-        @Test
-        void authorizePermissionRequestWhenNotFoundShouldThrowException() {
-                OAuthCallback callback = new OAuthCallback(Optional.of("code"), Optional.empty(), PERMISSION_ID);
-                when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.empty());
+    @Test
+    void authorizePermissionRequestWhenNotFoundShouldThrowException() {
+        OAuthCallback callback = new OAuthCallback(Optional.of("code"), Optional.empty(), PERMISSION_ID);
+        when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.empty());
 
-                assertThatThrownBy(() -> service.authorizePermissionRequest(callback))
-                                .isInstanceOf(PermissionNotFoundException.class);
-        }
+        assertThatThrownBy(() -> service.authorizePermissionRequest(callback))
+                .isInstanceOf(PermissionNotFoundException.class);
+    }
 
-        @Test
-        void authorizePermissionRequestWhenAlreadyRejectedShouldReturnEarly() throws Exception {
-                OAuthCallback callback = new OAuthCallback(Optional.of("code"), Optional.empty(), PERMISSION_ID);
-                when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
-                when(permissionRequest.status()).thenReturn(PermissionProcessStatus.REJECTED);
+    @Test
+    void authorizePermissionRequestWhenAlreadyRejectedShouldReturnEarly() throws Exception {
+        OAuthCallback callback = new OAuthCallback(Optional.of("code"), Optional.empty(), PERMISSION_ID);
+        DePermissionRequest permissionRequest = new DePermissionRequestBuilder()
+                .permissionId(PERMISSION_ID)
+                .status(PermissionProcessStatus.REJECTED)
+                .build();
+        when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
 
-                service.authorizePermissionRequest(callback);
+        service.authorizePermissionRequest(callback);
 
-                verify(outbox, never()).commit(any());
-                verify(oauthService, never()).exchangeCodeForToken(anyString(), anyString());
-        }
+        verify(outbox, never()).commit(any());
+        verify(oauthService, never()).exchangeCodeForToken(anyString(), anyString());
+    }
 
-        @Test
-        void authorizePermissionRequestWhenNotValidatedShouldReturnEarly() throws Exception {
-                OAuthCallback callback = new OAuthCallback(Optional.of("code"), Optional.empty(), PERMISSION_ID);
-                when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
-                // Status != REJECTED and != INVALID and != VALIDATED (e.g. ACCEPTED)
-                when(permissionRequest.status()).thenReturn(PermissionProcessStatus.ACCEPTED);
+    @Test
+    void authorizePermissionRequestWhenNotValidatedShouldReturnEarly() throws Exception {
+        OAuthCallback callback = new OAuthCallback(Optional.of("code"), Optional.empty(), PERMISSION_ID);
+        // Status != REJECTED and != INVALID and != VALIDATED (e.g. ACCEPTED)
+        DePermissionRequest permissionRequest = new DePermissionRequestBuilder()
+                .permissionId(PERMISSION_ID)
+                .status(PermissionProcessStatus.ACCEPTED)
+                .build();
+        when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
 
-                service.authorizePermissionRequest(callback);
+        service.authorizePermissionRequest(callback);
 
-                verify(outbox, never()).commit(any());
-                verify(oauthService, never()).exchangeCodeForToken(anyString(), anyString());
-        }
+        verify(outbox, never()).commit(any());
+        verify(oauthService, never()).exchangeCodeForToken(anyString(), anyString());
+    }
 
-        @Test
-        void authorizePermissionRequestWhenCallbackHasErrorShouldCommitRejected() throws Exception {
-                OAuthCallback callback = new OAuthCallback(Optional.empty(), Optional.of("access_denied"),
-                                PERMISSION_ID);
-                when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
-                when(permissionRequest.status()).thenReturn(PermissionProcessStatus.VALIDATED);
+    @Test
+    void authorizePermissionRequestWhenCallbackHasErrorShouldCommitRejected() throws Exception {
+        OAuthCallback callback = new OAuthCallback(Optional.empty(), Optional.of("access_denied"),
+                                                   PERMISSION_ID);
+        DePermissionRequest permissionRequest = new DePermissionRequestBuilder()
+                .permissionId(PERMISSION_ID)
+                .status(PermissionProcessStatus.VALIDATED)
+                .build();
+        when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
 
-                service.authorizePermissionRequest(callback);
+        service.authorizePermissionRequest(callback);
 
-                ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
-                verify(outbox, times(2)).commit(captor.capture());
+        ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
+        verify(outbox, times(2)).commit(captor.capture());
 
-                assertThat(captor.getAllValues().get(0).status())
-                                .isEqualTo(PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR);
-                assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.REJECTED);
-                verify(oauthService, never()).exchangeCodeForToken(anyString(), anyString());
-        }
+        assertThat(captor.getAllValues().get(0).status())
+                .isEqualTo(PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR);
+        assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.REJECTED);
+        verify(oauthService, never()).exchangeCodeForToken(anyString(), anyString());
+    }
 
-        @Test
-        void authorizePermissionRequestWhenSuccessfulAndTokenObtainedShouldCommitAccepted() throws Exception {
-                OAuthCallback callback = new OAuthCallback(Optional.of("auth-code"), Optional.empty(), PERMISSION_ID);
-                when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
-                when(permissionRequest.status()).thenReturn(PermissionProcessStatus.VALIDATED);
+    @Test
+    void authorizePermissionRequestWhenSuccessfulAndTokenObtainedShouldCommitAccepted() throws Exception {
+        OAuthCallback callback = new OAuthCallback(Optional.of("auth-code"), Optional.empty(), PERMISSION_ID);
+        DePermissionRequest permissionRequest = new DePermissionRequestBuilder()
+                .permissionId(PERMISSION_ID)
+                .status(PermissionProcessStatus.VALIDATED)
+                .build();
+        when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
 
-                OAuthTokenResponse tokenResponse = new OAuthTokenResponse(
-                                new OAuthTokenResponse.TokenData("access-token", "refresh-token"), true);
-                when(oauthService.exchangeCodeForToken("auth-code", "test-client"))
-                                .thenReturn(Mono.just(tokenResponse));
+        OAuthTokenResponse tokenResponse = new OAuthTokenResponse(
+                new OAuthTokenResponse.TokenData("access-token", "refresh-token"), true);
+        when(oauthService.exchangeCodeForToken("auth-code", "test-client"))
+                .thenReturn(Mono.just(tokenResponse));
 
-                service.authorizePermissionRequest(callback);
+        service.authorizePermissionRequest(callback);
 
-                ArgumentCaptor<SimpleEvent> simpleEventCaptor = ArgumentCaptor.forClass(SimpleEvent.class);
-                verify(outbox).commit(simpleEventCaptor.capture());
-                assertThat(simpleEventCaptor.getValue().status())
-                                .isEqualTo(PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR);
+        ArgumentCaptor<SimpleEvent> simpleEventCaptor = ArgumentCaptor.forClass(SimpleEvent.class);
+        verify(outbox).commit(simpleEventCaptor.capture());
+        assertThat(simpleEventCaptor.getValue().status())
+                .isEqualTo(PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR);
 
-                verify(outbox).commit(any(AcceptedEvent.class));
-        }
+        verify(outbox).commit(any(AcceptedEvent.class));
+    }
 
-        @Test
-        void authorizePermissionRequestWhenTokenExchangeYieldsNullTokenShouldCommitInvalid() throws Exception {
-                OAuthCallback callback = new OAuthCallback(Optional.of("auth-code"), Optional.empty(), PERMISSION_ID);
-                when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
-                when(permissionRequest.status()).thenReturn(PermissionProcessStatus.VALIDATED);
+    @Test
+    void authorizePermissionRequestWhenTokenExchangeYieldsNullTokenShouldCommitInvalid() throws Exception {
+        OAuthCallback callback = new OAuthCallback(Optional.of("auth-code"), Optional.empty(), PERMISSION_ID);
+        DePermissionRequest permissionRequest = new DePermissionRequestBuilder()
+                .permissionId(PERMISSION_ID)
+                .status(PermissionProcessStatus.VALIDATED)
+                .build();
+        when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
 
-                OAuthTokenResponse tokenResponse = new OAuthTokenResponse(null, true);
-                when(oauthService.exchangeCodeForToken("auth-code", "test-client"))
-                                .thenReturn(Mono.just(tokenResponse));
+        OAuthTokenResponse tokenResponse = new OAuthTokenResponse(null, true);
+        when(oauthService.exchangeCodeForToken("auth-code", "test-client"))
+                .thenReturn(Mono.just(tokenResponse));
 
-                service.authorizePermissionRequest(callback);
+        service.authorizePermissionRequest(callback);
 
-                ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
-                verify(outbox, times(2)).commit(captor.capture());
+        ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
+        verify(outbox, times(2)).commit(captor.capture());
 
-                assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
-        }
+        assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
+    }
 
-        @Test
-        void authorizePermissionRequestWhenTokenExchangeYieldsErrorResponseShouldCommitInvalid() throws Exception {
-                OAuthCallback callback = new OAuthCallback(Optional.of("auth-code"), Optional.empty(), PERMISSION_ID);
-                when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
-                when(permissionRequest.status()).thenReturn(PermissionProcessStatus.VALIDATED);
+    @Test
+    void authorizePermissionRequestWhenTokenExchangeYieldsErrorResponseShouldCommitInvalid() throws Exception {
+        OAuthCallback callback = new OAuthCallback(Optional.of("auth-code"), Optional.empty(), PERMISSION_ID);
+        DePermissionRequest permissionRequest = new DePermissionRequestBuilder()
+                .permissionId(PERMISSION_ID)
+                .status(PermissionProcessStatus.VALIDATED)
+                .build();
+        when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
 
-                OAuthTokenResponse tokenResponse = new OAuthTokenResponse(
-                                new OAuthTokenResponse.TokenData("access", "refresh"),
-                                false); // success=false
-                when(oauthService.exchangeCodeForToken("auth-code", "test-client"))
-                                .thenReturn(Mono.just(tokenResponse));
+        OAuthTokenResponse tokenResponse = new OAuthTokenResponse(
+                new OAuthTokenResponse.TokenData("access", "refresh"),
+                false); // success=false
+        when(oauthService.exchangeCodeForToken("auth-code", "test-client"))
+                .thenReturn(Mono.just(tokenResponse));
 
-                service.authorizePermissionRequest(callback);
+        service.authorizePermissionRequest(callback);
 
-                ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
-                verify(outbox, times(2)).commit(captor.capture());
+        ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
+        verify(outbox, times(2)).commit(captor.capture());
 
-                assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
-        }
+        assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
+    }
 
-        @Test
-        void authorizePermissionRequestWhenTokenExchangeFailsWithExceptionShouldCommitInvalid() throws Exception {
-                OAuthCallback callback = new OAuthCallback(Optional.of("auth-code"), Optional.empty(), PERMISSION_ID);
-                when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
-                when(permissionRequest.status()).thenReturn(PermissionProcessStatus.VALIDATED);
+    @Test
+    void authorizePermissionRequestWhenTokenExchangeFailsWithExceptionShouldCommitInvalid() throws Exception {
+        OAuthCallback callback = new OAuthCallback(Optional.of("auth-code"), Optional.empty(), PERMISSION_ID);
+        DePermissionRequest permissionRequest = new DePermissionRequestBuilder()
+                .permissionId(PERMISSION_ID)
+                .status(PermissionProcessStatus.VALIDATED)
+                .build();
+        when(repository.findByPermissionId(PERMISSION_ID)).thenReturn(Optional.of(permissionRequest));
 
-                when(oauthService.exchangeCodeForToken("auth-code", "test-client"))
-                                .thenReturn(Mono.error(new RuntimeException("API Error")));
+        when(oauthService.exchangeCodeForToken("auth-code", "test-client"))
+                .thenReturn(Mono.error(new RuntimeException("API Error")));
 
-                service.authorizePermissionRequest(callback);
+        service.authorizePermissionRequest(callback);
 
-                ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
-                verify(outbox, times(2)).commit(captor.capture());
+        ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
+        verify(outbox, times(2)).commit(captor.capture());
 
-                assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
-        }
+        assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
+    }
 }
