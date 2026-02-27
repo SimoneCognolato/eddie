@@ -21,6 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.nimbusds.oauth2.sdk.AuthorizationRequest;
+import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.State;
+
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -113,13 +120,13 @@ public class PermissionRequestCreationService {
 
     private String buildRedirectUri(String permissionId) {
         try {
-            com.nimbusds.oauth2.sdk.AuthorizationRequest request = new com.nimbusds.oauth2.sdk.AuthorizationRequest.Builder(
-                    new com.nimbusds.oauth2.sdk.ResponseType(com.nimbusds.oauth2.sdk.ResponseType.Value.CODE),
-                    new com.nimbusds.oauth2.sdk.id.ClientID(configuration.oauth().clientId()))
-                    .endpointURI(new java.net.URI(configuration.oauth().authorizationUrl()))
-                    .state(new com.nimbusds.oauth2.sdk.id.State(permissionId))
-                    .redirectionURI(new java.net.URI(configuration.oauth().redirectUri()))
-                    .scope(com.nimbusds.oauth2.sdk.Scope.parse(configuration.oauth().scope()))
+            AuthorizationRequest request = new AuthorizationRequest.Builder(
+                    new ResponseType(ResponseType.Value.CODE),
+                    new ClientID(configuration.oauth().clientId()))
+                    .endpointURI(new URI(configuration.oauth().authorizationUrl()))
+                    .state(new State(permissionId))
+                    .redirectionURI(new URI(configuration.oauth().redirectUri()))
+                    .scope(Scope.parse(configuration.oauth().scope()))
                     .build();
             return request.toURI().toString();
         } catch (Exception e) {

@@ -27,7 +27,8 @@ public class PermissionRequestAuthorizationService {
             DePermissionRequestRepository permissionRequestRepository,
             Outbox outbox,
             EtaOAuthService oauthService,
-            DeEtaPlusConfiguration configuration) {
+            DeEtaPlusConfiguration configuration
+    ) {
         this.permissionRequestRepository = permissionRequestRepository;
         this.outbox = outbox;
         this.oauthService = oauthService;
@@ -46,7 +47,7 @@ public class PermissionRequestAuthorizationService {
         var permissionRequest = pr.get();
 
         if (permissionRequest.status() == PermissionProcessStatus.REJECTED
-                || permissionRequest.status() == PermissionProcessStatus.INVALID) {
+            || permissionRequest.status() == PermissionProcessStatus.INVALID) {
             LOGGER.info("Permission request {} was already rejected/invalidated", permissionId);
             return;
         }
@@ -66,9 +67,9 @@ public class PermissionRequestAuthorizationService {
 
         LOGGER.info("Authorization callback was successful for permission request {}", permissionId);
         oauthService.exchangeCodeForToken(callback.code().orElseThrow(), configuration.oauth().clientId())
-                .subscribe(
-                        response -> handleTokenExchangeResponse(response, permissionId),
-                        error -> handleTokenExchangeError(error, permissionId));
+                    .subscribe(
+                            response -> handleTokenExchangeResponse(response, permissionId),
+                            error -> handleTokenExchangeError(error, permissionId));
     }
 
     private void handleTokenExchangeResponse(OAuthTokenResponse response, String permissionId) {
@@ -80,12 +81,12 @@ public class PermissionRequestAuthorizationService {
         var accessToken = response.getAccessToken();
         if (accessToken == null) {
             LOGGER.error("Token exchange returned null access token for permission request {}",
-                    permissionId);
+                         permissionId);
             outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));
             return;
         }
         LOGGER.info("Successfully obtained access token for permission request {}",
-                permissionId);
+                    permissionId);
         outbox.commit(new AcceptedEvent(permissionId, accessToken, response.getRefreshToken()));
     }
 
