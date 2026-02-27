@@ -6,82 +6,71 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class EtaOAuthServiceTest {
 
-        @Mock
-        private DeEtaPlusConfiguration configuration;
+    private MockWebServer mockWebServer;
+    private EtaOAuthService service;
 
-        private MockWebServer mockWebServer;
-        private EtaOAuthService service;
+    @BeforeEach
+    void setUp() throws IOException {
+        mockWebServer = new MockWebServer();
+        mockWebServer.start();
 
-        @BeforeEach
-        void setUp() throws IOException {
-                mockWebServer = new MockWebServer();
-                mockWebServer.start();
-                service = new EtaOAuthService(configuration);
-        }
+        String tokenUrl = mockWebServer.url("/token").toString();
+        DeEtaPlusConfiguration.OAuthConfig oauthConfig = new DeEtaPlusConfiguration.OAuthConfig(
+                "client", "secret", tokenUrl, "http://auth.url", "http://redirect.uri", "scope");
 
-        @AfterEach
-        void tearDown() throws IOException {
-                mockWebServer.shutdown();
-        }
+        DeEtaPlusConfiguration configuration = new DeEtaPlusConfiguration(
+                "partner", "http://api.url", oauthConfig, null);
 
-        @Test
-        void exchangeCodeForTokenShouldCallWebClientProperly() {
-                String tokenUrl = mockWebServer.url("/token").toString();
-                DeEtaPlusConfiguration.OAuthConfig oauthConfig = new DeEtaPlusConfiguration.OAuthConfig(
-                                "client", "secret", tokenUrl, "http://auth.url", "http://redirect.uri", "scope");
+        service = new EtaOAuthService(configuration);
+    }
 
-                when(configuration.oauth()).thenReturn(oauthConfig);
+    @AfterEach
+    void tearDown() throws IOException {
+        mockWebServer.shutdown();
+    }
 
-                mockWebServer.enqueue(new MockResponse()
-                                .setResponseCode(200)
-                                .setHeader("Content-Type", "application/json")
-                                .setBody("{\"success\": true, \"data\": {\"token\": \"acc-token\", \"refreshToken\": \"ref-token\"}}"));
+    @Test
+    void exchangeCodeForTokenShouldCallWebClientProperly() {
+        mockWebServer.enqueue(
+                new MockResponse()
+                        .setResponseCode(200)
+                        .setHeader("Content-Type", "application/json")
+                        .setBody(
+                                "{\"success\": true, \"data\": {\"token\": \"acc-token\", \"refreshToken\": \"ref-token\"}}"));
 
-                Mono<OAuthTokenResponse> resultMono = service.exchangeCodeForToken("auth-code", "client-id");
+        Mono<OAuthTokenResponse> resultMono = service.exchangeCodeForToken("auth-code", "client-id");
 
-                StepVerifier.create(resultMono)
-                                .assertNext(res -> {
-                                        assertThat(res.success()).isTrue();
-                                        assertThat(res.getAccessToken()).isEqualTo("acc-token");
-                                        assertThat(res.getRefreshToken()).isEqualTo("ref-token");
-                                })
-                                .verifyComplete();
-        }
+        StepVerifier.create(resultMono)
+                    .assertNext(res -> {
+                        assertThat(res.success()).isTrue();
+                        assertThat(res.getAccessToken()).isEqualTo("acc-token");
+                        assertThat(res.getRefreshToken()).isEqualTo("ref-token");
+                    })
+                    .verifyComplete();
+    }
 
-        @Test
-        void exchangeCodeForTokenWhenUnsuccessfulResponseShouldNotFailInProcessing() {
-                String tokenUrl = mockWebServer.url("/token").toString();
-                DeEtaPlusConfiguration.OAuthConfig oauthConfig = new DeEtaPlusConfiguration.OAuthConfig(
-                                "client", "secret", tokenUrl, "http://auth.url", "http://redirect.uri", "scope");
+    @Test
+    void exchangeCodeForTokenWhenUnsuccessfulResponseShouldNotFailInProcessing() {
+        mockWebServer.enqueue(new MockResponse()
+                                      .setResponseCode(400)
+                                      .setHeader("Content-Type", "application/json")
+                                      .setBody("{\"error\": \"invalid_request\"}"));
 
-                when(configuration.oauth()).thenReturn(oauthConfig);
+        Mono<OAuthTokenResponse> resultMono = service.exchangeCodeForToken("auth-code", "client-id");
 
-                mockWebServer.enqueue(new MockResponse()
-                                .setResponseCode(400)
-                                .setHeader("Content-Type", "application/json")
-                                .setBody("{\"error\": \"invalid_request\"}"));
-
-                Mono<OAuthTokenResponse> resultMono = service.exchangeCodeForToken("auth-code", "client-id");
-
-                StepVerifier.create(resultMono)
-                                .assertNext(res -> {
-                                        assertThat(res.success()).isFalse();
-                                        assertThat(res.getAccessToken()).isNull();
-                                })
-                                .verifyComplete();
-        }
+        StepVerifier.create(resultMono)
+                    .assertNext(res -> {
+                        assertThat(res.success()).isFalse();
+                        assertThat(res.getAccessToken()).isNull();
+                    }).verifyComplete();
+    }
 }
