@@ -40,10 +40,11 @@ class PermissionRequestControllerTest {
         when(service.createPermissionRequest(any())).thenReturn(response);
 
         mockMvc.perform(post(PATH_PERMISSION_REQUEST)
-                                .contentType(MediaType.APPLICATION_JSON
-                                ).content(
-                               "{\"connectionId\": \"conn-1\", \"dataNeedId\": \"dn-1\", \"meteringPointId\": \"mp-1\"}"
-                       )
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        // language=JSON
+                                        "{\"connectionId\": \"conn-1\", \"dataNeedId\": \"dn-1\", \"meteringPointId\": \"mp-1\"}"
+                                )
                )
                .andExpect(status().isCreated())
                .andExpect(jsonPath("$.permissionId").value("perm-1"))
