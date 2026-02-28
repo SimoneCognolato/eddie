@@ -15,6 +15,7 @@ import energy.eddie.regionconnector.shared.exceptions.PermissionNotFoundExceptio
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -51,6 +52,9 @@ class PermissionRequestAuthorizationServiceTest {
 
     @InjectMocks
     private PermissionRequestAuthorizationService service;
+
+    @Captor
+    private ArgumentCaptor<SimpleEvent> simpleEventCaptor;
 
     @Test
     void authorizePermissionRequestWhenNotFoundShouldThrowException() {
@@ -104,12 +108,12 @@ class PermissionRequestAuthorizationServiceTest {
 
         service.authorizePermissionRequest(callback);
 
-        ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
-        verify(outbox, times(2)).commit(captor.capture());
+        verify(outbox, times(2)).commit(simpleEventCaptor.capture());
 
-        assertThat(captor.getAllValues().get(0).status())
+        assertThat(simpleEventCaptor.getAllValues().get(0).status())
                 .isEqualTo(PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR);
-        assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.REJECTED);
+        assertThat(simpleEventCaptor.getAllValues().get(1).status())
+                .isEqualTo(PermissionProcessStatus.REJECTED);
         verify(oauthService, never()).exchangeCodeForToken(anyString(), anyString());
     }
 
@@ -129,7 +133,6 @@ class PermissionRequestAuthorizationServiceTest {
 
         service.authorizePermissionRequest(callback);
 
-        ArgumentCaptor<SimpleEvent> simpleEventCaptor = ArgumentCaptor.forClass(SimpleEvent.class);
         verify(outbox).commit(simpleEventCaptor.capture());
         assertThat(simpleEventCaptor.getValue().status())
                 .isEqualTo(PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR);
@@ -152,10 +155,9 @@ class PermissionRequestAuthorizationServiceTest {
 
         service.authorizePermissionRequest(callback);
 
-        ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
-        verify(outbox, times(2)).commit(captor.capture());
+        verify(outbox, times(2)).commit(simpleEventCaptor.capture());
 
-        assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
+        assertThat(simpleEventCaptor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
     }
 
     @Test
@@ -175,10 +177,9 @@ class PermissionRequestAuthorizationServiceTest {
 
         service.authorizePermissionRequest(callback);
 
-        ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
-        verify(outbox, times(2)).commit(captor.capture());
+        verify(outbox, times(2)).commit(simpleEventCaptor.capture());
 
-        assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
+        assertThat(simpleEventCaptor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
     }
 
     @Test
@@ -195,9 +196,8 @@ class PermissionRequestAuthorizationServiceTest {
 
         service.authorizePermissionRequest(callback);
 
-        ArgumentCaptor<SimpleEvent> captor = ArgumentCaptor.forClass(SimpleEvent.class);
-        verify(outbox, times(2)).commit(captor.capture());
+        verify(outbox, times(2)).commit(simpleEventCaptor.capture());
 
-        assertThat(captor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
+        assertThat(simpleEventCaptor.getAllValues().get(1).status()).isEqualTo(PermissionProcessStatus.INVALID);
     }
 }
