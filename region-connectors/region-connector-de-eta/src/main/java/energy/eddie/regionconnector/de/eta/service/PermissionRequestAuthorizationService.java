@@ -66,10 +66,19 @@ public class PermissionRequestAuthorizationService {
         }
 
         LOGGER.info("Authorization callback was successful for permission request {}", permissionId);
-        oauthService.exchangeCodeForToken(callback.code().orElseThrow(), configuration.oauth().clientId())
+
+        var codeOpt = callback.code();
+        if (codeOpt.isEmpty()) {
+            LOGGER.error("Authorization callback code is missing for permission request {}", permissionId);
+            outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));
+            return;
+        }
+
+        oauthService.exchangeCodeForToken(codeOpt.get(), configuration.oauth().clientId())
                     .subscribe(
                             response -> handleTokenExchangeResponse(response, permissionId),
-                            error -> handleTokenExchangeError(error, permissionId));
+                            error -> handleTokenExchangeError(error, permissionId)
+                    );
     }
 
     private void handleTokenExchangeResponse(OAuthTokenResponse response, String permissionId) {
@@ -91,7 +100,8 @@ public class PermissionRequestAuthorizationService {
     }
 
     private void handleTokenExchangeError(Throwable error, String permissionId) {
-        LOGGER.error("Error during token exchange for permission request " + permissionId, error);
+        LOGGER.error("Error during token exchange for permission request {}: {}", permissionId, error.getMessage(),
+                     error);
         outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));
     }
 }
