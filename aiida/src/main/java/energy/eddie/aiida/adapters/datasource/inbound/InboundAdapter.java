@@ -39,7 +39,8 @@ public class InboundAdapter extends MqttDataSourceAdapter<InboundDataSource> {
         acknowledgementStreamer = new InboundAcknowledgementStreamer(
                 mapper,
                 dataSource.acknowledgementTopic(),
-                inboundRecordSink.asFlux());
+                inboundRecordSink.asFlux()
+        );
     }
 
     @Override
