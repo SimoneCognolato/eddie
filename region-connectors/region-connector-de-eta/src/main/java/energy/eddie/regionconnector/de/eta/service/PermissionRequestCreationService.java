@@ -130,7 +130,8 @@ public class PermissionRequestCreationService {
                     .build();
             return request.toURI().toString();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to build authorization URI", e);
+            LOGGER.error("Failed to build authorization URI for permissionId: {}", permissionId, e);
+            return "";
         }
     }
 }
