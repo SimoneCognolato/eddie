@@ -14,8 +14,8 @@ import energy.eddie.aiida.models.record.AiidaRecordValue;
 import energy.eddie.aiida.models.record.FailedToSendEntity;
 import energy.eddie.aiida.models.record.PermissionLatestRecordMap;
 import energy.eddie.aiida.repositories.FailedToSendRepository;
-import energy.eddie.aiida.schemas.SchemaFormatterRegistry;
-import energy.eddie.aiida.schemas.raw.RawFormatter;
+import energy.eddie.aiida.schemas.rtd.SchemaFormatterRegistry;
+import energy.eddie.aiida.schemas.rtd.raw.RawFormatter;
 import energy.eddie.aiida.services.ApplicationInformationService;
 import energy.eddie.api.agnostic.aiida.AiidaConnectionStatusMessageDto;
 import energy.eddie.api.agnostic.aiida.AiidaSchema;
@@ -55,6 +55,7 @@ class MqttStreamerTest {
     private static final String EXPECTED_DATA_TOPIC = DATA_TOPIC + "/smart-meter-p1-raw";
     private static final String EXPECTED_STATUS_TOPIC = "aiida/v1/permission-id/status";
     private static final String EXPECTED_TERMINATION_TOPIC = "aiida/v1/permission-id/termination";
+    private static final String EXPECTED_ACK_TOPIC = "aiida/v1/permission-id/acknowledgement";
     private static final UUID PERMISSION_ID = UUID.fromString("6211ea05-d4ab-48ff-8613-8f4791a56606");
     private static final DataSource DATA_SOURCE = mock(DataSource.class);
 
@@ -108,7 +109,8 @@ class MqttStreamerTest {
                                   "mqttPassword",
                                   DATA_TOPIC,
                                   EXPECTED_STATUS_TOPIC,
-                                  EXPECTED_TERMINATION_TOPIC);
+                                  EXPECTED_TERMINATION_TOPIC,
+                                  EXPECTED_ACK_TOPIC);
         mqttStreamingConfig = new MqttStreamingConfig(mqttDto);
 
         // MQTT Streaming Context

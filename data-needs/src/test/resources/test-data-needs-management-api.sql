@@ -45,28 +45,30 @@ CREATE TABLE IF NOT EXISTS data_needs.accounting_point_data_need
 
 CREATE TABLE IF NOT EXISTS data_needs.outbound_aiida_data_need
 (
-    data_need_id          uuid                        NOT NULL PRIMARY KEY,
-    created_at            timestamp(6) WITH TIME ZONE NOT NULL,
-    enabled               boolean                     NOT NULL,
-    description           text                        NOT NULL,
-    name                  text                        NOT NULL,
-    policy_link           text                        NOT NULL,
-    purpose               text                        NOT NULL,
-    transmission_schedule VARCHAR(36)                 NOT NULL,
-    asset                 text                        NOT NULL
+    data_need_id                uuid                        NOT NULL PRIMARY KEY,
+    created_at                  timestamp(6) WITH TIME ZONE NOT NULL,
+    enabled                     boolean                     NOT NULL,
+    description                 text                        NOT NULL,
+    name                        text                        NOT NULL,
+    policy_link                 text                        NOT NULL,
+    purpose                     text                        NOT NULL,
+    transmission_schedule       VARCHAR(36)                 NOT NULL,
+    is_acknowledgement_required boolean                     NOT NULL,
+    asset                       text                        NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS data_needs.inbound_aiida_data_need
 (
-    data_need_id          uuid                        NOT NULL PRIMARY KEY,
-    created_at            timestamp(6) WITH TIME ZONE NOT NULL,
-    enabled               boolean                     NOT NULL,
-    description           text                        NOT NULL,
-    name                  text                        NOT NULL,
-    policy_link           text                        NOT NULL,
-    purpose               text                        NOT NULL,
-    transmission_schedule VARCHAR(36)                 NOT NULL,
-    asset                 text                        NOT NULL
+    data_need_id                uuid                        NOT NULL PRIMARY KEY,
+    created_at                  timestamp(6) WITH TIME ZONE NOT NULL,
+    enabled                     boolean                     NOT NULL,
+    description                 text                        NOT NULL,
+    name                        text                        NOT NULL,
+    policy_link                 text                        NOT NULL,
+    purpose                     text                        NOT NULL,
+    transmission_schedule       VARCHAR(36)                 NOT NULL,
+    is_acknowledgement_required boolean                     NOT NULL,
+    asset                       text                        NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS data_needs.aiida_data_need_data_tags
@@ -106,6 +108,9 @@ CREATE TABLE IF NOT EXISTS data_needs.validated_consumption_data_need
     min_granularity varchar(255) NOT NULL,
     enabled         boolean DEFAULT TRUE
 );
+
+--  SPDX-FileCopyrightText: 2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+--  SPDX-License-Identifier: Apache-2.0
 
 -- Create the main table for RegionConnectorFilter
 CREATE TABLE IF NOT EXISTS data_needs.region_connector_filter

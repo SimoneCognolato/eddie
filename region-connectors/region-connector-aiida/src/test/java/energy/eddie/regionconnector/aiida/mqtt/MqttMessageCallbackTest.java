@@ -145,7 +145,7 @@ class MqttMessageCallbackTest {
     @Test
     void messageArrived_smartMeterP1RawMessage_valid() {
         // Given
-        var topic = schemaTopic(AiidaSchema.SMART_METER_P1_RAW);
+        var topic = schemaTopic(MqttTopicType.OUTBOUND_DATA, AiidaSchema.SMART_METER_P1_RAW);
         var aiidaRecordDto = getAiidaRecordDto();
         var payload = realObjectMapper.writeValueAsString(aiidaRecordDto);
 
@@ -181,7 +181,7 @@ class MqttMessageCallbackTest {
     @MethodSource("aiidaSchemaCimScenarios")
     <T> void messageArrived_aiidaSchemaCim_valid(AiidaSchemaScenario<T> scenario) {
         // Given
-        var topic = schemaTopic(scenario.aiidaSchema());
+        var topic = schemaTopic(scenario.topicType, scenario.aiidaSchema());
 
         when(mockObjectMapper.readValue(any(byte[].class),
                                         eq(scenario.dataClass()))).thenReturn(scenario.data());
@@ -203,7 +203,7 @@ class MqttMessageCallbackTest {
     @MethodSource("aiidaSchemaCimScenarios")
     <T> void messageArrived_aiidaSchemaCim_invalidPermission(AiidaSchemaScenario<T> scenario) {
         // Given
-        var topic = schemaTopic(scenario.aiidaSchema());
+        var topic = schemaTopic(scenario.topicType, scenario.aiidaSchema());
 
         when(mockObjectMapper.readValue(any(byte[].class),
                                         eq(scenario.dataClass()))).thenReturn(scenario.data());
@@ -221,7 +221,7 @@ class MqttMessageCallbackTest {
     @MethodSource("aiidaSchemaCimScenarios")
     <T> void messageArrived_aiidaSchemaCim_invalidStatus(AiidaSchemaScenario<T> scenario) {
         // Given
-        var topic = schemaTopic(scenario.aiidaSchema());
+        var topic = schemaTopic(scenario.topicType, scenario.aiidaSchema());
 
         when(mockObjectMapper.readValue(any(byte[].class),
                                         eq(scenario.dataClass()))).thenReturn(scenario.data());
@@ -242,7 +242,7 @@ class MqttMessageCallbackTest {
     @MethodSource("aiidaSchemaCimScenarios")
     <T> void messageArrived_aiidaSchemaCim_beforeStartDate(AiidaSchemaScenario<T> scenario) {
         // Given
-        var topic = schemaTopic(scenario.aiidaSchema());
+        var topic = schemaTopic(scenario.topicType, scenario.aiidaSchema());
 
         var startDate = LocalDate.now(ZoneId.systemDefault()).plusDays(1);
         var endDate = LocalDate.now(ZoneId.systemDefault()).plusDays(10);
@@ -265,7 +265,7 @@ class MqttMessageCallbackTest {
     @MethodSource("aiidaSchemaCimScenarios")
     <T> void messageArrived_aiidaSchemaCim_afterEndDate(AiidaSchemaScenario<T> scenario) {
         // Given
-        var topic = schemaTopic(scenario.aiidaSchema());
+        var topic = schemaTopic(scenario.topicType, scenario.aiidaSchema());
         var startDate = LocalDate.now(ZoneId.systemDefault()).minusDays(10);
         var endDate = LocalDate.now(ZoneId.systemDefault()).minusDays(1);
 
@@ -364,16 +364,19 @@ class MqttMessageCallbackTest {
 
         return Stream.of(
                 Arguments.of(new AiidaSchemaScenario<>(
+                        MqttTopicType.OUTBOUND_DATA,
                         AiidaSchema.SMART_METER_P1_CIM_V1_04,
                         nearRealTimeDataSinkCimV104.asFlux(),
                         rtdEnvelopeV104,
                         energy.eddie.cim.v1_04.rtd.RTDEnvelope.class)),
                 Arguments.of(new AiidaSchemaScenario<>(
+                        MqttTopicType.OUTBOUND_DATA,
                         AiidaSchema.SMART_METER_P1_CIM_V1_12,
                         nearRealTimeDataSinkCimV112.asFlux(),
                         rtdEnvelopeV112,
                         energy.eddie.cim.v1_12.rtd.RTDEnvelope.class)),
                 Arguments.of(new AiidaSchemaScenario<>(
+                        MqttTopicType.ACKNOWLEDGEMENT,
                         AiidaSchema.ACKNOWLEDGEMENT_CIM_V1_12,
                         acknowledgementSinkCim.asFlux(),
                         ackEnvelope,
@@ -422,9 +425,9 @@ class MqttMessageCallbackTest {
         return MqttTopic.DEFAULT_PREFIX + "/" + PERMISSION_ID + "/" + MqttTopicType.STATUS.baseTopicName();
     }
 
-    private String schemaTopic(AiidaSchema aiidaSchema) {
+    private String schemaTopic(MqttTopicType topicType, AiidaSchema aiidaSchema) {
         return MqttTopic.DEFAULT_PREFIX + "/" + PERMISSION_ID + "/" +
-               aiidaSchema.buildTopicPath(MqttTopicType.OUTBOUND_DATA.baseTopicName());
+               aiidaSchema.buildTopicPath(topicType.baseTopicName());
     }
 
     private AiidaPermissionRequest acceptedPermission(LocalDate startDate, LocalDate endDate) {
@@ -444,6 +447,7 @@ class MqttMessageCallbackTest {
     }
 
     private record AiidaSchemaScenario<T>(
+            MqttTopicType topicType,
             AiidaSchema aiidaSchema,
             Flux<T> flux,
             T data,

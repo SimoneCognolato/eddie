@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.aiida.models.permission;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import energy.eddie.api.agnostic.aiida.mqtt.MqttDto;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -30,6 +31,9 @@ public class MqttStreamingConfig {
     private String statusTopic;
     @Column(name = "termination_topic", nullable = false)
     private String terminationTopic;
+    @Nullable
+    @Column(name = "acknowledgement_topic")
+    private String acknowledgementTopic;
 
     @SuppressWarnings("NullAway.Init") // required by JPA
     protected MqttStreamingConfig() {
@@ -42,6 +46,7 @@ public class MqttStreamingConfig {
         this.dataTopic = mqttDto.dataTopic();
         this.statusTopic = mqttDto.statusTopic();
         this.terminationTopic = mqttDto.terminationTopic();
+        this.acknowledgementTopic = mqttDto.acknowledgementTopic();
     }
 
     public UUID permissionId() {
@@ -70,5 +75,10 @@ public class MqttStreamingConfig {
 
     public String terminationTopic() {
         return terminationTopic;
+    }
+
+    @Nullable
+    public String acknowledgementTopic() {
+        return acknowledgementTopic;
     }
 }

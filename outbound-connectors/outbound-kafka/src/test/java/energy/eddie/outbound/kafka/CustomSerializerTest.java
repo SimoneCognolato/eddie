@@ -137,7 +137,7 @@ class CustomSerializerTest {
     }
 
     @Test
-    void testSerialize_EddieNearRealTimeMarketDocument_V1_04() throws SerdeInitializationException {
+    void testSerialize_EddieNearRealTimeMarketDocument_V1_12() throws SerdeInitializationException {
         // Given
         var customSerializer = new CustomSerializer(SerdeFactory.getInstance().create("json"));
         String topic = "test";
@@ -160,6 +160,32 @@ class CustomSerializerTest {
         // Clean-Up
         customSerializer.close();
     }
+
+    @Test
+    void testSerialize_EddieAcknowledgementMarketDocument() throws SerdeInitializationException {
+        // Given
+        var customSerializer = new CustomSerializer(SerdeFactory.getInstance().create("json"));
+        String topic = "test";
+        var data = new energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope()
+                .withMessageDocumentHeader(
+                        new energy.eddie.cim.v1_12.ack.MessageDocumentHeader()
+                                .withMetaInformation(
+                                        new energy.eddie.cim.v1_12.ack.MetaInformation()
+                                                .withRequestPermissionId("pid")
+                                                .withConnectionId("cid")
+                                                .withDataNeedId("dnid")
+                                                .withDocumentType("acknowledgement-market-document")));
+
+        // When
+        byte[] result = customSerializer.serialize(topic, data);
+
+        // Then
+        assertNotNull(result);
+
+        // Clean-Up
+        customSerializer.close();
+    }
+
 
     @Test
     void givenRawDataMessage_serializes_asExpected() throws SerdeInitializationException {

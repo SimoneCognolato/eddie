@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.aiida.models.datasource.mqtt.inbound;
@@ -14,6 +14,7 @@ import energy.eddie.aiida.models.datasource.mqtt.SecretGenerator;
 import energy.eddie.aiida.models.permission.MqttStreamingConfig;
 import energy.eddie.aiida.models.permission.Permission;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -30,6 +31,12 @@ public class InboundDataSource extends MqttDataSource {
     @JsonProperty
     protected String accessCode;
 
+    @Nullable
+    @Column(name = "acknowledgement_topic", table = TABLE_NAME)
+    @Schema(description = "The MQTT topic to which the EP should publish acknowledgements for received messages.")
+    @JsonProperty
+    protected String acknowledgementTopic;
+
     @Transient
     @JsonIgnore
     private MqttStreamingConfig config;
@@ -37,7 +44,11 @@ public class InboundDataSource extends MqttDataSource {
     @SuppressWarnings("NullAway")
     protected InboundDataSource() {}
 
-    public InboundDataSource(InboundDataSourceDto dto, UUID userId, MqttStreamingConfig mqttStreamingConfig) {
+    public InboundDataSource(
+            InboundDataSourceDto dto,
+            UUID userId,
+            MqttStreamingConfig mqttStreamingConfig
+    ) {
         this(dto, userId, mqttStreamingConfig, SecretGenerator.generate());
     }
 
@@ -51,11 +62,17 @@ public class InboundDataSource extends MqttDataSource {
         this.config = mqttStreamingConfig;
         this.internalHost = config.serverUri();
         this.externalHost = config.serverUri();
+        this.acknowledgementTopic = config.acknowledgementTopic();
         this.accessCode = accessCode;
     }
 
     public String accessCode() {
         return accessCode;
+    }
+
+    @Nullable
+    public String acknowledgementTopic() {
+        return acknowledgementTopic;
     }
 
     @Override
@@ -77,6 +94,7 @@ public class InboundDataSource extends MqttDataSource {
         public Builder(Permission permission) {
             this.userId = Objects.requireNonNull(permission.userId());
             var dataNeed = Objects.requireNonNull(permission.dataNeed());
+
             this.mqttStreamingConfig = Objects.requireNonNull(permission.mqttStreamingConfig());
 
             this.dataSourceDto = new InboundDataSourceDto(dataNeed.asset(), permission.id());

@@ -10,7 +10,8 @@ public enum MqttTopicType {
     OUTBOUND_DATA("data/outbound", "/+", MqttAction.PUBLISH, MqttAclType.ALLOW),
     INBOUND_DATA("data/inbound", "/+", MqttAction.SUBSCRIBE, MqttAclType.ALLOW),
     STATUS("status", MqttAction.PUBLISH, MqttAclType.ALLOW),
-    TERMINATION("termination", MqttAction.SUBSCRIBE, MqttAclType.ALLOW);
+    TERMINATION("termination", MqttAction.SUBSCRIBE, MqttAclType.ALLOW),
+    ACKNOWLEDGEMENT("acknowledgement", "/+", MqttAction.PUBLISH, MqttAclType.ALLOW);
 
     private final String baseTopicName;
     private final String topicSuffix;

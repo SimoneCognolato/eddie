@@ -214,7 +214,8 @@ class PermissionRequestControllerTest {
                 "MySuperSafePassword",
                 "data",
                 "status",
-                "termination"));
+                "termination",
+                "ack"));
 
         // When
         mockMvc.perform(patch(PATH_HANDSHAKE_PERMISSION_REQUEST, permissionId1).content(json)

@@ -84,7 +84,7 @@ class MqttServiceTest {
 
         // When, Then
         assertThrows(CredentialsAlreadyExistException.class,
-                     () -> mqttService.createCredentialsAndAclForPermission("foo", false));
+                     () -> mqttService.createCredentialsAndAclForPermission("foo", false, false));
     }
 
     @Test
@@ -100,7 +100,7 @@ class MqttServiceTest {
         when(mockConfiguration.mqttServerUri()).thenReturn(serverUri);
 
         // When
-        MqttDto dto = mqttService.createCredentialsAndAclForPermission(permissionId, false);
+        MqttDto dto = mqttService.createCredentialsAndAclForPermission(permissionId, false, false);
 
         // Then
         verify(mockUserRepository).save(mqttUserCaptor.capture());
@@ -114,6 +114,8 @@ class MqttServiceTest {
         // verify ACLs
         verify(mockAclRepository).saveAll(mqttAclCaptor.capture());
         List<MqttAcl> acls = StreamSupport.stream(mqttAclCaptor.getValue().spliterator(), false).toList();
+
+        assertEquals(3, acls.size());
 
         assertEquals("aiida/v1/testId/data/outbound/+", acls.getFirst().topic());
         assertEquals(MqttAction.PUBLISH, acls.getFirst().action());
@@ -137,10 +139,11 @@ class MqttServiceTest {
         assertEquals("aiida/v1/testId/data/outbound", dto.dataTopic());
         assertEquals("aiida/v1/testId/status", dto.statusTopic());
         assertEquals("aiida/v1/testId/termination", dto.terminationTopic());
+        assertNull(dto.acknowledgementTopic());
     }
 
     @Test
-    void givenPermissionIdAndInbound_createsAndSavesUserAndAcls() throws CredentialsAlreadyExistException {
+    void givenPermissionIdAcknowledgementAndInbound_createsAndSavesUserAndAcls() throws CredentialsAlreadyExistException {
         // Given
         String permissionId = "testId";
         String password = "MySuperSafePassword";
@@ -152,17 +155,25 @@ class MqttServiceTest {
         when(mockConfiguration.mqttServerUri()).thenReturn(serverUri);
 
         // When
-        MqttDto dto = mqttService.createCredentialsAndAclForPermission(permissionId, true);
+        MqttDto dto = mqttService.createCredentialsAndAclForPermission(permissionId, true, true);
 
         verify(mockAclRepository).saveAll(mqttAclCaptor.capture());
         List<MqttAcl> acls = StreamSupport.stream(mqttAclCaptor.getValue().spliterator(), false).toList();
+
+        assertEquals(4, acls.size());
 
         assertEquals("aiida/v1/testId/data/inbound/+", acls.getFirst().topic());
         assertEquals(MqttAction.SUBSCRIBE, acls.getFirst().action());
         assertEquals(MqttAclType.ALLOW, acls.getFirst().aclType());
         assertEquals(permissionId, acls.getFirst().username());
 
+        assertEquals("aiida/v1/testId/acknowledgement/+", acls.getLast().topic());
+        assertEquals(MqttAction.PUBLISH, acls.getLast().action());
+        assertEquals(MqttAclType.ALLOW, acls.getLast().aclType());
+        assertEquals(permissionId, acls.getLast().username());
+
         assertEquals("aiida/v1/testId/data/inbound/+", dto.dataTopic());
+        assertEquals("aiida/v1/testId/acknowledgement", dto.acknowledgementTopic());
     }
 
     @Test
@@ -182,6 +193,19 @@ class MqttServiceTest {
 
         // When
         mqttService.subscribeToOutboundDataTopic(permissionId);
+
+        // Then
+        verify(mockAsyncClient).subscribe(expected, 1);
+    }
+
+    @Test
+    void subscribeToAcknowledgementTopic_subscribesViaMqttClient() throws MqttException {
+        // Given
+        var permissionId = "test";
+        var expected = "aiida/v1/test/acknowledgement/+";
+
+        // When
+        mqttService.subscribeToAcknowledgementTopic(permissionId);
 
         // Then
         verify(mockAsyncClient).subscribe(expected, 1);

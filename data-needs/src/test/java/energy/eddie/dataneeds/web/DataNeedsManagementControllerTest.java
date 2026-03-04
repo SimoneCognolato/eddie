@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.dataneeds.web;
@@ -276,7 +276,7 @@ class DataNeedsManagementFullTest {
                 Arguments.of(
                         "{\"type\":\"validated\",\"name\":\"My awesome data need\",\"description\":\"descr\",\"purpose\":\"purpose\",\"policyLink\":\"https://example.com/toc\",\"duration\":{\"type\":\"relativeDuration\"},\"energyType\":\"ELECTRICITY\",\"minGranularity\":\"PT1H\",\"maxGranularity\":\"P1D\"}"),
                 Arguments.of(
-                        "{\"type\":\"outbound-aiida\",\"name\":\"AIIDA Data Need Test\",\"description\":\"With data tags\",\"purpose\":\"Test aiida data need with data tags\",\"policyLink\":\"https://example.com/toc\",\"transmissionSchedule\":\"*/2 * * * * *\",\"asset\":\"CONNECTION-AGREEMENT-POINT\",\"duration\":{\"type\":\"relativeDuration\",\"durationStart\":\"P0D\",\"durationEnd\":\"P10D\"},\"dataTags\":[\"1-0:1.8.0\",\"1-0:1.7.0\"],\"schemas\":[\"SMART-METER-P1-RAW\"]}"),
+                        "{\"type\":\"outbound-aiida\",\"name\":\"AIIDA Data Need Test\",\"description\":\"With data tags\",\"purpose\":\"Test aiida data need with data tags\",\"policyLink\":\"https://example.com/toc\",\"transmissionSchedule\":\"*/2 * * * * *\",\"asset\":\"CONNECTION-AGREEMENT-POINT\",\"duration\":{\"type\":\"relativeDuration\",\"durationStart\":\"P0D\",\"durationEnd\":\"P10D\"},\"dataTags\":[\"1-0:1.8.0\",\"1-0:1.7.0\"],\"schemas\":[\"SMART-METER-P1-RAW\"],\"isAcknowledgementRequired\":false}"),
                 Arguments.of(
                         "{\"type\":\"validated\",\"name\":\"NEXT_10_DAYS_ONE_MEASUREMENT_PER_DAY\",\"description\":\"Historical validated consumption data for the next 10 days, one measurement per day\",\"purpose\":\"Some purpose\",\"policyLink\":\"https://example.com/toc\",\"duration\":{\"type\":\"absoluteDuration\",\"start\":\"2024-04-01\",\"end\":\"2024-04-05\"},\"energyType\":\"ELECTRICITY\",\"minGranularity\":\"P1D\",\"maxGranularity\":\"P1D\"}"),
                 Arguments.of(

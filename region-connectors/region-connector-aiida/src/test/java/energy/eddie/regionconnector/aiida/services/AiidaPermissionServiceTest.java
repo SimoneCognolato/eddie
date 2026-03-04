@@ -131,8 +131,10 @@ class AiidaPermissionServiceTest {
         verify(mockViewRepository).findActivePermissionRequests();
         verify(mockMqttService).subscribeToOutboundDataTopic("perm-1");
         verify(mockMqttService).subscribeToStatusTopic("perm-1");
+        verify(mockMqttService).subscribeToAcknowledgementTopic("perm-1");
         verify(mockMqttService).subscribeToOutboundDataTopic("perm-2");
         verify(mockMqttService).subscribeToStatusTopic("perm-2");
+        verify(mockMqttService).subscribeToAcknowledgementTopic("perm-2");
     }
 
     @Test
@@ -464,7 +466,7 @@ class AiidaPermissionServiceTest {
         when(mockRequest.dataNeedId()).thenReturn(dataNeedId);
         when(mockDataNeedsService.findById(dataNeedId)).thenReturn(Optional.of(mockDataNeed));
         when(mockRequest.status()).thenReturn(PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR);
-        when(mockMqttService.createCredentialsAndAclForPermission(permissionId, false)).thenReturn(mockMqttDto);
+        when(mockMqttService.createCredentialsAndAclForPermission(permissionId, false, false)).thenReturn(mockMqttDto);
         doThrow(MqttException.class).when(mockMqttService).subscribeToStatusTopic(permissionId);
 
         // When
@@ -483,7 +485,7 @@ class AiidaPermissionServiceTest {
         when(mockRequest.dataNeedId()).thenReturn(dataNeedId);
         when(mockDataNeedsService.findById(dataNeedId)).thenReturn(Optional.of(mockDataNeed));
         when(mockRequest.status()).thenReturn(PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR);
-        when(mockMqttService.createCredentialsAndAclForPermission(permissionId, false)).thenReturn(mockMqttDto);
+        when(mockMqttService.createCredentialsAndAclForPermission(permissionId, false, false)).thenReturn(mockMqttDto);
 
         // When
         service.acceptPermission(permissionId, aiidaId);
@@ -507,6 +509,7 @@ class AiidaPermissionServiceTest {
 
         verify(mockMqttService).subscribeToOutboundDataTopic(permissionId);
         verify(mockMqttService).subscribeToStatusTopic(permissionId);
+        verify(mockMqttService).subscribeToAcknowledgementTopic(permissionId);
     }
 
     @Test
