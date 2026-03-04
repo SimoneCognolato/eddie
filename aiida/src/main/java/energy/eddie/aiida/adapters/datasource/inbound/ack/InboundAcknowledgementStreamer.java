@@ -57,7 +57,7 @@ public class InboundAcknowledgementStreamer {
     public void start(@Nullable IMqttAsyncClient mqttClient) {
         if (mqttClient != null && acknowledgementTopic != null) {
             LOGGER.info("Starting InboundAcknowledgementStreamer with topic {}", acknowledgementTopic);
-            inboundRecordFlux.subscribe(record -> publishAcknowledgement(mqttClient, record));
+            inboundRecordFlux.subscribe(inboundRecord -> publishAcknowledgement(mqttClient, inboundRecord));
         } else {
             LOGGER.info("Not starting InboundAcknowledgementStreamer, because mqttClient or ackTopic is null");
         }

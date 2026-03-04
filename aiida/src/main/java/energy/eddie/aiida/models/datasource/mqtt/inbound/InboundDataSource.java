@@ -67,7 +67,6 @@ public class InboundDataSource extends MqttDataSource {
 
     @Nullable
     public String acknowledgementTopic() {
-        var config = permission.mqttStreamingConfig();
         return config != null ? config.acknowledgementTopic() : null;
     }
 
