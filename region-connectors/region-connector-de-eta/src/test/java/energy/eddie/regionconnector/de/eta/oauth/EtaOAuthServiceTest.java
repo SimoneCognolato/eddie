@@ -25,12 +25,10 @@ class EtaOAuthServiceTest {
 
         String tokenUrl = mockWebServer.url("/token").toString();
         DeEtaPlusConfiguration.OAuthConfig oauthConfig = new DeEtaPlusConfiguration.OAuthConfig(
-                "client", "secret", tokenUrl, "http://auth.url", "http://redirect.uri", "scope"
-        );
+                "client", "secret", tokenUrl, "http://auth.url", "http://redirect.uri", "scope");
 
         DeEtaPlusConfiguration configuration = new DeEtaPlusConfiguration(
-                "partner", "http://api.url", oauthConfig, null
-        );
+                "partner", "http://api.url", oauthConfig, null);
 
         service = new EtaOAuthService(configuration);
     }
@@ -45,36 +43,34 @@ class EtaOAuthServiceTest {
         mockWebServer.enqueue(
                 new MockResponse()
                         .setResponseCode(200)
-                        .setHeader("Content-Type", "application/json")
+                        .setHeader("Content-Type", "application/json;charset=UTF-8")
                         .setBody(
-                                "{\"success\": true, \"data\": {\"token\": \"acc-token\", \"refreshToken\": \"ref-token\"}}"
-                        )
-        );
+                                "{\"access_token\": \"acc-token\", \"token_type\": \"bearer\", \"refresh_token\": \"ref-token\", \"expires_in\": 3600}"));
 
-        Mono<OAuthTokenResponse> resultMono = service.exchangeCodeForToken("auth-code", "client-id");
+        Mono<OAuthTokenResponse> resultMono = service.exchangeCodeForToken("auth-code", "http://redirect.uri");
 
         StepVerifier.create(resultMono)
-                    .assertNext(res -> {
-                        assertThat(res.success()).isTrue();
-                        assertThat(res.getAccessToken()).isEqualTo("acc-token");
-                        assertThat(res.getRefreshToken()).isEqualTo("ref-token");
-                    })
-                    .verifyComplete();
+                .assertNext(res -> {
+                    assertThat(res.success()).isTrue();
+                    assertThat(res.getAccessToken()).isEqualTo("acc-token");
+                    assertThat(res.getRefreshToken()).isEqualTo("ref-token");
+                })
+                .verifyComplete();
     }
 
     @Test
     void exchangeCodeForTokenWhenUnsuccessfulResponseShouldNotFailInProcessing() {
         mockWebServer.enqueue(new MockResponse()
-                                      .setResponseCode(400)
-                                      .setHeader("Content-Type", "application/json")
-                                      .setBody("{\"error\": \"invalid_request\"}"));
+                .setResponseCode(400)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"error\": \"invalid_request\"}"));
 
         Mono<OAuthTokenResponse> resultMono = service.exchangeCodeForToken("auth-code", "client-id");
 
         StepVerifier.create(resultMono)
-                    .assertNext(res -> {
-                        assertThat(res.success()).isFalse();
-                        assertThat(res.getAccessToken()).isNull();
-                    }).verifyComplete();
+                .assertNext(res -> {
+                    assertThat(res.success()).isFalse();
+                    assertThat(res.getAccessToken()).isNull();
+                }).verifyComplete();
     }
 }

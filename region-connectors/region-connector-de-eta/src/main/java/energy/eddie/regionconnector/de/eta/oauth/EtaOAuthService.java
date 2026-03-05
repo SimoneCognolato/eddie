@@ -1,24 +1,30 @@
 package energy.eddie.regionconnector.de.eta.oauth;
 
+import com.nimbusds.oauth2.sdk.AccessTokenResponse;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.TokenErrorResponse;
+import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import energy.eddie.regionconnector.de.eta.config.DeEtaPlusConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.net.URI;
 
-import com.nimbusds.oauth2.sdk.ParseException;
-
 @Service
 public class EtaOAuthService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EtaOAuthService.class);
-    private static final String SUCCESS_KEY = "success";
 
     private final DeEtaPlusConfiguration configuration;
 
@@ -29,62 +35,67 @@ public class EtaOAuthService {
     public Mono<OAuthTokenResponse> exchangeCodeForToken(String code, String openid) {
         return Mono.fromCallable(() -> performTokenExchange(code, openid))
                    .subscribeOn(Schedulers.boundedElastic())
-                   .onErrorResume(
-                           error -> {
-                               LOGGER.error("Error during token exchange", error);
-                               return Mono.just(new OAuthTokenResponse(null, false));
-                           });
+                   .onErrorResume(error -> {
+                       LOGGER.error("Error during token exchange", error);
+                       return Mono.just(new OAuthTokenResponse(null, false));
+                   });
     }
 
-    private OAuthTokenResponse performTokenExchange(String code, String openid) throws IOException, ParseException {
+    private OAuthTokenResponse performTokenExchange(String code, String openid)
+            throws IOException, ParseException {
+
         LOGGER.info("Exchanging authorization token for access token");
 
-        URI tokenEndpoint = UriComponentsBuilder
-                .fromUriString(configuration.oauth().tokenUrl())
-                .queryParam("token", code)
-                .queryParam("openid", openid)
-                .queryParam("client_id", configuration.oauth().clientId())
-                .build()
-                .toUri();
+        AuthorizationCodeGrant codeGrant = new AuthorizationCodeGrant(
+                new AuthorizationCode(code),
+                URI.create(openid));
 
-        HTTPRequest request = new HTTPRequest(HTTPRequest.Method.POST, tokenEndpoint);
-        request.setAccept("application/json");
+        URI tokenEndpoint = URI.create(configuration.oauth().tokenUrl());
+        ClientID clientID = new ClientID(configuration.oauth().clientId());
 
-        HTTPResponse response = request.send();
+        TokenRequest request = new TokenRequest(tokenEndpoint, clientID, codeGrant);
+        HTTPRequest httpRequest = request.toHTTPRequest();
+        httpRequest.setAccept("application/json");
 
-        if (!response.indicatesSuccess()) {
-            LOGGER.warn("Token exchange returned unsuccessful response: {}", response.getBody());
+        HTTPResponse response = httpRequest.send();
+
+        TokenResponse tokenResponse = TokenResponse.parse(response);
+
+        if (!tokenResponse.indicatesSuccess()) {
+            TokenErrorResponse errorResponse = tokenResponse.toErrorResponse();
+            ErrorObject errorObject = errorResponse.getErrorObject();
+
+            if (errorObject != null && errorObject.getCode() != null) {
+                LOGGER.warn("Token exchange unsuccessful: {}", errorObject.getCode());
+            } else {
+                LOGGER.warn("Token exchange unsuccessful with unknown error");
+            }
+
             return new OAuthTokenResponse(null, false);
         }
 
-        var jsonObject = response.getBodyAsJSONObject();
+        AccessTokenResponse successResponse = tokenResponse.toSuccessResponse();
 
-        boolean success = false;
-        if (jsonObject.containsKey(SUCCESS_KEY) && jsonObject.get(SUCCESS_KEY) instanceof Boolean successFlag) {
-            success = successFlag;
-        }
+        String token = successResponse.getTokens()
+                                      .getAccessToken()
+                                      .getValue();
 
-        if (!success) {
-            LOGGER.warn("Token exchange returned unsuccessful response: success flag is false");
-            return new OAuthTokenResponse(null, false);
-        }
+        long expiresIn = successResponse.getTokens()
+                                        .getAccessToken()
+                                        .getLifetime();
 
-        @SuppressWarnings("unchecked")
-        var data = (java.util.Map<String, Object>) jsonObject.get("data");
-
-        String token = null;
         String refreshTokenString = null;
-
-        if (data != null) {
-            token = (String) data.get("token");
-            refreshTokenString = (String) data.get("refreshToken");
+        if (successResponse.getTokens().getRefreshToken() != null) {
+            refreshTokenString = successResponse.getTokens()
+                                                .getRefreshToken()
+                                                .getValue();
         }
 
-        if (token == null) {
-            LOGGER.warn("Token exchange returned a response without a token");
-            return new OAuthTokenResponse(null, false);
-        }
-        LOGGER.info("Successfully exchanged token for access token");
-        return new OAuthTokenResponse(new OAuthTokenResponse.TokenData(token, refreshTokenString), success);
+        LOGGER.info("Successfully exchanged token for access token. Expires in: {} seconds", expiresIn);
+
+        return new OAuthTokenResponse(
+                new OAuthTokenResponse.TokenData(token, refreshTokenString),
+                true
+        );
     }
 }
