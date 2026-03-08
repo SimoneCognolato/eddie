@@ -6,7 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
 /**
- * Event emitted when a permission request is accepted (OAuth token obtained).
+ * Event emitted when a permission request is accepted (Auth token obtained).
  */
 @Entity(name = "DeAcceptedEvent")
 @SuppressWarnings({ "NullAway", "unused" })

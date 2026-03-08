@@ -1,6 +1,6 @@
 package energy.eddie.regionconnector.de.eta.web;
 
-import energy.eddie.regionconnector.de.eta.oauth.OAuthCallback;
+import energy.eddie.regionconnector.de.eta.auth.AuthCallback;
 import energy.eddie.regionconnector.de.eta.service.PermissionRequestAuthorizationService;
 import energy.eddie.regionconnector.shared.exceptions.PermissionNotFoundException;
 import org.slf4j.Logger;
@@ -29,14 +29,14 @@ public class AuthorizationCallbackController {
             @RequestParam(required = false) String token,
             @RequestParam(required = false) String error,
             @RequestParam String state) {
-        LOGGER.info("Received OAuth callback for permission request {}", state);
+        LOGGER.info("Received Auth callback for permission request {}", state);
 
         boolean success;
         String message;
 
         try {
-            // ETA+ uses 'token' instead of the standard OAuth 'code' parameter
-            var callback = new OAuthCallback(
+            // ETA+ uses 'token' instead of the standard Auth 'code' parameter
+            var callback = new AuthCallback(
                     Optional.ofNullable(token),
                     Optional.ofNullable(error),
                     state);
@@ -49,7 +49,7 @@ public class AuthorizationCallbackController {
             success = false;
             message = "Permission request not found";
         } catch (Exception e) {
-            LOGGER.error("Error processing OAuth callback", e);
+            LOGGER.error("Error processing Auth callback", e);
             success = false;
             message = "Authorization failed";
         }
@@ -68,7 +68,7 @@ public class AuthorizationCallbackController {
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>OAuth Authorization</title>
+                    <title>Auth Authorization</title>
                     <style>
                         body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f3f4f6; }
                         .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; text-align: center; }

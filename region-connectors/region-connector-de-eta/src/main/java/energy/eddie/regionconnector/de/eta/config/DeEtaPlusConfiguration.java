@@ -9,10 +9,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record DeEtaPlusConfiguration(
                 String eligiblePartyId,
                 String apiBaseUrl,
-                OAuthConfig oauth,
+                AuthConfig auth,
                 ApiConfig api) {
 
-        public record OAuthConfig(
+        public record AuthConfig(
                         String clientId,
                         String clientSecret,
                         String tokenUrl,

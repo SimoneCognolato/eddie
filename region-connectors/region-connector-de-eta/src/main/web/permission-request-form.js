@@ -44,7 +44,7 @@ class PermissionRequestForm extends PermissionRequestFormBase {
     this.createPermissionRequest(jsonData)
       .then((response) => {
         this._isPermissionRequestCreated = true;
-        // Open OAuth authorization URL in new window
+        // Open Auth authorization URL in new window
         if (response.redirectUri) {
           window.open(response.redirectUri, "_blank");
         }

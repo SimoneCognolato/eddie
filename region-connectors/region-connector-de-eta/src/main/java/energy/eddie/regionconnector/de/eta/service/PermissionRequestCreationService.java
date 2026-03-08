@@ -4,7 +4,6 @@
 package energy.eddie.regionconnector.de.eta.service;
 
 import energy.eddie.regionconnector.de.eta.config.DeEtaPlusConfiguration;
-import org.springframework.web.util.UriComponentsBuilder;
 import energy.eddie.api.agnostic.Granularity;
 import energy.eddie.api.agnostic.data.needs.*;
 import energy.eddie.api.agnostic.process.model.validation.AttributeError;
@@ -122,11 +121,11 @@ public class PermissionRequestCreationService {
         try {
             AuthorizationRequest request = new AuthorizationRequest.Builder(
                     new ResponseType(ResponseType.Value.CODE),
-                    new ClientID(configuration.oauth().clientId()))
-                    .endpointURI(new URI(configuration.oauth().authorizationUrl()))
+                    new ClientID(configuration.auth().clientId()))
+                    .endpointURI(new URI(configuration.auth().authorizationUrl()))
                     .state(new State(permissionId))
-                    .redirectionURI(new URI(configuration.oauth().redirectUri()))
-                    .scope(Scope.parse(configuration.oauth().scope()))
+                    .redirectionURI(new URI(configuration.auth().redirectUri()))
+                    .scope(Scope.parse(configuration.auth().scope()))
                     .build();
             return request.toURI().toString();
         } catch (Exception e) {

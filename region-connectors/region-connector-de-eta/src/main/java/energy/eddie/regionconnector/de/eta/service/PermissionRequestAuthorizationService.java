@@ -2,9 +2,9 @@ package energy.eddie.regionconnector.de.eta.service;
 
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.de.eta.config.DeEtaPlusConfiguration;
-import energy.eddie.regionconnector.de.eta.oauth.EtaOAuthService;
-import energy.eddie.regionconnector.de.eta.oauth.OAuthCallback;
-import energy.eddie.regionconnector.de.eta.oauth.OAuthTokenResponse;
+import energy.eddie.regionconnector.de.eta.auth.EtaAuthService;
+import energy.eddie.regionconnector.de.eta.auth.AuthCallback;
+import energy.eddie.regionconnector.de.eta.auth.AuthTokenResponse;
 import energy.eddie.regionconnector.de.eta.permission.request.events.AcceptedEvent;
 import energy.eddie.regionconnector.de.eta.permission.request.events.SimpleEvent;
 import energy.eddie.regionconnector.de.eta.persistence.DePermissionRequestRepository;
@@ -20,22 +20,22 @@ public class PermissionRequestAuthorizationService {
 
     private final DePermissionRequestRepository permissionRequestRepository;
     private final Outbox outbox;
-    private final EtaOAuthService oauthService;
+    private final EtaAuthService authService;
     private final DeEtaPlusConfiguration configuration;
 
     public PermissionRequestAuthorizationService(
             DePermissionRequestRepository permissionRequestRepository,
             Outbox outbox,
-            EtaOAuthService oauthService,
+            EtaAuthService authService,
             DeEtaPlusConfiguration configuration
     ) {
         this.permissionRequestRepository = permissionRequestRepository;
         this.outbox = outbox;
-        this.oauthService = oauthService;
+        this.authService = authService;
         this.configuration = configuration;
     }
 
-    public void authorizePermissionRequest(OAuthCallback callback) throws PermissionNotFoundException {
+    public void authorizePermissionRequest(AuthCallback callback) throws PermissionNotFoundException {
         var permissionId = callback.state();
         var pr = permissionRequestRepository.findByPermissionId(permissionId);
 
@@ -74,14 +74,14 @@ public class PermissionRequestAuthorizationService {
             return;
         }
 
-        oauthService.exchangeCodeForToken(codeOpt.get(), configuration.oauth().clientId())
+        authService.exchangeCodeForToken(codeOpt.get(), configuration.auth().clientId())
                     .subscribe(
                             response -> handleTokenExchangeResponse(response, permissionId),
                             error -> handleTokenExchangeError(error, permissionId)
                     );
     }
 
-    private void handleTokenExchangeResponse(OAuthTokenResponse response, String permissionId) {
+    private void handleTokenExchangeResponse(AuthTokenResponse response, String permissionId) {
         if (response == null || !response.success()) {
             LOGGER.error("Token exchange failed for permission request {}", permissionId);
             outbox.commit(new SimpleEvent(permissionId, PermissionProcessStatus.INVALID));

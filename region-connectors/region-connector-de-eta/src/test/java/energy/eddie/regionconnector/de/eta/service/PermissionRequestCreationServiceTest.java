@@ -22,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,11 +43,11 @@ class PermissionRequestCreationServiceTest {
 
     @BeforeEach
     void setUp() {
-        DeEtaPlusConfiguration.OAuthConfig oauthConfig = new DeEtaPlusConfiguration.OAuthConfig(
+        DeEtaPlusConfiguration.AuthConfig authConfig = new DeEtaPlusConfiguration.AuthConfig(
                 "client-1", "secret", "token-url", "http://auth.url", "http://redirect.uri", "scope"
         );
         DeEtaPlusConfiguration configuration = new DeEtaPlusConfiguration(
-                "partner", "http://api.url", oauthConfig, null
+                "partner", "http://api.url", authConfig, null
         );
         service = new PermissionRequestCreationService(dataNeedCalculationService, outbox, configuration);
     }
