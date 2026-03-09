@@ -4,6 +4,7 @@
 <script lang="ts" setup>
 import {
   getPermissionsPaginated,
+  getRegionConnectorsSupportedFeatures,
   getStatusMessages,
   retransmitPermission,
   type StatusMessage,
@@ -38,6 +39,8 @@ const filters = ref({ global: { value: null, matchMode: 'contains' } })
 const selectedRows = ref<StatusMessage[]>([])
 const expandedRows = ref<DataTableExpandedRows>({})
 const rowExpansions = ref<{ [key: string]: StatusMessage[] }>({})
+
+const retransmissionRegionConnectors = ref<string[]>([])
 
 let loadedPage = 0
 
@@ -133,7 +136,9 @@ function confirmTermination(permissionId: string) {
 
 function retransmitSelected() {
   for (const row of selectedRows.value) {
-    handleRetransmit(row.permissionId)
+    if (canRetransmit(row)) {
+      handleRetransmit(row.permissionId)
+    }
   }
 }
 
@@ -143,8 +148,22 @@ function terminateSelected() {
   }
 }
 
+function canRetransmit(permission: StatusMessage) {
+  return (
+    retransmissionRegionConnectors.value.includes(permission.regionConnectorId) &&
+    (permission.status === 'ACCEPTED' || permission.status === 'FULFILLED')
+  )
+}
+
 onMounted(async () => {
   await fetchPermissions()
+
+  for (const connector of await getRegionConnectorsSupportedFeatures()) {
+    if (connector.supportsRetransmissionRequests) {
+      retransmissionRegionConnectors.value.push(connector.regionConnectorId)
+    }
+  }
+
   loading.value = false
 })
 </script>
@@ -234,7 +253,7 @@ onMounted(async () => {
       <template #body="slotProps">
         <div class="column-actions">
           <Button
-            v-if="slotProps.data.status === 'ACCEPTED' || slotProps.data.status === 'FULFILLED'"
+            v-if="canRetransmit(slotProps.data)"
             label="Retransmit"
             rounded
             @click="handleRetransmit(slotProps.data.permissionId)"
