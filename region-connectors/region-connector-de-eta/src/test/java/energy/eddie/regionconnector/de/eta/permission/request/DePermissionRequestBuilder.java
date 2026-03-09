@@ -5,6 +5,7 @@ import energy.eddie.api.agnostic.data.needs.EnergyType;
 import energy.eddie.api.v0.PermissionProcessStatus;
 
 import jakarta.annotation.Nullable;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
@@ -113,6 +114,7 @@ public class DePermissionRequestBuilder {
                 created,
                 dataNeedId,
                 message,
-                cause);
+                cause
+        );
     }
 }
