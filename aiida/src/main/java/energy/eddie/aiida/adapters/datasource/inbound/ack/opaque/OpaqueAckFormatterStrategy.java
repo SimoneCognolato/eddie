@@ -21,7 +21,8 @@ public class OpaqueAckFormatterStrategy extends BaseAckFormatterStrategy {
 
     @Override
     public AcknowledgementEnvelope convert(ObjectMapper objectMapper, InboundRecord inboundRecord) {
-        var opaqueEnvelope = objectMapper.readValue(inboundRecord.payload(), OpaqueEnvelope.class);
+        var payload = inboundRecord.payload();
+        var opaqueEnvelope = objectMapper.readValue(payload, OpaqueEnvelope.class);
         var now = ZonedDateTime.now(UTC);
 
         var header = new MessageDocumentHeader()

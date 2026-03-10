@@ -70,7 +70,7 @@ public class OpaqueEnvelopeRouter implements AutoCloseable {
         if (rc == null) {
             return false;
         }
-        rc.opaqueMessageArrived(opaqueEnvelope);
+        rc.opaqueEnvelopeArrived(opaqueEnvelope);
         return true;
     }
 }

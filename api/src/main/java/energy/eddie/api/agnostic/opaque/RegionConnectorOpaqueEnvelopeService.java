@@ -10,5 +10,5 @@ public interface RegionConnectorOpaqueEnvelopeService {
      *
      * @param opaqueEnvelope The opaque envelope that has arrived.
      */
-    void opaqueMessageArrived(OpaqueEnvelope opaqueEnvelope);
+    void opaqueEnvelopeArrived(OpaqueEnvelope opaqueEnvelope);
 }

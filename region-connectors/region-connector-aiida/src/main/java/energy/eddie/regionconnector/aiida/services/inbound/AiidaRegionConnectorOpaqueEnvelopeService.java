@@ -24,7 +24,7 @@ public class AiidaRegionConnectorOpaqueEnvelopeService implements RegionConnecto
     }
 
     @Override
-    public void opaqueMessageArrived(OpaqueEnvelope opaqueEnvelope) {
+    public void opaqueEnvelopeArrived(OpaqueEnvelope opaqueEnvelope) {
         var permissionId = opaqueEnvelope.permissionId();
 
         LOGGER.info("Received opaque message with permissionId '{}'", permissionId);
