@@ -91,7 +91,7 @@ function handleRetransmit(permissionId: string) {
     .catch(() => {
       toast.add({
         severity: 'error',
-        summary: 'Failed to reqeuest retransmission.',
+        summary: 'Failed to request retransmission.',
         detail: `Failed to request retransmission for permission with ID ${permissionId}.`,
         life: 3000
       })
