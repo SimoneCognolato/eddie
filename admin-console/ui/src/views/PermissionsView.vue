@@ -238,9 +238,9 @@ onMounted(async () => {
     <Column field="regionConnectorId" header="Region Connector" />
     <Column field="dataNeedId" header="Data Need" />
     <Column field="permissionId" header="Permission" />
-    <Column field="startDate" header="Last updated" sortable>
+    <Column field="creationDate" header="Last updated" sortable>
       <template #body="slotProps">
-        {{ formatDate(slotProps.data.startDate) }}
+        {{ formatDate(slotProps.data.creationDate) }}
       </template>
     </Column>
     <Column field="status" header="Status">
@@ -273,9 +273,13 @@ onMounted(async () => {
       <ul class="permission-states">
         <li
           v-for="row in rowExpansions[slotProps.data.permissionId]"
-          :key="row.status + row.startDate"
+          :key="row.status + row.creationDate"
         >
-          <PermissionStatusCard :status="row.status" :datetime="row.startDate" />
+          <PermissionStatusCard
+            :status="row.status"
+            :datetime="row.creationDate"
+            :message="row.reason"
+          />
         </li>
       </ul>
     </template>
