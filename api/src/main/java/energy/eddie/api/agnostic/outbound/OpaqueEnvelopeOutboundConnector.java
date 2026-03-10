@@ -7,7 +7,7 @@ import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
 import reactor.core.publisher.Flux;
 
 /**
- * A opaque envelope connector allows the eligible party to send opaque envelopes with any payload to a certain region-connector.
+ * An opaque envelope connector allows the eligible party to send opaque envelopes with any payload to a certain region-connector.
  */
 public interface OpaqueEnvelopeOutboundConnector {
 

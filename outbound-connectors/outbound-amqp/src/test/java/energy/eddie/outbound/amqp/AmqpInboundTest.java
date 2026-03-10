@@ -20,6 +20,7 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -217,7 +218,13 @@ class AmqpInboundTest {
 
         var id = UUID.randomUUID();
         var idString = id.toString();
-        var envelope = new OpaqueEnvelope(idString, idString, idString, idString, id, "test-payload");
+        var envelope = new OpaqueEnvelope(idString,
+                                          idString,
+                                          idString,
+                                          idString,
+                                          id,
+                                          ZonedDateTime.now(),
+                                          "test-payload");
 
         var msg = publisher.message(serde.serialize(envelope));
         // When

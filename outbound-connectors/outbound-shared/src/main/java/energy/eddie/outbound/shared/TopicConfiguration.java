@@ -125,7 +125,7 @@ public class TopicConfiguration {
      * Used to receive messages from the eligible party.
      */
     public String opaqueEnvelope() {
-        return toTopic(TopicStructure.Direction.EP,
+        return toTopic(TopicStructure.Direction.FW,
                        TopicStructure.DataModels.AGNOSTIC,
                        TopicStructure.DocumentTypes.OPAQUE_ENVELOPE);
     }

@@ -38,6 +38,7 @@ public class OpaqueAckFormatterStrategy extends BaseAckFormatterStrategy {
         return new AcknowledgementMarketDocument()
                 .withMRID(UUID.randomUUID().toString())
                 .withCreatedDateTime(now)
+                .withReceivedMarketDocumentCreatedDateTime(opaqueEnvelope.timestamp())
                 .withReceivedMarketDocumentMRID(opaqueEnvelope.messageId().toString());
     }
 }

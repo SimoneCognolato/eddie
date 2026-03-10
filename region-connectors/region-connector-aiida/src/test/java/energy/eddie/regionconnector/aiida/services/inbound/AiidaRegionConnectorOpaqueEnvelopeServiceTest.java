@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
@@ -29,7 +30,13 @@ class AiidaRegionConnectorOpaqueEnvelopeServiceTest {
         // Given
         var id = UUID.fromString("00000000-0000-0000-0000-000000000001");
         var idString = id.toString();
-        var envelope = new OpaqueEnvelope(idString, idString, idString, idString, id, "test-payload");
+        var envelope = new OpaqueEnvelope(idString,
+                                          idString,
+                                          idString,
+                                          idString,
+                                          id,
+                                          ZonedDateTime.now(),
+                                          "test-payload");
 
         // When
         service.opaqueEnvelopeArrived(envelope);

@@ -35,6 +35,7 @@ class CustomSerializer implements Serializer<Object> {
             // Agnostic
             case ConnectionStatusMessage ignored -> serialize(data);
             case RawDataMessage ignored -> serialize(data);
+            case OpaqueEnvelope ignored -> serialize(data);
             // CIM v0.82
             case ValidatedHistoricalDataEnvelope ignored -> serialize(data);
             case PermissionEnvelope ignored -> serialize(data);
@@ -48,7 +49,6 @@ class CustomSerializer implements Serializer<Object> {
             case energy.eddie.cim.v1_12.rtd.RTDEnvelope ignored -> serialize(data);
             case energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope ignored -> serialize(data);
             case energy.eddie.cim.v1_12.recmmoe.RECMMOEEnvelope ignored -> serialize(data);
-            case OpaqueEnvelope ignored -> serialize(data);
             case null -> null;
             default -> {
                 LOGGER.warn("Got invalid type to serialize {}", data.getClass());

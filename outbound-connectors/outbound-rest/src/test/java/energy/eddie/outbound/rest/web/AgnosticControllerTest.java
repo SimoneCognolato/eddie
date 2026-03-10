@@ -152,7 +152,7 @@ class AgnosticControllerTest {
     void opaqueEnvelope_returnsAccepted() {
         var id = UUID.randomUUID();
         var idString = id.toString();
-        var msg = new OpaqueEnvelope(idString, idString, idString, idString, id, "test-payload");
+        var msg = new OpaqueEnvelope(idString, idString, idString, idString, id, ZonedDateTime.now(), "test-payload");
 
         webTestClient.post()
                      .uri("/agnostic/opaque-envelope")

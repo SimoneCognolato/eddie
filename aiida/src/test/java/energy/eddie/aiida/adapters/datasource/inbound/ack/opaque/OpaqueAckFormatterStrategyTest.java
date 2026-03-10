@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +31,8 @@ class OpaqueAckFormatterStrategyTest {
     private static final UUID PERMISSION_ID = UUID.fromString("00213495-bdbf-4497-8695-5d811e45aa64");
     private static final UUID DATA_NEED_ID = UUID.fromString("5dc71d7e-e8cd-4403-a3a8-d3c095c97a12");
     private static final UUID MESSAGE_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    private static final String TIMESTAMP_STRING = "2024-01-01T12:00:00Z";
+    private static final ZonedDateTime TIMESTAMP = ZonedDateTime.parse(TIMESTAMP_STRING);
 
     private static final String PAYLOAD = """
             {
@@ -38,9 +41,14 @@ class OpaqueAckFormatterStrategyTest {
               "connectionId":"%s",
               "dataNeedId":"%s",
               "messageId":"%s",
+              "timestamp":"%s",
               "payload":"test-payload"
             }
-            """.formatted(PERMISSION_ID.toString(), CONNECTION_ID, DATA_NEED_ID.toString(), MESSAGE_ID.toString());
+            """.formatted(PERMISSION_ID.toString(),
+                          CONNECTION_ID,
+                          DATA_NEED_ID.toString(),
+                          MESSAGE_ID.toString(),
+                          TIMESTAMP_STRING);
 
     private final OpaqueAckFormatterStrategy strategy = new OpaqueAckFormatterStrategy(AIIDA_ID);
 
@@ -109,6 +117,7 @@ class OpaqueAckFormatterStrategyTest {
         assertAll(
                 () -> assertNotNull(marketDocument.getCreatedDateTime()),
                 () -> assertNotNull(marketDocument.getMRID()),
+                () -> assertEquals(TIMESTAMP, marketDocument.getReceivedMarketDocumentCreatedDateTime()),
                 () -> assertEquals(MESSAGE_ID.toString(), marketDocument.getReceivedMarketDocumentMRID())
         );
     }
