@@ -28,8 +28,6 @@ CREATE TABLE de_eta.permission_event
     message                   TEXT,
     cause                     TEXT,
     errors                    TEXT,
-    access_token              TEXT,
-    refresh_token             TEXT,
     PRIMARY KEY (id)
 );
 
