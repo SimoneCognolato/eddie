@@ -128,8 +128,11 @@ public class HomeController {
                 statusMessage.getDataNeedId(),
                 country,
                 statusMessage.getDso(),
+                statusMessage.getCreationDate(),
                 statusMessage.getStartDate(),
+                statusMessage.getEndDate(),
                 statusMessage.getDescription(),
-                cimStatus);
+                cimStatus,
+                statusMessage.getReason());
     }
 }

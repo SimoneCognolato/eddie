@@ -11,7 +11,10 @@ public record StatusMessageDTO(
         @JsonProperty String dataNeedId,
         @JsonProperty String country,
         @JsonProperty String dso,
+        @JsonProperty String creationDate,
         @JsonProperty String startDate,
+        @JsonProperty String endDate,
         @JsonProperty String status,
-        @JsonProperty String cimStatus
+        @JsonProperty String cimStatus,
+        @JsonProperty String reason
 ) {}

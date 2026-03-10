@@ -31,10 +31,12 @@ export type StatusMessage = {
   dataNeedId: string
   country: string
   dso: string
+  creationDate: string
   startDate: string
+  endDate: string
   status: PermissionStatus
   cimStatus: string
-  parsedStartDate: string
+  reason: string
 }
 
 export type RegionConnectorMetadata = {

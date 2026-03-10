@@ -22,7 +22,6 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 
 import static energy.eddie.outbound.admin.console.config.AdminConsoleSecurityConfig.ADMIN_CONSOLE_BASE_URL;
@@ -52,16 +51,22 @@ class HomeControllerTest {
                               "testCountry",
                               "testDso",
                               "2024-05-22T08:20:03+02:00",
+                              "2024-05-22T08:20:03+02:00",
+                              "2024-05-22T08:20:03+02:00",
                               "A06",
-                              "ACCEPTED"),
+                              "ACCEPTED",
+                              null),
             new StatusMessage("testPermissionId",
                               "testRegionConnectorId",
                               "testDataNeedId",
                               "testCountry",
                               "testDso",
                               "2024-05-22T08:20:03+02:00",
+                              "2024-05-22T08:20:03+02:00",
+                              "2024-05-22T08:20:03+02:00",
                               "A05",
-                              "ACCEPTED")
+                              "ACCEPTED",
+                              null)
     );
 
     @Autowired
@@ -101,7 +106,7 @@ class HomeControllerTest {
     @Test
     void testGetStatusMessagesByPermissionId() throws Exception {
         // Given
-        when(statusMessageRepository.findByPermissionIdOrderByStartDateDescIdDesc("testPermissionId"))
+        when(statusMessageRepository.findByPermissionIdOrderByIdDesc("testPermissionId"))
                 .thenReturn(statusMessages);
 
         // When
@@ -114,7 +119,7 @@ class HomeControllerTest {
         List<StatusMessageDTO> result = objectMapper.readValue(json, new TypeReference<>() {});
 
         // Then
-        verify(statusMessageRepository, times(1)).findByPermissionIdOrderByStartDateDescIdDesc("testPermissionId");
+        verify(statusMessageRepository, times(1)).findByPermissionIdOrderByIdDesc("testPermissionId");
         assertEquals(2, result.size());
         assertEquals("Available", result.get(0).cimStatus());
         assertEquals("Active", result.get(1).cimStatus());
@@ -129,9 +134,12 @@ class HomeControllerTest {
                                                             "testDataNeedId",
                                                             "testDso",
                                                             "2024-05-22T08:20:03+02:00",
+                                                            "2024-05-22T08:20:03+02:00",
+                                                            "2024-05-22T08:20:03+02:00",
                                                             "A05",
-                                                            "ACCEPTED");
-        when(statusMessageRepository.findByPermissionIdOrderByStartDateDescIdDesc("testPermissionId"))
+                                                            "ACCEPTED",
+                                                            null);
+        when(statusMessageRepository.findByPermissionIdOrderByIdDesc("testPermissionId"))
                 .thenReturn(List.of(testStatusMessage));
 
         // When
@@ -154,9 +162,12 @@ class HomeControllerTest {
                                                             "testDataNeedId",
                                                             "testDso",
                                                             "2024-05-22T08:20:03+02:00",
+                                                            "2024-05-22T08:20:03+02:00",
+                                                            "2024-05-22T08:20:03+02:00",
                                                             "A05",
-                                                            "ACCEPTED");
-        when(statusMessageRepository.findByPermissionIdOrderByStartDateDescIdDesc("testPermissionId"))
+                                                            "ACCEPTED",
+                                                            null);
+        when(statusMessageRepository.findByPermissionIdOrderByIdDesc("testPermissionId"))
                 .thenReturn(List.of(testStatusMessage));
         // When
         mockMvc.perform(post("/retransmit/testPermissionId").with(csrf()))
@@ -174,7 +185,7 @@ class HomeControllerTest {
         assertEquals(testStatusMessage.getPermissionId(), permissionIdCaptor.getValue());
         assertEquals(testStatusMessage.getRegionConnectorId(), regionConnectorIdCaptor.getValue());
         assertEquals(LocalDate.parse("2024-05-22"), startDateCaptor.getValue());
-        assertEquals(LocalDate.now(ZoneId.systemDefault()).minusDays(1), endDateCaptor.getValue());
+        assertEquals(LocalDate.parse("2024-05-22"), endDateCaptor.getValue());
     }
 
     @Test
