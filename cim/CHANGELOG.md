@@ -80,3 +80,7 @@ For more information, see [Common Information Model Client Libraries](https://ar
 ## 3.6.0 - 2026-03-10
 
 - Add schema definitions for agnostic opaque envelopes
+
+## 3.7.0 - 2026-03-23
+
+- Add Java classes for agnostic schemas 
