@@ -32,11 +32,13 @@ public class DeEtaSpringConfig {
     @Bean
     public ConnectionStatusMessageHandler<DePermissionRequest> connectionStatusMessageHandler(
             EventBus eventBus,
-            DePermissionRequestRepository repository) {
+            DePermissionRequestRepository repository
+    ) {
         return new ConnectionStatusMessageHandler<>(
                 eventBus,
                 repository,
-                pr -> "");
+                pr -> ""
+        );
     }
 
     // For permission market documents, the CIM pendant to connection status
@@ -46,7 +48,8 @@ public class DeEtaSpringConfig {
             EventBus eventBus,
             DePermissionRequestRepository repo,
             @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") DataNeedsService dataNeedsService,
-            @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") CommonInformationModelConfiguration cimConfig) {
+            @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") CommonInformationModelConfiguration cimConfig
+    ) {
         return new PermissionMarketDocumentMessageHandler<>(
                 eventBus,
                 repo,
@@ -54,6 +57,7 @@ public class DeEtaSpringConfig {
                 cimConfig.eligiblePartyFallbackId(),
                 cimConfig,
                 pr -> null,
-                ZoneOffset.UTC);
+                ZoneOffset.UTC
+        );
     }
 }
