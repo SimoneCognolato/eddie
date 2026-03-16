@@ -114,6 +114,7 @@ public class DePermissionRequestBuilder {
                 created,
                 dataNeedId,
                 message,
-                cause);
+                cause
+        );
     }
 }
