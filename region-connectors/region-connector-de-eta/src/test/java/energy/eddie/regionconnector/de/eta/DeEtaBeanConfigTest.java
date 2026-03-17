@@ -19,10 +19,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class EtaRegionConnectorSpringConfigTest {
+class DeEtaBeanConfigTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withUserConfiguration(EtaRegionConnectorSpringConfig.class);
+            .withUserConfiguration(DeEtaBeanConfig.class);
 
     @Test
     void testBeansAreCreated() {

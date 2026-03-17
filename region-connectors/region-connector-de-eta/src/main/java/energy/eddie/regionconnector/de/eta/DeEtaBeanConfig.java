@@ -30,7 +30,7 @@ import java.time.ZoneOffset;
  */
 @Configuration
 @EnableConfigurationProperties(DeEtaPlusConfiguration.class)
-public class EtaRegionConnectorSpringConfig {
+public class DeEtaBeanConfig {
 
     @Bean
     public EventBus eventBus() {
@@ -43,7 +43,7 @@ public class EtaRegionConnectorSpringConfig {
     }
 
     // For connection status messages
-    @Bean
+    @Bean("deConnectionStatusMessageHandler")
     public ConnectionStatusMessageHandler<DePermissionRequest> connectionStatusMessageHandler(
             EventBus eventBus,
             DePermissionRequestRepository repository
@@ -57,7 +57,7 @@ public class EtaRegionConnectorSpringConfig {
 
     // For permission market documents, the CIM pendant to connection status
     // messages
-    @Bean
+    @Bean("dePermissionMarketDocumentMessageHandler")
     public PermissionMarketDocumentMessageHandler<DePermissionRequest> permissionMarketDocumentMessageHandler(
             EventBus eventBus,
             DePermissionRequestRepository repo,
