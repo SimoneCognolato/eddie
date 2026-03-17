@@ -172,13 +172,10 @@ class DataNeedSummary extends HTMLElement {
   }
 
   durationDescription(duration) {
-    const dates = datesFromDuration(duration);
-    if (dates.length === 1) {
-      const [start] = dates;
-      return `From ${start.toLocaleDateString()}`;
-    }
-    const [start, end] = dates;
-    return `From ${start.toLocaleDateString()} to ${end.toLocaleDateString()}`;
+    const [start, end] = datesFromDuration(duration);
+    return end
+      ? `From ${start.toLocaleDateString()} to ${end.toLocaleDateString()}`
+      : `From ${start.toLocaleDateString()}`;
   }
 }
 
