@@ -60,13 +60,13 @@ public class DeEtaBeanConfig {
     @Bean("dePermissionMarketDocumentMessageHandler")
     public PermissionMarketDocumentMessageHandler<DePermissionRequest> permissionMarketDocumentMessageHandler(
             EventBus eventBus,
-            DePermissionRequestRepository repo,
+            DePermissionRequestRepository repository,
             DataNeedsService dataNeedsService,
             CommonInformationModelConfiguration cimConfig
     ) {
         return new PermissionMarketDocumentMessageHandler<>(
                 eventBus,
-                repo,
+                repository,
                 dataNeedsService,
                 cimConfig.eligiblePartyFallbackId(),
                 cimConfig,
