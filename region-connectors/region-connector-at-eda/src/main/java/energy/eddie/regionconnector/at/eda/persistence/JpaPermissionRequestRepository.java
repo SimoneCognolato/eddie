@@ -51,7 +51,7 @@ public interface JpaPermissionRequestRepository extends PagingAndSortingReposito
                 at_eda.firstval_agg(pe.status)                  OVER w AS status,
                 at_eda.firstval_agg(pe.cause)                   OVER w AS cause,
                 at_eda.firstval_agg(pe.energy_direction)        OVER w AS energy_direction,
-                at_eda.firstval_agg(pe.participation_factor)    OVER w AS energy_direction
+                at_eda.firstval_agg(pe.participation_factor)    OVER w AS participation_factor 
             FROM at_eda.permission_event pe
                      JOIN permissions USING (permission_id)
             WINDOW w AS (
@@ -93,8 +93,8 @@ public interface JpaPermissionRequestRepository extends PagingAndSortingReposito
                                       at_eda.firstval_agg(message) OVER w                   AS message,
                                       at_eda.firstval_agg(status) OVER w                    AS status,
                                       at_eda.firstval_agg(cause) OVER w                     AS cause,
-                                      at_eda.firstval_agg(pe.energy_direction) OVER w       AS energy_direction,
-                                      at_eda.firstval_agg(pe.participation_factor) OVER w   AS energy_direction
+                                      at_eda.firstval_agg(energy_direction) OVER w       AS energy_direction,
+                                      at_eda.firstval_agg(participation_factor) OVER w   AS participation_factor
                                     FROM at_eda.permission_event pe, permissions_for_metering_point pm
                                     WHERE pe.permission_id = pm.permission_id
                                     WINDOW w AS (PARTITION BY pe.permission_id ORDER BY event_created DESC)
@@ -134,7 +134,7 @@ public interface JpaPermissionRequestRepository extends PagingAndSortingReposito
                 at_eda.firstval_agg(pe.status)                  OVER w AS status,
                 at_eda.firstval_agg(pe.cause)                   OVER w AS cause,
                 at_eda.firstval_agg(pe.energy_direction)        OVER w AS energy_direction,
-                at_eda.firstval_agg(pe.participation_factor)    OVER w AS energy_direction
+                at_eda.firstval_agg(pe.participation_factor)    OVER w AS participation_factor 
             FROM at_eda.permission_event pe
                      JOIN permissions USING (permission_id)
             WINDOW w AS (
@@ -181,7 +181,7 @@ public interface JpaPermissionRequestRepository extends PagingAndSortingReposito
                         at_eda.firstval_agg(status) OVER w                  AS status,
                         at_eda.firstval_agg(cause) OVER w                   AS cause,
                         at_eda.firstval_agg(pe.energy_direction) OVER w     AS energy_direction,
-                        at_eda.firstval_agg(pe.participation_factor) OVER w AS energy_direction
+                        at_eda.firstval_agg(pe.participation_factor) OVER w AS participation_factor 
                 FROM at_eda.permission_event pe, permissions_for_metering_point pm
                 WHERE pe.permission_id = pm.permission_id
                 WINDOW w AS (PARTITION BY pe.permission_id ORDER BY event_created DESC)
