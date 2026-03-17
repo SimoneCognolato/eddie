@@ -155,7 +155,7 @@ class DataNeedSummary extends HTMLElement {
           ${participationFactor
             ? /* HTML */ `
                 <dt>Participation Factor</dt>
-                <dd>${participationFactor}%</dd>
+                <dd>${participationFactor}</dd>
               `
             : ""}
           <dt>Purpose</dt>

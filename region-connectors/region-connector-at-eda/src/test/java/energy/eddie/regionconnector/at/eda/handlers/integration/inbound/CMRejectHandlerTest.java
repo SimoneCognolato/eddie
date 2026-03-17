@@ -5,6 +5,7 @@ package energy.eddie.regionconnector.at.eda.handlers.integration.inbound;
 
 import energy.eddie.api.agnostic.Granularity;
 import energy.eddie.api.agnostic.data.needs.DataNeedCalculationService;
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.agnostic.data.needs.Timeframe;
 import energy.eddie.api.agnostic.data.needs.ValidatedHistoricalDataDataNeedResult;
 import energy.eddie.api.v0.PermissionProcessStatus;
@@ -189,8 +190,8 @@ class CMRejectHandlerTest {
                 "message",
                 allowedGranularity.name(),
                 PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR.name(),
-                Instant.now()
-        );
+                Instant.now(),
+                EnergyDirection.CONSUMPTION, 100);
     }
 
     private static CMRequestStatus cmRequestStatus(ResponseCode.KnownResponseCodes responseCode) {

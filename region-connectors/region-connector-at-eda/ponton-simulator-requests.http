@@ -24,8 +24,8 @@ Content-Type: application/json
 GET http://localhost:8080/region-connectors/at-eda/ponton/cm-request
 
 ### POST CM Notification - Answer
-@request-id=QDST6OXZ
-@conversation-id=CC100855T1773139352125
+@request-id=SQ56LQC5
+@conversation-id=CC100855T1773662399315
 POST http://localhost:8080/region-connectors/at-eda/ponton/cm-notification/ECON_ANSWER
 accept: */*
 Content-Type: application/xml
@@ -84,7 +84,7 @@ Content-Type: application/xml
     </ns0:MarketParticipantDirectory>
     <ns0:ProcessDirectory>
         <ns1:MessageId>AT000000000000000000000000000000000</ns1:MessageId>
-        <ns1:ConversationId>EP00000000000000000000</ns1:ConversationId>
+        <ns1:ConversationId>{{conversation-id}}</ns1:ConversationId>
         <ns0:CMRequestId>{{request-id}}</ns0:CMRequestId>
         <ns0:ResponseData>
             <ns0:MeteringPoint>{{metering-point-id}}</ns0:MeteringPoint>
@@ -95,8 +95,8 @@ Content-Type: application/xml
 </ns0:CMNotification>
 
 ### POST consumption record
-@start=2026-03-11T00:00:00+01:00
-@end=2026-03-11T00:15:00+01:00
+@start=2026-03-17T00:00:00+01:00
+@end=2026-03-17T00:15:00+01:00
 POST http://localhost:8080/region-connectors/at-eda/ponton/consumption-record
 accept: */*
 Content-Type: application/xml

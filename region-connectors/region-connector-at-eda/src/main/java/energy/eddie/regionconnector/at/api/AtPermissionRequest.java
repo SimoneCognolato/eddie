@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.api;
 
 
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.agnostic.process.model.PermissionRequest;
 import energy.eddie.regionconnector.at.eda.requests.restricted.enums.AllowedGranularity;
 
@@ -26,9 +27,10 @@ public interface AtPermissionRequest extends PermissionRequest {
     String conversationId();
 
     /**
-     * In austria every permission request is associated with exactly one metering point. When the request is sent
+     * In Austria every permission request is associated with exactly one metering point. When the request is sent
      * without a metering point id, the user is asked to select a metering point in his DSO web portal. So it can be
      * empty in the beginning, but it will always be set once the request has been accepted.
+     * This will always be present if the {@link #dataNeedId()} is a {@link energy.eddie.dataneeds.needs.CESUJoinRequestDataNeed}.
      *
      * @return meteringPointId
      */
@@ -55,4 +57,20 @@ public interface AtPermissionRequest extends PermissionRequest {
      * @return granularity
      */
     AllowedGranularity granularity();
+
+    /**
+     * The participation factor of a final customer in a CESU.
+     * Only present if this permission request has a {@link energy.eddie.dataneeds.needs.CESUJoinRequestDataNeed}.
+     *
+     * @return Participation factor in a CESU.
+     */
+    Optional<Integer> participationFactor();
+
+    /**
+     * Returns the EnergyDirection of the {@link #meteringPointId()}.
+     * Similar to the {@link #participationFactor()} this is only present if the data need is a {@link energy.eddie.dataneeds.needs.CESUJoinRequestDataNeed}.
+     *
+     * @return EnergyDirection of the metering point ID.
+     */
+    Optional<EnergyDirection> energyDirection();
 }

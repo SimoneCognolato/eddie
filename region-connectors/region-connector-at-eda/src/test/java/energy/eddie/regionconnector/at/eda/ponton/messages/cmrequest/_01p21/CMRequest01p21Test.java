@@ -4,9 +4,9 @@
 package energy.eddie.regionconnector.at.eda.ponton.messages.cmrequest._01p21;
 
 import energy.eddie.api.agnostic.Granularity;
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.dataneeds.needs.AccountingPointDataNeed;
 import energy.eddie.dataneeds.needs.CESUJoinRequestDataNeed;
-import energy.eddie.dataneeds.needs.EnergyDirection;
 import energy.eddie.regionconnector.at.eda.config.AtConfiguration;
 import energy.eddie.regionconnector.at.eda.requests.CCMORequest;
 import energy.eddie.regionconnector.at.eda.requests.CCMOTimeFrame;

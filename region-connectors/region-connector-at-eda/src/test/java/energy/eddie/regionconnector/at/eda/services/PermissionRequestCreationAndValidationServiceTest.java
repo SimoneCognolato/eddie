@@ -10,24 +10,31 @@ import energy.eddie.dataneeds.exceptions.UnsupportedDataNeedException;
 import energy.eddie.dataneeds.needs.DataNeed;
 import energy.eddie.regionconnector.at.eda.config.AtConfiguration;
 import energy.eddie.regionconnector.at.eda.permission.request.dtos.PermissionRequestForCreation;
+import energy.eddie.regionconnector.at.eda.permission.request.events.ValidatedEvent;
 import energy.eddie.regionconnector.at.eda.permission.request.events.ValidatedEventFactory;
 import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static energy.eddie.api.agnostic.data.needs.EnergyDirection.CONSUMPTION;
+import static energy.eddie.api.agnostic.data.needs.EnergyDirection.PRODUCTION;
 import static energy.eddie.regionconnector.at.eda.EdaRegionConnectorMetadata.AT_ZONE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +51,8 @@ class PermissionRequestCreationAndValidationServiceTest {
     private DataNeedCalculationService<DataNeed> calculationService;
     @InjectMocks
     private PermissionRequestCreationAndValidationService creationService;
+    @Captor
+    private ArgumentCaptor<ValidatedEvent> createdEventCaptor;
 
     @Test
     void createValidPermissionRequest_forHVDDataNeed() throws DataNeedNotFoundException, UnsupportedDataNeedException {
@@ -160,19 +169,51 @@ class PermissionRequestCreationAndValidationServiceTest {
         assertThrows(DataNeedNotFoundException.class, () -> creationService.createAndValidatePermissionRequest(pr));
     }
 
-    @Test
-    void createValidPermissionRequest_forCESUJoinRequestDataNeed() throws DataNeedNotFoundException, UnsupportedDataNeedException {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    @ParameterizedTest
+    @MethodSource("cesuAttributes")
+    void createValidPermissionRequest_withCESUAttributes_forCESUJoinRequestDataNeed(
+            Optional<EnergyDirection> dataNeedEnergyDirection,
+            Optional<Integer> dataNeedParticipationFactor,
+            @Nullable EnergyDirection energyDirection,
+            @Nullable Integer participationFactor,
+            EnergyDirection expectedEnergyDirection,
+            Integer expectedParticipationFactor
+    ) throws DataNeedNotFoundException, UnsupportedDataNeedException {
         // Given
         var now = LocalDate.now(ZoneOffset.UTC);
         when(calculationService.calculate("dnid"))
-                .thenReturn(new CESUJoinRequestDataNeedResult(now, List.of(Granularity.PT15M, Granularity.P1D)));
-        var pr = new PermissionRequestForCreation("cid", "AT0000000699900000000000206868100",
-                                                  List.of("dnid"), "AT000000");
+                .thenReturn(new CESUJoinRequestDataNeedResult(now,
+                                                              List.of(Granularity.PT15M, Granularity.P1D),
+                                                              dataNeedEnergyDirection,
+                                                              dataNeedParticipationFactor));
+        var pr = new PermissionRequestForCreation("cid",
+                                                  "AT0000000699900000000000206868100",
+                                                  List.of("dnid"),
+                                                  "AT000000",
+                                                  energyDirection,
+                                                  participationFactor);
 
         // When
         var res = creationService.createAndValidatePermissionRequest(pr);
 
         // Then
         assertNotNull(res);
+        verify(mockOutbox).commit(createdEventCaptor.capture());
+        var event = createdEventCaptor.getValue();
+        assertAll(
+                () -> assertEquals(expectedEnergyDirection, event.energyDirection()),
+                () -> assertEquals(expectedParticipationFactor, event.participationFactor())
+        );
+    }
+
+    private static Stream<Arguments> cesuAttributes() {
+        return Stream.of(
+                Arguments.of(Optional.empty(), Optional.empty(), PRODUCTION, 80, PRODUCTION, 80),
+                Arguments.of(Optional.of(CONSUMPTION), Optional.of(33), null, null, CONSUMPTION, 33),
+                Arguments.of(Optional.of(CONSUMPTION), Optional.of(33), PRODUCTION, 80, CONSUMPTION, 33),
+                Arguments.of(Optional.of(CONSUMPTION), Optional.empty(), PRODUCTION, 80, CONSUMPTION, 80),
+                Arguments.of(Optional.empty(), Optional.of(33), PRODUCTION, 80, PRODUCTION, 33)
+        );
     }
 }

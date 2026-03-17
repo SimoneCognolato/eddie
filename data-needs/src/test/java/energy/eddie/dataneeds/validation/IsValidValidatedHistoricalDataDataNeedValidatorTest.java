@@ -57,7 +57,7 @@ class IsValidValidatedHistoricalDataDataNeedValidatorTest {
             when(mockContext.buildConstraintViolationWithTemplate(any())).thenReturn(mockBuilder);
             when(mockBuilder.addConstraintViolation()).thenReturn(mockContext);
         }
-        var duration = createVhdDataNeedUsingReflection(minGranularity, maxGranularity);
+        var duration = createVhdDataNeed(minGranularity, maxGranularity);
 
         // When
         boolean isValid = validator.isValid(duration, mockContext);
@@ -71,7 +71,7 @@ class IsValidValidatedHistoricalDataDataNeedValidatorTest {
         }
     }
 
-    private ValidatedHistoricalDataDataNeed createVhdDataNeedUsingReflection(
+    private ValidatedHistoricalDataDataNeed createVhdDataNeed(
             Granularity minGranularity,
             Granularity maxGranularity
     ) {

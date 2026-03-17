@@ -1,21 +1,16 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda;
 
-import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
-import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequest;
-import energy.eddie.regionconnector.at.eda.requests.restricted.enums.AllowedGranularity;
+import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequestBuilder;
 import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -56,13 +51,9 @@ class EdaRegionConnectorTest {
     @Test
     void terminateExistingPermission_emitsTermination() throws TransmissionException {
         // given
-        var start = LocalDate.now(ZoneOffset.UTC);
-        var end = start.plusDays(10);
-        var permissionRequest = new EdaPermissionRequest("connectionId", "pid", "dnid", "cmRequestId",
-                                                         "conversationId", "mid", "dsoId", start, end,
-                                                         AllowedGranularity.PT15M,
-                                                         PermissionProcessStatus.ACCEPTED, "",
-                                                         "consentId", ZonedDateTime.now(ZoneOffset.UTC));
+        var permissionRequest = new EdaPermissionRequestBuilder()
+                .setPermissionId("pid")
+                .build();
         when(repository.findByPermissionId("permissionId")).thenReturn(Optional.of(permissionRequest));
         var regionConnector = new EdaRegionConnector(edaAdapter, repository, outbox);
 

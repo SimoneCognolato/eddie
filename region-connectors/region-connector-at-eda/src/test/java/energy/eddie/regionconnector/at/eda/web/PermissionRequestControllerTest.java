@@ -3,7 +3,11 @@
 
 package energy.eddie.regionconnector.at.eda.web;
 
+import energy.eddie.api.agnostic.Granularity;
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.dataneeds.exceptions.UnsupportedDataNeedException;
+import energy.eddie.dataneeds.needs.CESUJoinRequestDataNeed;
+import energy.eddie.dataneeds.services.DataNeedsService;
 import energy.eddie.dataneeds.web.DataNeedsAdvice;
 import energy.eddie.regionconnector.at.eda.EdaRegionConnectorMetadata;
 import energy.eddie.regionconnector.at.eda.permission.request.dtos.CreatedPermissionRequest;
@@ -27,6 +31,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static energy.eddie.api.agnostic.GlobalConfig.ERRORS_JSON_PATH;
@@ -45,6 +50,45 @@ class PermissionRequestControllerTest {
     private MockMvc mockMvc;
     @MockitoBean
     private PermissionRequestCreationAndValidationService permissionRequestCreationAndValidationService;
+    @MockitoBean
+    private DataNeedsService dataNeedsService;
+
+    @ParameterizedTest
+    @MethodSource("validCESUAttributes")
+    void createPermissionRequest_givenCESUJoinRequestDataNeed_returnsCreatedPermissionRequest(
+            EnergyDirection dataNeedEnergyDirection,
+            Integer dataNeedParticipationFactor,
+            EnergyDirection energyDirection,
+            Integer participationFactor
+    ) throws Exception {
+        // Given
+        when(dataNeedsService.findById("dnid"))
+                .thenReturn(Optional.of(new CESUJoinRequestDataNeed(dataNeedParticipationFactor,
+                                                                    Granularity.PT15M,
+                                                                    Granularity.P1D,
+                                                                    dataNeedEnergyDirection)));
+        when(permissionRequestCreationAndValidationService.createAndValidatePermissionRequest(any()))
+                .thenReturn(new CreatedPermissionRequest(List.of("pid")));
+
+        var dto = new PermissionRequestForCreation(
+                "cid",
+                "0".repeat(33),
+                List.of("dnid"),
+                "0".repeat(8),
+                energyDirection,
+                participationFactor
+        );
+
+        // When
+        mockMvc.perform(
+                       MockMvcRequestBuilders.post("/permission-request")
+                                             .contentType(MediaType.APPLICATION_JSON)
+                                             .content(objectMapper.writeValueAsString(dto))
+               )
+               // Then
+               .andExpect(status().isCreated())
+               .andExpect(jsonPath("$.permissionIds.[0]", is("pid")));
+    }
 
     @Test
     void createPermissionRequest_415WhenNotJsonBody() throws Exception {
@@ -219,6 +263,60 @@ class PermissionRequestControllerTest {
                )
                // Then
                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidCESUAttributes")
+    void createPermissionRequest_givenCESUJoinRequestDataNeedWithoutCESUAttributes_returnsBadRequest(
+            EnergyDirection energyDirection,
+            Integer participationFactor,
+            String meteringPoint
+    ) throws Exception {
+        // Given
+        when(dataNeedsService.findById("dnid"))
+                .thenReturn(Optional.of(new CESUJoinRequestDataNeed(participationFactor,
+                                                                    Granularity.PT15M,
+                                                                    Granularity.P1D,
+                                                                    energyDirection)));
+        when(permissionRequestCreationAndValidationService.createAndValidatePermissionRequest(any()))
+                .thenReturn(new CreatedPermissionRequest(List.of("pid")));
+
+        var dto = new PermissionRequestForCreation(
+                "cid",
+                meteringPoint,
+                List.of("dnid"),
+                "0".repeat(8),
+                energyDirection,
+                participationFactor
+        );
+
+        // When
+        mockMvc.perform(
+                       MockMvcRequestBuilders.post("/permission-request")
+                                             .contentType(MediaType.APPLICATION_JSON)
+                                             .content(objectMapper.writeValueAsString(dto))
+               )
+               // Then
+               .andExpect(status().isBadRequest());
+    }
+
+    private static Stream<Arguments> invalidCESUAttributes() {
+        var meteringPoint = "0".repeat(33);
+        return Stream.of(
+                Arguments.of(EnergyDirection.PRODUCTION, null, meteringPoint),
+                Arguments.of(null, 100, meteringPoint),
+                Arguments.of(EnergyDirection.CONSUMPTION, 110, meteringPoint),
+                Arguments.of(EnergyDirection.CONSUMPTION, 100, null)
+        );
+    }
+
+    private static Stream<Arguments> validCESUAttributes() {
+        return Stream.of(
+                Arguments.of(EnergyDirection.CONSUMPTION, 33, null, null),
+                Arguments.of(null, null, EnergyDirection.PRODUCTION, 44),
+                Arguments.of(EnergyDirection.CONSUMPTION, null, null, 44),
+                Arguments.of(null, 33, EnergyDirection.PRODUCTION, null)
+        );
     }
 
     private static Stream<Arguments> permissionRequestArguments() {

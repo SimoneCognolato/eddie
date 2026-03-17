@@ -4,10 +4,10 @@
 package energy.eddie.regionconnector.at.eda.permission.request;
 
 import energy.eddie.api.agnostic.DataSourceInformation;
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequest;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestProjection;
-import energy.eddie.regionconnector.at.eda.requests.CCMORequest;
 import energy.eddie.regionconnector.at.eda.requests.restricted.enums.AllowedGranularity;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -15,7 +15,6 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import static energy.eddie.regionconnector.at.eda.EdaRegionConnectorMetadata.AT_ZONE_ID;
 
@@ -51,35 +50,21 @@ public class EdaPermissionRequest implements AtPermissionRequest {
     @Column(columnDefinition = "text")
     private final PermissionProcessStatus status;
     private final ZonedDateTime created;
-
-    public EdaPermissionRequest(
-            String connectionId, String dataNeedId, CCMORequest ccmoRequest,
-            AllowedGranularity granularity, PermissionProcessStatus status, String message,
-            String consentId
-    ) {
-        this(connectionId,
-             UUID.randomUUID().toString(),
-             dataNeedId,
-             ccmoRequest.cmRequestId(),
-             ccmoRequest.messageId(),
-             ccmoRequest.meteringPointId().orElse(null),
-             ccmoRequest.dsoId(),
-             ccmoRequest.start(),
-             ccmoRequest.end().orElse(null),
-             granularity,
-             status,
-             message,
-             consentId,
-             ZonedDateTime.now(AT_ZONE_ID));
-    }
+    @Nullable
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "text")
+    private final EnergyDirection energyDirection;
+    @Nullable
+    @Column(columnDefinition = "number")
+    private final Integer participationFactor;
 
     @SuppressWarnings("java:S107")
-    public EdaPermissionRequest(
+    EdaPermissionRequest(
             String connectionId, String permissionId, String dataNeedId, String cmRequestId,
             String conversationId, @Nullable String meteringPointId, String dsoId,
             LocalDate start, @Nullable LocalDate end, AllowedGranularity granularity,
             PermissionProcessStatus status, String message, @Nullable String consentId,
-            ZonedDateTime created
+            ZonedDateTime created, @Nullable EnergyDirection energyDirection, @Nullable Integer participationFactor
     ) {
         this.connectionId = connectionId;
         this.permissionId = permissionId;
@@ -95,12 +80,14 @@ public class EdaPermissionRequest implements AtPermissionRequest {
         this.message = message;
         this.consentId = consentId;
         this.created = created;
+        this.energyDirection = energyDirection;
+        this.participationFactor = participationFactor;
     }
 
     // protected no-args ctor needed for JPA and reflections
     protected EdaPermissionRequest() {
         this(null, null, null, null, null, null,
-             null, null, null, null, null, null, null, null);
+             null, null, null, null, null, null, null, null, null, null);
     }
 
     public static EdaPermissionRequest fromProjection(AtPermissionRequestProjection projection) {
@@ -118,7 +105,9 @@ public class EdaPermissionRequest implements AtPermissionRequest {
                 PermissionProcessStatus.valueOf(projection.getStatus()),
                 projection.getMessage(),
                 projection.getConsentId(),
-                ZonedDateTime.ofInstant(projection.getCreated(), AT_ZONE_ID)
+                ZonedDateTime.ofInstant(projection.getCreated(), AT_ZONE_ID),
+                projection.getEnergyDirection(),
+                projection.getParticipationFactor()
         );
     }
 
@@ -190,5 +179,15 @@ public class EdaPermissionRequest implements AtPermissionRequest {
     @Override
     public AllowedGranularity granularity() {
         return granularity;
+    }
+
+    @Override
+    public Optional<Integer> participationFactor() {
+        return Optional.ofNullable(participationFactor);
+    }
+
+    @Override
+    public Optional<EnergyDirection> energyDirection() {
+        return Optional.ofNullable(energyDirection);
     }
 }

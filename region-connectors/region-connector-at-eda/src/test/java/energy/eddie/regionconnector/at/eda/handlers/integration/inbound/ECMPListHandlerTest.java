@@ -7,9 +7,10 @@ import at.ebutilities.schemata.customerprocesses.ecmplist._01p10.ECMPList;
 import at.ebutilities.schemata.customerprocesses.ecmplist._01p10.MPListData;
 import at.ebutilities.schemata.customerprocesses.ecmplist._01p10.MPTimeData;
 import at.ebutilities.schemata.customerprocesses.ecmplist._01p10.ProcessDirectory;
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.eda.dto.IdentifiableECMPList;
-import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequest;
+import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequestBuilder;
 import energy.eddie.regionconnector.at.eda.permission.request.events.UpdateEndDateEvent;
 import energy.eddie.regionconnector.at.eda.ponton.messages.ecmplist._01p10.ECMPList01p10;
 import energy.eddie.regionconnector.at.eda.provider.IdentifiableStreams;
@@ -46,22 +47,23 @@ class ECMPListHandlerTest {
     @Test
     void givenECMPList_whenHandle_thenUpdatesEndDate() {
         // Given
-        var pr = new EdaPermissionRequest(
-                "cid",
-                "pid",
-                "dnid",
-                "cm-id",
-                "conv-id",
-                "AT0000000000000000000000000000000",
-                "AT000000",
-                LocalDate.of(2026, 1, 1),
-                null,
-                AllowedGranularity.PT15M,
-                PermissionProcessStatus.ACCEPTED,
-                "message",
-                "c-id",
-                ZonedDateTime.now(AT_ZONE_ID)
-        );
+        var pr = new EdaPermissionRequestBuilder().setConnectionId("cid")
+                                                  .setPermissionId("pid")
+                                                  .setDataNeedId("dnid")
+                                                  .setCmRequestId("cm-id")
+                                                  .setConversationId("conv-id")
+                                                  .setMeteringPointId("AT0000000000000000000000000000000")
+                                                  .setDsoId("AT000000")
+                                                  .setStart(LocalDate.of(2026, 1, 1))
+                                                  .setEnd(null)
+                                                  .setGranularity(AllowedGranularity.PT15M)
+                                                  .setStatus(PermissionProcessStatus.ACCEPTED)
+                                                  .setMessage("message")
+                                                  .setConsentId("c-id")
+                                                  .setCreated(ZonedDateTime.now(AT_ZONE_ID))
+                                                  .setEnergyDirection(EnergyDirection.CONSUMPTION)
+                                                  .setParticipationFactor(1)
+                                                  .build();
         var ecmpList = createECMPList();
         var id = new IdentifiableECMPList(new ECMPList01p10(ecmpList), pr);
         when(streams.ecmpListStream()).thenReturn(Flux.just(id));
@@ -80,22 +82,23 @@ class ECMPListHandlerTest {
     @NullSource
     void givenECMPListWithoutMatchingMeteringPoint_whenHandle_thenDoesNothing(String meteringPointId) {
         // Given
-        var pr = new EdaPermissionRequest(
-                "cid",
-                "pid",
-                "dnid",
-                "cm-id",
-                "conv-id",
-                meteringPointId,
-                "AT000000",
-                LocalDate.of(2026, 1, 1),
-                null,
-                AllowedGranularity.PT15M,
-                PermissionProcessStatus.ACCEPTED,
-                "message",
-                "c-id",
-                ZonedDateTime.now(AT_ZONE_ID)
-        );
+        var pr = new EdaPermissionRequestBuilder().setConnectionId("cid")
+                                                  .setPermissionId("pid")
+                                                  .setDataNeedId("dnid")
+                                                  .setCmRequestId("cm-id")
+                                                  .setConversationId("conv-id")
+                                                  .setMeteringPointId(meteringPointId)
+                                                  .setDsoId("AT000000")
+                                                  .setStart(LocalDate.of(2026, 1, 1))
+                                                  .setEnd(null)
+                                                  .setGranularity(AllowedGranularity.PT15M)
+                                                  .setStatus(PermissionProcessStatus.ACCEPTED)
+                                                  .setMessage("message")
+                                                  .setConsentId("c-id")
+                                                  .setCreated(ZonedDateTime.now(AT_ZONE_ID))
+                                                  .setEnergyDirection(EnergyDirection.CONSUMPTION)
+                                                  .setParticipationFactor(1)
+                                                  .build();
         var ecmpList = createECMPList();
         var id = new IdentifiableECMPList(new ECMPList01p10(ecmpList), pr);
         when(streams.ecmpListStream()).thenReturn(Flux.just(id));

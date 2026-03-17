@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda.services;
 
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestProjection;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
@@ -11,8 +12,8 @@ import energy.eddie.regionconnector.at.eda.dto.EdaCMRevoke;
 import energy.eddie.regionconnector.at.eda.dto.SimpleEdaCMRevoke;
 import energy.eddie.regionconnector.at.eda.handlers.integration.inbound.AtPermissionRequestProjectionTest;
 import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequest;
+import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequestBuilder;
 import energy.eddie.regionconnector.at.eda.permission.request.events.SimpleEvent;
-import energy.eddie.regionconnector.at.eda.requests.CCMORequest;
 import energy.eddie.regionconnector.at.eda.requests.restricted.enums.AllowedGranularity;
 import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
 import org.junit.jupiter.api.Test;
@@ -46,13 +47,10 @@ class RevocationServiceTest {
     void revokeWithConsentId_revokesPermissionRequest() {
         // Given
         var edaAdapter = mock(EdaAdapter.class);
-        var permissionRequest = new EdaPermissionRequest("cid",
-                                                         "dnid",
-                                                         mock(CCMORequest.class),
-                                                         AllowedGranularity.PT15M,
-                                                         PermissionProcessStatus.ACCEPTED,
-                                                         null,
-                                                         null);
+        var permissionRequest = new EdaPermissionRequestBuilder()
+                .setPermissionId("pid")
+                .setStatus(PermissionProcessStatus.ACCEPTED)
+                .build();
         TestPublisher<EdaCMRevoke> revocationStream = TestPublisher.create();
         when(edaAdapter.getCMRevokeStream()).thenReturn(revocationStream.flux());
         var repository = mock(AtPermissionRequestRepository.class);
@@ -72,12 +70,11 @@ class RevocationServiceTest {
     void revokeWithoutConsentId_revokesPermissionRequest() {
         // Given
         var edaAdapter = mock(EdaAdapter.class);
-        CCMORequest ccmoRequest = mock(CCMORequest.class);
         LocalDate now = LocalDate.now(AT_ZONE_ID);
-        when(ccmoRequest.start()).thenReturn(now);
-        when(ccmoRequest.end()).thenReturn(Optional.of(now.plusDays(10)));
-        var permissionRequest = new EdaPermissionRequest("cid", "dnid", ccmoRequest, AllowedGranularity.PT15M,
-                                                         PermissionProcessStatus.ACCEPTED, null, null);
+        var permissionRequest = new EdaPermissionRequestBuilder()
+                .setPermissionId("pid")
+                .setStatus(PermissionProcessStatus.ACCEPTED)
+                .build();
         TestPublisher<EdaCMRevoke> revocationStream = TestPublisher.create();
         when(edaAdapter.getCMRevokeStream()).thenReturn(revocationStream.flux());
         var repository = mock(AtPermissionRequestRepository.class);
@@ -103,12 +100,11 @@ class RevocationServiceTest {
     void revokeWithWrongPermissionState_doesNotRevokePermissionRequest() {
         // Given
         var edaAdapter = mock(EdaAdapter.class);
-        CCMORequest ccmoRequest = mock(CCMORequest.class);
         LocalDate now = LocalDate.now(AT_ZONE_ID);
-        when(ccmoRequest.start()).thenReturn(now);
-        when(ccmoRequest.end()).thenReturn(Optional.of(now.plusDays(10)));
-        var permissionRequest = new EdaPermissionRequest("cid", "dnid", ccmoRequest, AllowedGranularity.PT15M,
-                                                         PermissionProcessStatus.CREATED, null, null);
+        var permissionRequest = new EdaPermissionRequestBuilder()
+                .setPermissionId("pid")
+                .setStatus(PermissionProcessStatus.CREATED)
+                .build();
         TestPublisher<EdaCMRevoke> revocationStream = TestPublisher.create();
         when(edaAdapter.getCMRevokeStream()).thenReturn(revocationStream.flux());
         var repository = mock(AtPermissionRequestRepository.class);
@@ -131,9 +127,20 @@ class RevocationServiceTest {
 
     private static AtPermissionRequestProjection projection(EdaPermissionRequest epm) {
         return new AtPermissionRequestProjectionTest(
-                epm.permissionId(), epm.connectionId(), epm.cmRequestId(), epm.conversationId(),
-                LocalDate.now(ZoneId.systemDefault()), LocalDate.now(ZoneId.systemDefault()), epm.dataNeedId(), "dnid", null, null,
-                epm.message(), AllowedGranularity.PT15M.name(), epm.status().name(), Instant.now()
-        );
+                epm.permissionId(),
+                epm.connectionId(),
+                epm.cmRequestId(),
+                epm.conversationId(),
+                LocalDate.now(ZoneId.systemDefault()),
+                LocalDate.now(ZoneId.systemDefault()),
+                epm.dataNeedId(),
+                "dnid",
+                null,
+                null,
+                epm.message(),
+                AllowedGranularity.PT15M.name(),
+                epm.status().name(),
+                Instant.now(),
+                EnergyDirection.CONSUMPTION, 100);
     }
 }

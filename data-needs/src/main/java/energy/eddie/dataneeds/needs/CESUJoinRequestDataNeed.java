@@ -6,20 +6,27 @@ package energy.eddie.dataneeds.needs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import energy.eddie.api.agnostic.Granularity;
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.dataneeds.validation.BasicValidationsGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Range;
+import org.jspecify.annotations.Nullable;
 
+import java.util.Optional;
+
+/**
+ * This data need is used to request the addition of a metering point to an already existing Collective Energy Sharing Unit (CESU).
+ */
 @Entity
 @Table(name = "cesu_join_request_data_need", schema = "data_needs")
 @Schema(description = "Data need for adding a new final customer to an existing energy community")
 public class CESUJoinRequestDataNeed extends DataNeed {
     public static final String DISCRIMINATOR_VALUE = "cesu-join-request";
-    @Column(name = "participation_factor", nullable = false)
-    @JsonProperty(required = true)
-    @NotNull(groups = BasicValidationsGroup.class)
+    @Column(name = "participation_factor")
+    @JsonProperty()
+    @Nullable
     @Range(min = 1, max = 100)
     private final Integer participationFactor;
     @Enumerated(EnumType.STRING)
@@ -33,9 +40,9 @@ public class CESUJoinRequestDataNeed extends DataNeed {
     @NotNull(groups = BasicValidationsGroup.class)
     private final Granularity maxGranularity;
     @Enumerated(EnumType.STRING)
-    @Column(name = "energy_direction", nullable = false)
-    @JsonProperty(required = true)
-    @NotNull(groups = BasicValidationsGroup.class)
+    @Column(name = "energy_direction")
+    @JsonProperty()
+    @Nullable
     private final EnergyDirection energyDirection;
 
     @SuppressWarnings("NullAway")
@@ -47,10 +54,10 @@ public class CESUJoinRequestDataNeed extends DataNeed {
     }
 
     public CESUJoinRequestDataNeed(
-            Integer participationFactor,
+            @Nullable Integer participationFactor,
             Granularity minGranularity,
             Granularity maxGranularity,
-            EnergyDirection energyDirection
+            @Nullable EnergyDirection energyDirection
     ) {
         super();
         this.participationFactor = participationFactor;
@@ -64,8 +71,8 @@ public class CESUJoinRequestDataNeed extends DataNeed {
      *
      * @return the participation factor of the final customer in the energy community.
      */
-    public Integer participationFactor() {
-        return participationFactor;
+    public Optional<Integer> participationFactor() {
+        return Optional.ofNullable(participationFactor);
     }
 
 
@@ -94,7 +101,7 @@ public class CESUJoinRequestDataNeed extends DataNeed {
      *
      * @return consumption, if the final customer is going to consume electricity produced by other members of the energy community, or if the final customer is going to produce energy for the other members.
      */
-    public EnergyDirection energyDirection() {
-        return energyDirection;
+    public Optional<EnergyDirection> energyDirection() {
+        return Optional.ofNullable(energyDirection);
     }
 }

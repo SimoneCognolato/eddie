@@ -1,7 +1,9 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.api;
+
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -21,4 +23,8 @@ public interface AtPermissionRequestProjection {
     String getGranularity();
     String getStatus();
     Instant getCreated();
+
+    EnergyDirection getEnergyDirection();
+
+    Integer getParticipationFactor();
 }

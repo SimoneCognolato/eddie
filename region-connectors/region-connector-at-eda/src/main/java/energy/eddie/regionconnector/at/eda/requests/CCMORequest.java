@@ -3,10 +3,11 @@
 
 package energy.eddie.regionconnector.at.eda.requests;
 
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.dataneeds.needs.AccountingPointDataNeed;
 import energy.eddie.dataneeds.needs.CESUJoinRequestDataNeed;
 import energy.eddie.dataneeds.needs.DataNeed;
-import energy.eddie.dataneeds.needs.EnergyDirection;
+import energy.eddie.regionconnector.at.api.AtPermissionRequest;
 import energy.eddie.regionconnector.at.eda.config.AtConfiguration;
 import energy.eddie.regionconnector.at.eda.models.MessageCodes;
 import energy.eddie.regionconnector.at.eda.requests.restricted.enums.AllowedGranularity;
@@ -27,8 +28,59 @@ public record CCMORequest(
         AllowedTransmissionCycle transmissionCycle,
         AtConfiguration configuration,
         ZonedDateTime timestamp,
-        DataNeed dataNeed
+        DataNeed dataNeed,
+        Optional<EnergyDirection> givenEnergyDirection,
+        Optional<Integer> participationFactor
 ) {
+    public CCMORequest(
+            AtPermissionRequest permissionRequest,
+            @Nullable AllowedGranularity replacementGranularity,
+            AtConfiguration configuration,
+            DataNeed dataNeed
+    ) {
+        this(
+                new DsoIdAndMeteringPoint(
+                        permissionRequest.dataSourceInformation().permissionAdministratorId(),
+                        permissionRequest.meteringPointId().orElse(null)
+                ),
+                new CCMOTimeFrame(permissionRequest.start(), permissionRequest.end()),
+                permissionRequest.cmRequestId(),
+                permissionRequest.conversationId(),
+                Optional.ofNullable(replacementGranularity).orElse(permissionRequest.granularity()),
+                AllowedTransmissionCycle.D,
+                configuration,
+                permissionRequest.created(),
+                dataNeed,
+                permissionRequest.energyDirection(),
+                permissionRequest.participationFactor()
+        );
+    }
+
+    public CCMORequest(
+            DsoIdAndMeteringPoint dsoIdAndMeteringPoint,
+            CCMOTimeFrame timeframe,
+            String cmRequestId,
+            String messageId,
+            AllowedGranularity granularity,
+            AllowedTransmissionCycle transmissionCycle,
+            AtConfiguration configuration,
+            ZonedDateTime timestamp,
+            DataNeed dataNeed
+    ) {
+        this(
+                dsoIdAndMeteringPoint,
+                timeframe,
+                cmRequestId,
+                messageId,
+                granularity,
+                transmissionCycle,
+                configuration,
+                timestamp,
+                dataNeed,
+                Optional.empty(),
+                Optional.empty()
+        );
+    }
 
     public String dsoId() {
         return dsoIdAndMeteringPoint.dsoId();
@@ -92,7 +144,10 @@ public record CCMORequest(
     @Nullable
     public BigDecimal partFact() {
         if (dataNeed instanceof CESUJoinRequestDataNeed ec) {
-            return BigDecimal.valueOf(ec.participationFactor());
+            return ec.participationFactor()
+                     .or(this::participationFactor)
+                     .map(BigDecimal::valueOf)
+                     .orElse(null);
         }
         return null;
     }
@@ -100,7 +155,8 @@ public record CCMORequest(
     @Nullable
     public EnergyDirection energyDirection() {
         if (dataNeed instanceof CESUJoinRequestDataNeed ec) {
-            return ec.energyDirection();
+            return ec.energyDirection().or(this::givenEnergyDirection)
+                     .orElse(null);
         }
         return null;
     }

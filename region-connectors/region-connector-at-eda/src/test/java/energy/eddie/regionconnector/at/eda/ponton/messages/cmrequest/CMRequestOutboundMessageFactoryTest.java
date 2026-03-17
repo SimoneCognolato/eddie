@@ -36,6 +36,8 @@ public abstract class CMRequestOutboundMessageFactoryTest {
     @Autowired
     protected Jaxb2Marshaller marshaller;
 
+    protected abstract CMRequestOutboundMessageFactory factory();
+
     @Test
     void createOutboundMessage() {
         // given
@@ -63,6 +65,4 @@ public abstract class CMRequestOutboundMessageFactoryTest {
         // then
         assertNotNull(message);
     }
-
-    protected abstract CMRequestOutboundMessageFactory factory();
 }

@@ -102,7 +102,7 @@
  */
 
 /**
- * @typedef {ValidatedHistoricalDataDataNeed | AiidaDataNeed | AccountingPointDataNeed} DataNeedAttributes
+ * @typedef {ValidatedHistoricalDataDataNeed | AiidaDataNeed | AccountingPointDataNeed | CESUJoinRequestDataNeed} DataNeedAttributes
  */
 
 /**

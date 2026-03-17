@@ -35,7 +35,7 @@ Accounting point data is related to the metering points owned by a final custome
 
 ### CESUJoinRequestDataNeed
 
-This data need is used to request adding a metering point to an existing CESU(Collective Energy Sharing Unit).
+This data need is used to request adding a metering point to an existing CESU (Collective Energy Sharing Unit).
 Furthermore, it will request [validated historical data](#validatedhistoricaldatadataneed) for the maximum time into the future.
 
 ## Data need configuration

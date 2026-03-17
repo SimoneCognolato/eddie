@@ -68,8 +68,9 @@ class CMRequest01p21OutboundMessageFactoryTest extends CMRequestOutboundMessageF
     void isMessageType_01p21() {
         // Given
         var factory = new CMRequest01p21OutboundMessageFactory(marshaller);
+        var now = LocalDate.now(ZoneOffset.UTC);
         var ccmoRequest = new CCMORequest(new DsoIdAndMeteringPoint("dso", null),
-                                          new CCMOTimeFrame(LocalDate.now(ZoneOffset.UTC), null),
+                                          new CCMOTimeFrame(now, null),
                                           "cmReqId",
                                           "messageId",
                                           AllowedGranularity.PT15M,

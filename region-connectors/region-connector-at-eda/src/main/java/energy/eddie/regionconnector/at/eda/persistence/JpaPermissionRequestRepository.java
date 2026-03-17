@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda.persistence;
@@ -29,36 +29,38 @@ public interface JpaPermissionRequestRepository extends PagingAndSortingReposito
 
     @Override
     @Query(value = """
-        WITH permissions AS (
-            SELECT DISTINCT ON (permission_id) permission_id
-            FROM at_eda.permission_event
-            WHERE cm_request_id = :cmRequestId or conversation_id = :conversationId
-        )
-        SELECT DISTINCT ON (pe.permission_id)
-            pe.permission_id,
-            at_eda.firstval_agg(pe.cm_request_id)     OVER w AS cm_request_id,
-            at_eda.firstval_agg(pe.connection_id)     OVER w AS connection_id,
-            at_eda.firstval_agg(pe.conversation_id)   OVER w AS conversation_id,
-            at_eda.firstval_agg(pe.created)           OVER w AS created,
-            at_eda.firstval_agg(pe.data_need_id)      OVER w AS data_need_id,
-            at_eda.firstval_agg(pe.dso_id)            OVER w AS dso_id,
-            at_eda.firstval_agg(pe.granularity)       OVER w AS granularity,
-            at_eda.firstval_agg(pe.metering_point_id) OVER w AS metering_point_id,
-            at_eda.firstval_agg(pe.permission_start)  OVER w AS permission_start,
-            at_eda.firstval_agg(pe.permission_end)    OVER w AS permission_end,
-            at_eda.firstval_agg(pe.cm_consent_id)     OVER w AS cm_consent_id,
-            at_eda.firstval_agg(pe.message)           OVER w AS message,
-            at_eda.firstval_agg(pe.status)            OVER w AS status,
-            at_eda.firstval_agg(pe.cause)             OVER w AS cause
-        FROM at_eda.permission_event pe
-                 JOIN permissions USING (permission_id)
-        WINDOW w AS (
-                PARTITION BY pe.permission_id
-                ORDER BY pe.event_created DESC
-                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-                )
-        ORDER BY pe.permission_id, pe.event_created DESC;
-        """, nativeQuery = true)
+            WITH permissions AS (
+                SELECT DISTINCT ON (permission_id) permission_id
+                FROM at_eda.permission_event
+                WHERE cm_request_id = :cmRequestId OR conversation_id = :conversationId
+            )
+            SELECT DISTINCT ON (pe.permission_id)
+                pe.permission_id,
+                at_eda.firstval_agg(pe.cm_request_id)           OVER w AS cm_request_id,
+                at_eda.firstval_agg(pe.connection_id)           OVER w AS connection_id,
+                at_eda.firstval_agg(pe.conversation_id)         OVER w AS conversation_id,
+                at_eda.firstval_agg(pe.created)                 OVER w AS created,
+                at_eda.firstval_agg(pe.data_need_id)            OVER w AS data_need_id,
+                at_eda.firstval_agg(pe.dso_id)                  OVER w AS dso_id,
+                at_eda.firstval_agg(pe.granularity)             OVER w AS granularity,
+                at_eda.firstval_agg(pe.metering_point_id)       OVER w AS metering_point_id,
+                at_eda.firstval_agg(pe.permission_start)        OVER w AS permission_start,
+                at_eda.firstval_agg(pe.permission_end)          OVER w AS permission_end,
+                at_eda.firstval_agg(pe.cm_consent_id)           OVER w AS cm_consent_id,
+                at_eda.firstval_agg(pe.message)                 OVER w AS message,
+                at_eda.firstval_agg(pe.status)                  OVER w AS status,
+                at_eda.firstval_agg(pe.cause)                   OVER w AS cause,
+                at_eda.firstval_agg(pe.energy_direction)        OVER w AS energy_direction,
+                at_eda.firstval_agg(pe.participation_factor)    OVER w AS energy_direction
+            FROM at_eda.permission_event pe
+                     JOIN permissions USING (permission_id)
+            WINDOW w AS (
+                    PARTITION BY pe.permission_id
+                    ORDER BY pe.event_created DESC
+                    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+                    )
+            ORDER BY pe.permission_id, pe.event_created DESC;
+            """, nativeQuery = true)
     List<AtPermissionRequestProjection> findByConversationIdOrCMRequestId(
             @Param("conversationId") String conversationId,
             @Param("cmRequestId") @Nullable String cmRequestId
@@ -77,27 +79,29 @@ public interface JpaPermissionRequestRepository extends PagingAndSortingReposito
                                                      FROM at_eda.permission_event
                                                      WHERE metering_point_id = :meteringPointId),
               permission_result AS (SELECT DISTINCT ON (pe.permission_id) pe.permission_id,
-                                      at_eda.firstval_agg(cm_request_id) OVER w     AS cm_request_id,
-                                      at_eda.firstval_agg(connection_id) OVER w     AS connection_id,
-                                      at_eda.firstval_agg(conversation_id) OVER w   AS conversation_id,
-                                      at_eda.firstval_agg(created) OVER w           AS created,
-                                      at_eda.firstval_agg(data_need_id) OVER w      AS data_need_id,
-                                      at_eda.firstval_agg(dso_id) OVER w            AS dso_id,
-                                      at_eda.firstval_agg(granularity) OVER w       AS granularity,
-                                      at_eda.firstval_agg(metering_point_id) OVER w AS metering_point_id,
-                                      at_eda.firstval_agg(permission_start) OVER w  AS permission_start,
-                                      at_eda.firstval_agg(permission_end) OVER w    AS permission_end,
-                                      at_eda.firstval_agg(cm_consent_id) OVER w     AS cm_consent_id,
-                                      at_eda.firstval_agg(message) OVER w           AS message,
-                                      at_eda.firstval_agg(status) OVER w            AS status,
-                                      at_eda.firstval_agg(cause) OVER w             AS cause
+                                      at_eda.firstval_agg(cm_request_id) OVER w             AS cm_request_id,
+                                      at_eda.firstval_agg(connection_id) OVER w             AS connection_id,
+                                      at_eda.firstval_agg(conversation_id) OVER w           AS conversation_id,
+                                      at_eda.firstval_agg(created) OVER w                   AS created,
+                                      at_eda.firstval_agg(data_need_id) OVER w              AS data_need_id,
+                                      at_eda.firstval_agg(dso_id) OVER w                    AS dso_id,
+                                      at_eda.firstval_agg(granularity) OVER w               AS granularity,
+                                      at_eda.firstval_agg(metering_point_id) OVER w         AS metering_point_id,
+                                      at_eda.firstval_agg(permission_start) OVER w          AS permission_start,
+                                      at_eda.firstval_agg(permission_end) OVER w            AS permission_end,
+                                      at_eda.firstval_agg(cm_consent_id) OVER w             AS cm_consent_id,
+                                      at_eda.firstval_agg(message) OVER w                   AS message,
+                                      at_eda.firstval_agg(status) OVER w                    AS status,
+                                      at_eda.firstval_agg(cause) OVER w                     AS cause,
+                                      at_eda.firstval_agg(pe.energy_direction) OVER w       AS energy_direction,
+                                      at_eda.firstval_agg(pe.participation_factor) OVER w   AS energy_direction
                                     FROM at_eda.permission_event pe, permissions_for_metering_point pm
                                     WHERE pe.permission_id = pm.permission_id
                                     WINDOW w AS (PARTITION BY pe.permission_id ORDER BY event_created DESC)
                                     ORDER BY pe.permission_id, pe.event_created)
              SELECT pr
              FROM permission_result pr
-             where pr.permission_start <= :date
+             WHERE pr.permission_start <= :date
                AND (pr.permission_end >= :date OR pr.permission_end IS NULL)
                AND pr.status IN ('ACCEPTED','FULFILLED');
             """, nativeQuery = true)
@@ -108,36 +112,38 @@ public interface JpaPermissionRequestRepository extends PagingAndSortingReposito
 
     @Override
     @Query(value = """
-        WITH permissions AS (
-            SELECT DISTINCT ON (permission_id) permission_id
-            FROM at_eda.permission_event
-            WHERE cm_consent_id = :consentId
-        )
-        SELECT DISTINCT ON (pe.permission_id)
-            pe.permission_id,
-            at_eda.firstval_agg(pe.cm_request_id)     OVER w AS cm_request_id,
-            at_eda.firstval_agg(pe.connection_id)     OVER w AS connection_id,
-            at_eda.firstval_agg(pe.conversation_id)   OVER w AS conversation_id,
-            at_eda.firstval_agg(pe.created)           OVER w AS created,
-            at_eda.firstval_agg(pe.data_need_id)      OVER w AS data_need_id,
-            at_eda.firstval_agg(pe.dso_id)            OVER w AS dso_id,
-            at_eda.firstval_agg(pe.granularity)       OVER w AS granularity,
-            at_eda.firstval_agg(pe.metering_point_id) OVER w AS metering_point_id,
-            at_eda.firstval_agg(pe.permission_start)  OVER w AS permission_start,
-            at_eda.firstval_agg(pe.permission_end)    OVER w AS permission_end,
-            at_eda.firstval_agg(pe.cm_consent_id)     OVER w AS cm_consent_id,
-            at_eda.firstval_agg(pe.message)           OVER w AS message,
-            at_eda.firstval_agg(pe.status)            OVER w AS status,
-            at_eda.firstval_agg(pe.cause)             OVER w AS cause
-        FROM at_eda.permission_event pe
-                 JOIN permissions USING (permission_id)
-        WINDOW w AS (
-                PARTITION BY pe.permission_id
-                ORDER BY pe.event_created DESC
-                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-                )
-        ORDER BY pe.permission_id, pe.event_created DESC;
-        """, nativeQuery = true)
+            WITH permissions AS (
+                SELECT DISTINCT ON (permission_id) permission_id
+                FROM at_eda.permission_event
+                WHERE cm_consent_id = :consentId
+            )
+            SELECT DISTINCT ON (pe.permission_id)
+                pe.permission_id,
+                at_eda.firstval_agg(pe.cm_request_id)           OVER w AS cm_request_id,
+                at_eda.firstval_agg(pe.connection_id)           OVER w AS connection_id,
+                at_eda.firstval_agg(pe.conversation_id)         OVER w AS conversation_id,
+                at_eda.firstval_agg(pe.created)                 OVER w AS created,
+                at_eda.firstval_agg(pe.data_need_id)            OVER w AS data_need_id,
+                at_eda.firstval_agg(pe.dso_id)                  OVER w AS dso_id,
+                at_eda.firstval_agg(pe.granularity)             OVER w AS granularity,
+                at_eda.firstval_agg(pe.metering_point_id)       OVER w AS metering_point_id,
+                at_eda.firstval_agg(pe.permission_start)        OVER w AS permission_start,
+                at_eda.firstval_agg(pe.permission_end)          OVER w AS permission_end,
+                at_eda.firstval_agg(pe.cm_consent_id)           OVER w AS cm_consent_id,
+                at_eda.firstval_agg(pe.message)                 OVER w AS message,
+                at_eda.firstval_agg(pe.status)                  OVER w AS status,
+                at_eda.firstval_agg(pe.cause)                   OVER w AS cause,
+                at_eda.firstval_agg(pe.energy_direction)        OVER w AS energy_direction,
+                at_eda.firstval_agg(pe.participation_factor)    OVER w AS energy_direction
+            FROM at_eda.permission_event pe
+                     JOIN permissions USING (permission_id)
+            WINDOW w AS (
+                    PARTITION BY pe.permission_id
+                    ORDER BY pe.event_created DESC
+                    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+                    )
+            ORDER BY pe.permission_id, pe.event_created DESC;
+            """, nativeQuery = true)
     Optional<AtPermissionRequestProjection> findByConsentId(@Param("consentId") String consentId);
 
     @Override
@@ -156,51 +162,53 @@ public interface JpaPermissionRequestRepository extends PagingAndSortingReposito
      * @return a list of matching permission requests
      */
     @Query(value = """
-            WITH permissions_for_metering_point AS (SELECT DISTINCT ON (permission_id) permission_id
-                                                FROM at_eda.permission_event
-                                                WHERE metering_point_id = :meteringPointId),
-        permission_result AS (SELECT DISTINCT ON (pe.permission_id) pe.permission_id,
-                at_eda.firstval_agg(cm_request_id) OVER w     AS cm_request_id,
-                at_eda.firstval_agg(connection_id) OVER w     AS connection_id,
-                at_eda.firstval_agg(conversation_id) OVER w   AS conversation_id,
-                at_eda.firstval_agg(created) OVER w           AS created,
-                at_eda.firstval_agg(data_need_id) OVER w      AS data_need_id,
-                at_eda.firstval_agg(dso_id) OVER w            AS dso_id,
-                at_eda.firstval_agg(granularity) OVER w       AS granularity,
-                at_eda.firstval_agg(metering_point_id) OVER w AS metering_point_id,
-                at_eda.firstval_agg(permission_start) OVER w  AS permission_start,
-                at_eda.firstval_agg(permission_end) OVER w    AS permission_end,
-                at_eda.firstval_agg(cm_consent_id) OVER w     AS cm_consent_id,
-                at_eda.firstval_agg(message) OVER w           AS message,
-                at_eda.firstval_agg(status) OVER w            AS status,
-                at_eda.firstval_agg(cause) OVER w             AS cause
-        FROM at_eda.permission_event pe, permissions_for_metering_point pm
-        WHERE pe.permission_id = pm.permission_id
-        WINDOW w AS (PARTITION BY pe.permission_id ORDER BY event_created DESC)
-        ORDER BY pe.permission_id, pe.event_created)
-        SELECT permission_id,
-               cm_request_id,
-               connection_id,
-               conversation_id,
-               created,
-               data_need_id,
-               dso_id,
-               granularity,
-               metering_point_id,
-               permission_start,
-               permission_end,
-               cm_consent_id,
-               message,
-               status,
-               cause
-        FROM permission_result
-        where permission_start <= :date
-          AND (permission_end >= :date OR permission_end IS NULL)
-          AND status IN (
-              'ACCEPTED',
-              'FULFILLED',
-              'SENT_TO_PERMISSION_ADMINISTRATOR'
-          );
-    """, nativeQuery = true)
+                    WITH permissions_for_metering_point AS (SELECT DISTINCT ON (permission_id) permission_id
+                                                        FROM at_eda.permission_event
+                                                        WHERE metering_point_id = :meteringPointId),
+                permission_result AS (SELECT DISTINCT ON (pe.permission_id) pe.permission_id,
+                        at_eda.firstval_agg(cm_request_id) OVER w           AS cm_request_id,
+                        at_eda.firstval_agg(connection_id) OVER w           AS connection_id,
+                        at_eda.firstval_agg(conversation_id) OVER w         AS conversation_id,
+                        at_eda.firstval_agg(created) OVER w                 AS created,
+                        at_eda.firstval_agg(data_need_id) OVER w            AS data_need_id,
+                        at_eda.firstval_agg(dso_id) OVER w                  AS dso_id,
+                        at_eda.firstval_agg(granularity) OVER w             AS granularity,
+                        at_eda.firstval_agg(metering_point_id) OVER w       AS metering_point_id,
+                        at_eda.firstval_agg(permission_start) OVER w        AS permission_start,
+                        at_eda.firstval_agg(permission_end) OVER w          AS permission_end,
+                        at_eda.firstval_agg(cm_consent_id) OVER w           AS cm_consent_id,
+                        at_eda.firstval_agg(message) OVER w                 AS message,
+                        at_eda.firstval_agg(status) OVER w                  AS status,
+                        at_eda.firstval_agg(cause) OVER w                   AS cause,
+                        at_eda.firstval_agg(pe.energy_direction) OVER w     AS energy_direction,
+                        at_eda.firstval_agg(pe.participation_factor) OVER w AS energy_direction
+                FROM at_eda.permission_event pe, permissions_for_metering_point pm
+                WHERE pe.permission_id = pm.permission_id
+                WINDOW w AS (PARTITION BY pe.permission_id ORDER BY event_created DESC)
+                ORDER BY pe.permission_id, pe.event_created)
+                SELECT permission_id,
+                       cm_request_id,
+                       connection_id,
+                       conversation_id,
+                       created,
+                       data_need_id,
+                       dso_id,
+                       granularity,
+                       metering_point_id,
+                       permission_start,
+                       permission_end,
+                       cm_consent_id,
+                       message,
+                       status,
+                       cause
+                FROM permission_result
+                WHERE permission_start <= :date
+                  AND (permission_end >= :date OR permission_end IS NULL)
+                  AND status IN (
+                      'ACCEPTED',
+                      'FULFILLED',
+                      'SENT_TO_PERMISSION_ADMINISTRATOR'
+                  );
+            """, nativeQuery = true)
     List<AtPermissionRequestProjection> findByMeteringPointIdAndDateAndStateSentToPAOrAfterAccepted(String meteringPointId, LocalDate date);
 }

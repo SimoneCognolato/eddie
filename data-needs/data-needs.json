@@ -137,5 +137,15 @@
     "energyDirection": "CONSUMPTION",
     "minGranularity": "PT15M",
     "maxGranularity": "P1D"
+  },
+  {
+    "type": "cesu-join-request",
+    "id": "3dd39c06-253e-4c95-a255-e3eefc69f614",
+    "name": "CESU Join Request data need without participation factor and energy direction",
+    "description": "Adds the final customer to an energy community",
+    "purpose": "Some purpose",
+    "policyLink": "https://example.com/toc",
+    "minGranularity": "PT15M",
+    "maxGranularity": "P1D"
   }
 ]

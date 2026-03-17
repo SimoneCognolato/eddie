@@ -10,6 +10,9 @@ import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/compone
 import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/components/alert/alert.js";
 import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/components/spinner/spinner.js";
 import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/components/copy-button/copy-button.js";
+import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/components/radio-group/radio-group.js";
+import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/components/radio/radio.js";
+import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/components/tooltip/tooltip.js";
 
 class PermissionRequestForm extends PermissionRequestFormBase {
   static properties = {
@@ -20,6 +23,8 @@ class PermissionRequestForm extends PermissionRequestFormBase {
     companyName: { attribute: "company-name" },
     accountingPointId: { attribute: "accounting-point-id" },
     dataNeedType: { attribute: "data-need-type" },
+    energyDirection: { attribute: "energy-direction" },
+    participationFactor: { attribute: "participation-factor" },
     _isSubmitDisabled: { type: Boolean },
     _dataNeedIds: { type: Array },
     _createdCount: { type: Number },
@@ -70,7 +75,14 @@ class PermissionRequestForm extends PermissionRequestFormBase {
       dsoId: this.companyId,
       connectionId: this.connectionId,
       dataNeedIds: this._dataNeedIds,
+      participationFactor: !!formData.get("participation-factor")
+        ? Number.parseInt(formData.get("participation-factor"))
+        : null,
+      energyDirection: !!formData.get("energy-direction")
+        ? formData.get("energy-direction")
+        : null,
     };
+    console.debug(jsonData);
 
     this._isSubmitDisabled = true;
 
@@ -81,6 +93,7 @@ class PermissionRequestForm extends PermissionRequestFormBase {
   }
 
   render() {
+    const hasCesuJoinReqeust = this.dataNeedType.includes("cesu-join-request");
     return this._sentCount === 0
       ? html`
           <form id="request-form">
@@ -96,8 +109,34 @@ class PermissionRequestForm extends PermissionRequestFormBase {
               placeholder="${this.companyId}..."
               .value="${this.accountingPointId ?? nothing}"
               .disabled="${!!this.accountingPointId}"
-              .required="${this.dataNeedType.includes("energy-community")}"
+              .required="${hasCesuJoinReqeust}"
             ></sl-input>
+            ${hasCesuJoinReqeust
+              ? html`
+                <br />
+                <sl-radio-group
+                  label="Energy Direction"
+                  name="energy-direction"
+                  .value="${this.energyDirection ?? "PRDOUCTION"}"
+                  .required="${hasCesuJoinReqeust}"
+                  help-text="The DSO needs to know with which energy direction you want to participate in the CESU"
+                >
+                  <sl-radio value="PRODUCTION" .disabled="${!!this.energyDirection}">Production</sl-radio>
+                  <sl-radio value="CONSUMPTION" .disabled="${!!this.energyDirection}">Consumption</sl-radio>
+                </sl-radio-group>
+                <br />
+                <sl-input
+                  label="Participation Factor"
+                  type="number"
+                  help-text="The participation factor you want to use in the CESU"
+                  name="participation-factor"
+                  .value="${this.participationFactor ?? nothing}"
+                  .disabled="${!!this.participationFactor}"
+                  .required="${hasCesuJoinReqeust}"
+                >
+                  </sl-inpuit>
+              `
+              : ""}
 
             <br />
 
@@ -127,47 +166,47 @@ class PermissionRequestForm extends PermissionRequestFormBase {
             : ""}
         `
       : html`
-          <sl-alert open>
-            <sl-icon slot="icon" name="info-circle"></sl-icon>
+        <sl-alert open>
+          <sl-icon slot="icon" name="info-circle"></sl-icon>
 
-            <p>
-              ${this._sentCount} of ${this._dataNeedIds.length} requests were
-              successfully sent to the permission administrator. The Consent
-              Request IDs for this connection are
-              ${this._cmRequestIds.join(", ")}
-            </p>
+          <p>
+            ${this._sentCount} of ${this._dataNeedIds.length} requests were
+            successfully sent to the permission administrator. The Consent
+            Request IDs for this connection are
+            ${this._cmRequestIds.join(", ")}
+          </p>
 
-            <p>
-              Further steps are required at the website of the permission
-              administrator. Visit the website using the button below and look
-              for your provided Zählpunktnummer or the Consent Request with one
-              of the following IDs
+          <p>
+            Further steps are required at the website of the permission
+            administrator. Visit the website using the button below and look
+            for your provided Zählpunktnummer or the Consent Request with one
+            of the following IDs
 
-            <ul>
-              ${this._cmRequestIds.map(
-                (cmRequestId) => html`
-                  <li>
-                    <span id="${cmRequestId}">${cmRequestId}</span>
-                    <sl-copy-button from="${cmRequestId}"></sl-copy-button>
-                  </li>
-                `
-              )}
-            </ul>
-            </p>
+          <ul>
+            ${this._cmRequestIds.map(
+              (cmRequestId) => html`
+                <li>
+                  <span id="${cmRequestId}">${cmRequestId}</span>
+                  <sl-copy-button from="${cmRequestId}"></sl-copy-button>
+                </li>
+              `
+            )}
+          </ul>
+          </p>
 
-            ${
-              this.jumpOffUrl
-                ? html` <sl-button
-                    href="${this.jumpOffUrl}"
-                    target="_blank"
-                    variant="primary"
-                  >
-                    Continue to ${this.companyName}
-                  </sl-button>`
-                : ""
-            }
-          </sl-alert>
-        `;
+          ${
+            this.jumpOffUrl
+              ? html` <sl-button
+                  href="${this.jumpOffUrl}"
+                  target="_blank"
+                  variant="primary"
+                >
+                  Continue to ${this.companyName}
+                </sl-button>`
+              : ""
+          }
+        </sl-alert>
+      `;
   }
 }
 

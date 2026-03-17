@@ -120,6 +120,8 @@ public class CMAcceptHandler {
                 permissionRequest.granularity(),
                 permissionRequest.cmRequestId(),
                 permissionRequest.conversationId(),
+                permissionRequest.energyDirection().orElse(null),
+                permissionRequest.participationFactor().orElse(null),
                 ValidatedEvent.NeedsToBeSent.NO
         ));
         outbox.commit(new EdaAnswerEvent(

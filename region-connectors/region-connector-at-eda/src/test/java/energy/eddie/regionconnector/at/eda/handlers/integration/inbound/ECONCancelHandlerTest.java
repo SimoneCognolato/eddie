@@ -3,6 +3,7 @@
 
 package energy.eddie.regionconnector.at.eda.handlers.integration.inbound;
 
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestProjection;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
@@ -73,7 +74,7 @@ class ECONCancelHandlerTest {
                 "message",
                 AllowedGranularity.PT15M.name(),
                 PermissionProcessStatus.ACCEPTED.name(),
-                Instant.now(Clock.systemUTC())
-        );
+                Instant.now(Clock.systemUTC()),
+                EnergyDirection.CONSUMPTION, 100);
     }
 }

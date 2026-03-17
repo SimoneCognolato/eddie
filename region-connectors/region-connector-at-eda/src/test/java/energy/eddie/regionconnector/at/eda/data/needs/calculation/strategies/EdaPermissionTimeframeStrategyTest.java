@@ -4,11 +4,11 @@
 package energy.eddie.regionconnector.at.eda.data.needs.calculation.strategies;
 
 import energy.eddie.api.agnostic.Granularity;
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.agnostic.data.needs.EnergyType;
 import energy.eddie.api.agnostic.data.needs.Timeframe;
 import energy.eddie.dataneeds.duration.RelativeDuration;
 import energy.eddie.dataneeds.needs.CESUJoinRequestDataNeed;
-import energy.eddie.dataneeds.needs.EnergyDirection;
 import energy.eddie.dataneeds.needs.ValidatedHistoricalDataDataNeed;
 import org.junit.jupiter.api.Test;
 

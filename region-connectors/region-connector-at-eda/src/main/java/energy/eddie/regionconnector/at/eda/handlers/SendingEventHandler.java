@@ -13,9 +13,6 @@ import energy.eddie.regionconnector.at.eda.config.AtConfiguration;
 import energy.eddie.regionconnector.at.eda.permission.request.events.ExceptionEvent;
 import energy.eddie.regionconnector.at.eda.permission.request.events.ValidatedEvent;
 import energy.eddie.regionconnector.at.eda.requests.CCMORequest;
-import energy.eddie.regionconnector.at.eda.requests.CCMOTimeFrame;
-import energy.eddie.regionconnector.at.eda.requests.DsoIdAndMeteringPoint;
-import energy.eddie.regionconnector.at.eda.requests.restricted.enums.AllowedTransmissionCycle;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBus;
 import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
 import energy.eddie.regionconnector.shared.event.sourcing.handlers.EventHandler;
@@ -66,20 +63,6 @@ public class SendingEventHandler implements EventHandler<ValidatedEvent> {
 
     private CCMORequest ccmoRequest(AtPermissionRequest permissionRequest, ValidatedEvent event) {
         var dataNeed = dataNeedsService.getById(permissionRequest.dataNeedId());
-        return new CCMORequest(
-                new DsoIdAndMeteringPoint(
-                        permissionRequest.dataSourceInformation().permissionAdministratorId(),
-                        permissionRequest.meteringPointId().orElse(null)
-                ),
-                new CCMOTimeFrame(permissionRequest.start(), permissionRequest.end()),
-                permissionRequest.cmRequestId(),
-                permissionRequest.conversationId(),
-                event.granularity() == null ? permissionRequest.granularity() : event.granularity(),
-                AllowedTransmissionCycle.D,
-                configuration,
-                permissionRequest.created(),
-                dataNeed
-        );
+        return new CCMORequest(permissionRequest, event.granularity(), configuration, dataNeed);
     }
-
 }

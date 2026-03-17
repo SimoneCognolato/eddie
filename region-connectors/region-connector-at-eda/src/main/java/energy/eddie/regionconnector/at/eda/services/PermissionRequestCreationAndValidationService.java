@@ -123,22 +123,19 @@ public class PermissionRequestCreationAndValidationService {
                     permissionId, LocalDate.now(AT_ZONE_ID), null, null, calculation
             );
             case CESUJoinRequestDataNeedResult(
-                    var start, var supportedGranularities
-            ) when permissionRequest.meteringPointId() != null -> validatedEventFactory.createValidatedEvent(
+                    var start,
+                    var supportedGranularities,
+                    var energyDirection,
+                    var participationFactor
+            ) -> validatedEventFactory.createValidatedEvent(
                     permissionId,
                     start,
                     null,
-                    AllowedGranularity.valueOf(supportedGranularities.getFirst().name()),
-                    calculation
+                    AllowedGranularity.valueOf(supportedGranularities.getFirst()),
+                    calculation,
+                    energyDirection.orElseGet(permissionRequest::energyDirection),
+                    participationFactor.orElseGet(permissionRequest::participationFactor)
             );
-            case CESUJoinRequestDataNeedResult ignored -> {
-                outbox.commit(new MalformedEvent(permissionId,
-                                                 new AttributeError("meteringPointId",
-                                                                    "Must be present for the energy community data need.")));
-                throw new UnsupportedDataNeedException(REGION_CONNECTOR_ID,
-                                                       dataNeedId,
-                                                       "Metering Point Id must be present for the energy community data need.");
-            }
         };
         outbox.commit(event);
         return permissionId;
@@ -153,7 +150,7 @@ public class PermissionRequestCreationAndValidationService {
                 permissionId,
                 calculation.energyTimeframe().start(),
                 calculation.energyTimeframe().end(),
-                AllowedGranularity.valueOf(granularity.name()),
+                AllowedGranularity.valueOf(granularity),
                 calculation
         );
     }

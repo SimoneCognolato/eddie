@@ -14,6 +14,7 @@ import energy.eddie.dataneeds.needs.aiida.AiidaDataNeed;
 import energy.eddie.dataneeds.needs.aiida.InboundAiidaDataNeed;
 import energy.eddie.dataneeds.needs.aiida.OutboundAiidaDataNeed;
 import energy.eddie.dataneeds.rules.DataNeedRule;
+import energy.eddie.dataneeds.rules.DataNeedRule.CESUJoinRequestDataNeedRule;
 import energy.eddie.dataneeds.rules.DataNeedRule.SpecificDataNeedRule;
 import energy.eddie.dataneeds.rules.DataNeedRule.ValidatedHistoricalDataDataNeedRule;
 import energy.eddie.dataneeds.rules.DataNeedRuleSet;
@@ -153,11 +154,14 @@ public class DataNeedCalculationServiceImpl implements DataNeedCalculationServic
                                                                         energyStartAndEndDate);
             case AccountingPointDataNeed ignored -> new AccountingPointDataNeedResult(permissionStartAndEndDate);
             case CESUJoinRequestDataNeed need -> {
-                var rule = List.copyOf(dataNeedRuleSet.dataNeedRules(DataNeedRule.CESUJoinRequestDataNeedRule.class))
+                var rule = List.copyOf(dataNeedRuleSet.dataNeedRules(CESUJoinRequestDataNeedRule.class))
                                .getFirst();
                 var choice = new GranularityChoice(rule.granularities());
                 var supportedGranularities = choice.findAll(need.minGranularity(), need.maxGranularity());
-                yield new CESUJoinRequestDataNeedResult(permissionStartAndEndDate.start(), supportedGranularities);
+                yield new CESUJoinRequestDataNeedResult(permissionStartAndEndDate.start(),
+                                                        supportedGranularities,
+                                                        need.energyDirection(),
+                                                        need.participationFactor());
             }
             default -> new DataNeedNotSupportedResult("Unknown data need type: %s".formatted(dataNeed.getClass()));
         };
@@ -242,15 +246,17 @@ public class DataNeedCalculationServiceImpl implements DataNeedCalculationServic
     }
 
     private static Optional<InvalidDataNeedCombination> repeatedUniqueDataNeedTypes(List<DataNeed> dns) {
-        var repeatedAccountingPointDns = dns.stream()
-                                            .filter(AccountingPointDataNeed.class::isInstance)
-                                            .map(DataNeed::id)
-                                            .toList();
-        if (repeatedAccountingPointDns.size() > 1) {
-            return Optional.of(
-                    new InvalidDataNeedCombination(new HashSet<>(repeatedAccountingPointDns),
-                                                   "Only one accounting point data need allowed at a time")
-            );
+        Set<Class<? extends DataNeed>> uniqueDataNeedTypes = Set.of(AccountingPointDataNeed.class,
+                                                                    CESUJoinRequestDataNeed.class);
+        for (var uniqueDataNeedType : uniqueDataNeedTypes) {
+            var repeatedType = dns.stream()
+                                  .filter(uniqueDataNeedType::isInstance)
+                                  .map(DataNeed::id)
+                                  .toList();
+            if (repeatedType.size() > 1) {
+                var message = "Only one %s allowed at a time".formatted(uniqueDataNeedType.getSimpleName());
+                return Optional.of(new InvalidDataNeedCombination(new HashSet<>(repeatedType), message));
+            }
         }
         return Optional.empty();
     }

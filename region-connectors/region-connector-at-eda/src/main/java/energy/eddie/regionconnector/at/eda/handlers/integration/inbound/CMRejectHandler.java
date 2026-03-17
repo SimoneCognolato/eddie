@@ -74,7 +74,9 @@ public class CMRejectHandler {
                                 permissionRequest.start(),
                                 permissionRequest.end(),
                                 permissionRequest.granularity(),
-                                calc
+                                calc,
+                                permissionRequest.energyDirection().orElse(null),
+                                permissionRequest.participationFactor().orElse(null)
                         ));
                 case ResponseCode.KnownResponseCodes.TIMEOUT -> emitEvent(new EdaAnswerEvent(permissionId,
                                                                                              PermissionProcessStatus.TIMED_OUT,
@@ -113,7 +115,9 @@ public class CMRejectHandler {
                 permissionRequest.start(),
                 permissionRequest.end(),
                 AllowedGranularity.P1D,
-                calc
+                calc,
+                permissionRequest.energyDirection().orElse(null),
+                permissionRequest.participationFactor().orElse(null)
         ));
         return true;
     }

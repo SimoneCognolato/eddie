@@ -18,8 +18,8 @@ export const DATA_NEED_TOOLTIPS = {
     "AIIDA Inbound Data",
     "Data need for an AIIDA instance to retrieve data.",
   ],
-  "energy-community": [
-    "Add a new member to an Energy Community",
-    "Data need to add a new member to an Energy Community",
+  "cesu-join-request": [
+    "CESU Join Request Data Need",
+    "Data need to add a new accounting point to a Collective Self Consumption Unit",
   ],
 };

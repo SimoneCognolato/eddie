@@ -3,6 +3,7 @@
 
 package energy.eddie.regionconnector.at.eda.handlers.integration.inbound;
 
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestProjection;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
@@ -86,7 +87,10 @@ class CMAnswerHandlerTest {
                 "pid", "connectionId", "cmRequestId", "conversationId",
                 LocalDate.now(ZoneId.systemDefault()), LocalDate.now(ZoneId.systemDefault()), "dnid", "dsoId", "meteringPointId",
                 "consentId", "message",
-                AllowedGranularity.PT15M.name(), s.name(), Instant.now()
-        );
+                AllowedGranularity.PT15M.name(),
+                s.name(),
+                Instant.now(),
+                EnergyDirection.CONSUMPTION,
+                100);
     }
 }

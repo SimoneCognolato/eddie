@@ -11,12 +11,14 @@ import energy.eddie.api.v0.RegionConnectorMetadata;
 import energy.eddie.dataneeds.duration.RelativeDuration;
 import energy.eddie.dataneeds.exceptions.UnsupportedDataNeedException;
 import energy.eddie.dataneeds.needs.AccountingPointDataNeed;
+import energy.eddie.dataneeds.needs.CESUJoinRequestDataNeed;
 import energy.eddie.dataneeds.needs.RegionConnectorFilter;
 import energy.eddie.dataneeds.needs.ValidatedHistoricalDataDataNeed;
 import energy.eddie.dataneeds.needs.aiida.InboundAiidaDataNeed;
 import energy.eddie.dataneeds.needs.aiida.OutboundAiidaDataNeed;
 import energy.eddie.dataneeds.rules.DataNeedRule;
 import energy.eddie.dataneeds.rules.DataNeedRule.AllowMultipleDataNeedsRule;
+import energy.eddie.dataneeds.rules.DataNeedRule.CESUJoinRequestDataNeedRule;
 import energy.eddie.dataneeds.rules.DataNeedRule.ValidatedHistoricalDataDataNeedRule;
 import energy.eddie.dataneeds.rules.DataNeedRuleSet;
 import energy.eddie.dataneeds.services.DataNeedsService;
@@ -394,6 +396,28 @@ class DataNeedCalculationServiceImplTest {
 
         // When
         var res = service.calculateAll(Set.of("ap-dnid-1", "ap-dnid-2"));
+
+        // Then
+        assertThat(res).isInstanceOf(InvalidDataNeedCombination.class);
+    }
+
+    @Test
+    void givenMultipleCESUJoinRequestDataNeeds_whenCalculateAll_thenReturnsRepeatedDataNeedResult() {
+        // Given
+        var cesu = new CESUJoinRequestDataNeed(0, Granularity.PT15M, Granularity.P1D, EnergyDirection.CONSUMPTION);
+        when(dataNeedsService.findById("cesu-dnid-1")).thenReturn(Optional.of(cesu));
+        when(dataNeedsService.findById("cesu-dnid-2")).thenReturn(Optional.of(cesu));
+        List<DataNeedRule> dataNeedRules = List.of(
+                new ValidatedHistoricalDataDataNeedRule(EnergyType.ELECTRICITY, List.of(Granularity.PT1H)),
+                new CESUJoinRequestDataNeedRule(List.of(Granularity.PT1H)),
+                new AllowMultipleDataNeedsRule()
+        );
+        var service = new DataNeedCalculationServiceImpl(dataNeedsService,
+                                                         metadata,
+                                                         new TestDataNeedRuleSet(dataNeedRules));
+
+        // When
+        var res = service.calculateAll(Set.of("cesu-dnid-1", "cesu-dnid-2"));
 
         // Then
         assertThat(res).isInstanceOf(InvalidDataNeedCombination.class);
