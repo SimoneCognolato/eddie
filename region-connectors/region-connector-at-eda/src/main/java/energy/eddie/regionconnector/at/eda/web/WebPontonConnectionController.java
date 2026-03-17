@@ -44,7 +44,7 @@ public class WebPontonConnectionController implements PontonMessengerConnection 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebPontonConnectionController.class);
     private final InboundMessageFactoryCollection inboundMessageFactoryCollection;
     private final OutboundMessageFactoryCollection outboundMessageFactoryCollection;
-    private final Sinks.Many<String> cmRequestStream = Sinks.many().multicast().onBackpressureBuffer();
+    private final Sinks.Many<String> cmRequestStream = Sinks.many().replay().limit(100);
     private final Sinks.Many<String> ccmoRevokeStream = Sinks.many().multicast().onBackpressureBuffer();
     private final Sinks.Many<String> cpRequestCrStream = Sinks.many().multicast().onBackpressureBuffer();
     @Nullable

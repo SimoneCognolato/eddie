@@ -24,8 +24,8 @@ Content-Type: application/json
 GET http://localhost:8080/region-connectors/at-eda/ponton/cm-request
 
 ### POST CM Notification - Answer
-@request-id=SQ56LQC5
-@conversation-id=CC100855T1773662399315
+@request-id=NKUHZPZF
+@conversation-id=CC100855T1773749081266
 POST http://localhost:8080/region-connectors/at-eda/ponton/cm-notification/ECON_ANSWER
 accept: */*
 Content-Type: application/xml
@@ -57,12 +57,19 @@ Content-Type: application/xml
     </ns0:ProcessDirectory>
 </ns0:CMNotification>
 
-### POST CM Notification - ACCEPT for CESUJoinRequestDataNeed
+### POST CM Notification - Decision for CESUJoinRequestDataNeed
+# See https://www.ebutilities.at/prozesse/553
+# For Rejection by customer
+#@responseCode=ECON_REJECT
+#@response-code=172
+# For Acceptance
+@responseCode=ECON_ACCEPT
+@response-code=175
 < {%
   client.global.set("consent-id", $uuid)
   console.log(`consent-id is ${client.global.get("consent-id")}`)
 %}
-POST http://localhost:8080/region-connectors/at-eda/ponton/cm-notification/ECON_ACCEPT
+POST http://localhost:8080/region-connectors/at-eda/ponton/cm-notification/{{responseCode}}
 accept: */*
 Content-Type: application/xml
 
@@ -88,7 +95,7 @@ Content-Type: application/xml
         <ns0:CMRequestId>{{request-id}}</ns0:CMRequestId>
         <ns0:ResponseData>
             <ns0:MeteringPoint>{{metering-point-id}}</ns0:MeteringPoint>
-            <ns0:ResponseCode>175</ns0:ResponseCode>
+            <ns0:ResponseCode>{{response-code}}</ns0:ResponseCode>
             <ns0:ConsentId>{{consent-id}}</ns0:ConsentId>
         </ns0:ResponseData>
     </ns0:ProcessDirectory>
