@@ -21,6 +21,8 @@ import energy.eddie.regionconnector.shared.services.data.needs.DataNeedCalculati
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.ZoneOffset;
+
 /**
  * Spring configuration for the German (DE) ETA Plus region connector.
  * This configuration class sets up beans and dependencies required by the
@@ -28,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(DeEtaPlusConfiguration.class)
-public class EtaRegionConnectorSpringConfig {
+public class DeEtaBeanConfig {
 
     @Bean
     public EventBus eventBus() {
@@ -40,32 +42,37 @@ public class EtaRegionConnectorSpringConfig {
         return new Outbox(eventBus, eventRepository);
     }
 
-    @Bean
-    public ConnectionStatusMessageHandler<DePermissionRequest> deConnectionStatusMessageHandler(
+    // For connection status messages
+    @Bean("deConnectionStatusMessageHandler")
+    public ConnectionStatusMessageHandler<DePermissionRequest> connectionStatusMessageHandler(
             EventBus eventBus,
-            DePermissionRequestRepository repository) {
+            DePermissionRequestRepository repository
+    ) {
         return new ConnectionStatusMessageHandler<>(
                 eventBus,
                 repository,
-                req -> req.message().orElse(null));
+                pr -> ""
+        );
     }
 
-    @Bean
-    public PermissionMarketDocumentMessageHandler<DePermissionRequest> dePermissionMarketDocumentMessageHandler(
+    // For permission market documents, the CIM pendant to connection status
+    // messages
+    @Bean("dePermissionMarketDocumentMessageHandler")
+    public PermissionMarketDocumentMessageHandler<DePermissionRequest> permissionMarketDocumentMessageHandler(
             EventBus eventBus,
             DePermissionRequestRepository repository,
             DataNeedsService dataNeedsService,
-            DeEtaPlusConfiguration configuration,
-            CommonInformationModelConfiguration cimConfig,
-            TransmissionScheduleProvider<DePermissionRequest> transmissionScheduleProvider) {
+            CommonInformationModelConfiguration cimConfig
+    ) {
         return new PermissionMarketDocumentMessageHandler<>(
                 eventBus,
                 repository,
                 dataNeedsService,
-                configuration.eligiblePartyId(),
+                cimConfig.eligiblePartyFallbackId(),
                 cimConfig,
-                transmissionScheduleProvider,
-                EtaRegionConnectorMetadata.DE_ZONE_ID);
+                pr -> null,
+                ZoneOffset.UTC
+        );
     }
 
     @Bean
@@ -77,8 +84,8 @@ public class EtaRegionConnectorSpringConfig {
     public DataNeedCalculationService<DataNeed> dataNeedCalculationService(
             @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") DataNeedsService dataNeedsService,
             RegionConnectorMetadata metadata,
-            DataNeedRuleSet ruleSet) {
+            DataNeedRuleSet ruleSet
+    ) {
         return new DataNeedCalculationServiceImpl(dataNeedsService, metadata, ruleSet);
     }
-
 }
