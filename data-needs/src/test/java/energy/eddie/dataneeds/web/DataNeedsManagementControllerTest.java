@@ -120,6 +120,27 @@ class DataNeedsManagementControllerTest {
                         List.of(
                                 "dataNeed: maxGranularity must be higher or equal to minGranularity."
                         )
+                ),
+                Arguments.of(
+                        // language=JSON
+                        "{\"type\":\"cesu-join-request\",\"name\":\"My awesome data need\",\"description\":\"descr\",\"purpose\":\"purpose\",\"policyLink\":\"https://example.com/toc\",\"minGranularity\":\"PT15M\",\"maxGranularity\":\"PT1H\", \"energyDirection\": \"PRODUCTION\", \"participationFactor\": \"-10\"}",
+                        List.of(
+                                "participationFactor: must be between 1 and 100"
+                        )
+                ),
+                Arguments.of(
+                        // language=JSON
+                        "{\"type\":\"cesu-join-request\",\"name\":\"My awesome data need\",\"description\":\"descr\",\"purpose\":\"purpose\",\"policyLink\":\"https://example.com/toc\",\"minGranularity\":\"PT15M\",\"maxGranularity\":\"PT1H\", \"energyDirection\": \"PRODUCTION\", \"participationFactor\": \"100000\"}",
+                        List.of(
+                                "participationFactor: must be between 1 and 100"
+                        )
+                ),
+                Arguments.of(
+                        // language=JSON
+                        "{\"type\":\"cesu-join-request\",\"name\":\"My awesome data need\",\"description\":\"descr\",\"purpose\":\"purpose\",\"policyLink\":\"https://example.com/toc\",\"minGranularity\":\"PT15M\",\"maxGranularity\":\"PT1H\", \"energyDirection\": \"asdf\", \"participationFactor\": \"1\"}",
+                        List.of(
+                                "energyDirection: Invalid enum value: 'asdf'. Valid values: [CONSUMPTION, PRODUCTION]."
+                        )
                 )
         );
     }
@@ -148,7 +169,7 @@ class DataNeedsManagementControllerTest {
     }
 
     @Test
-    void nullgivenDataNeeds_getAllDataNeeds_returnsAllDataNeeds() throws Exception {
+    void givenDataNeeds_getAllDataNeeds_returnsAllDataNeeds() throws Exception {
         // Given
         when(mockService.findAll()).thenReturn(List.of(exampleAccount, exampleVhd));
 
