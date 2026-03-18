@@ -34,11 +34,11 @@ public class EdaDataNeedRuleSet implements DataNeedRuleSet {
         dataNeedRules.add(new AllowMultipleDataNeedsRule());
         if (config.energyCommunityId() != null) {
             LOGGER.debug(
-                    "Energy Community ID present, enabling the energy community data need for the AT EDA Region Connector");
+                    "Energy Community ID present, enabling the CESU Join Request data need for the AT EDA Region Connector");
             dataNeedRules.add(new DataNeedRule.CESUJoinRequestDataNeedRule(SUPPORTED_GRANULARITIES));
         } else {
             LOGGER.debug(
-                    "Energy Community ID not present, disabling the energy community data need for the AT EDA Region Connector");
+                    "Energy Community ID not present, disabling the CESU Join Request data need for the AT EDA Region Connector");
         }
         return dataNeedRules;
     }

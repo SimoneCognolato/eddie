@@ -78,7 +78,7 @@ public class DataReceivedHandler implements EventHandler<DataReceivedEvent> {
 
     /**
      * Checks whether the timeframe end is after the end of the permission request.
-     * If the permission request does not have an end, as is the case for permissions for energy communities.
+     * If the permission request does not have an end, as is the case for permissions for energy communities, it will return false.
      *
      * @param timeframe of the received data
      * @param pr        the permission request

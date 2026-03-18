@@ -82,7 +82,7 @@ public class PermissionRequestCreationService {
                 throw unsupportedDataNeed(permissionId, message, dataNeedId);
             }
             case CESUJoinRequestDataNeedResult ignored -> {
-                var message = "Energy Community Data Need not supported";
+                var message = "CESU Join Request Data Need not supported";
                 outbox.commit(new MalformedEvent(permissionId, List.of(new AttributeError(DATA_NEED_FIELD, message))));
                 throw new UnsupportedDataNeedException(REGION_CONNECTOR_ID, dataNeedId, message);
             }

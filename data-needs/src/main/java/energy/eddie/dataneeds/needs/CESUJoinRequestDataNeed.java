@@ -21,7 +21,7 @@ import java.util.Optional;
  */
 @Entity
 @Table(name = "cesu_join_request_data_need", schema = "data_needs")
-@Schema(description = "Data need for adding a new final customer to an existing energy community")
+@Schema(description = "Data need for adding a new accounting point of a final customer to an existing CESU")
 public class CESUJoinRequestDataNeed extends DataNeed {
     public static final String DISCRIMINATOR_VALUE = "cesu-join-request";
     @Column(name = "participation_factor")
@@ -67,9 +67,9 @@ public class CESUJoinRequestDataNeed extends DataNeed {
     }
 
     /**
-     * The amount with which the final customer will participate in the energy community.
+     * The factor with which the accounting point will participate in the CESU.
      *
-     * @return the participation factor of the final customer in the energy community.
+     * @return the participation factor of the accounting point in the CESU.
      */
     public Optional<Integer> participationFactor() {
         return Optional.ofNullable(participationFactor);
@@ -99,7 +99,7 @@ public class CESUJoinRequestDataNeed extends DataNeed {
     /**
      * Indicates whether the final customer should produce or consume energy.
      *
-     * @return consumption, if the final customer is going to consume electricity produced by other members of the energy community, or if the final customer is going to produce energy for the other members.
+     * @return consumption, if the final customer is going to consume electricity produced by other members of the CESU, or if the final customer is going to produce energy for the other members.
      */
     public Optional<EnergyDirection> energyDirection() {
         return Optional.ofNullable(energyDirection);

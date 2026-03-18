@@ -33,7 +33,7 @@ public class ECMPListHandler {
                      messageId);
         if (meteringPoint.isEmpty()) {
             LOGGER.warn(
-                    "Permission request {} does not have a metering point for ECMPList with message ID '{}', but the metering point HAS to be present for the Energy Community Data Need",
+                    "Permission request {} does not have a metering point for ECMPList with message ID '{}', but the metering point HAS to be present for the CESUJoinRequest Data Need",
                     permissionId,
                     messageId
             );

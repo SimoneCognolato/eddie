@@ -80,7 +80,7 @@
  * @typedef {DataNeed} CESUJoinRequestDataNeed
  * @property {string} minGranularity - The minimum granularity of the data.
  * @property {string} maxGranularity - The maximum granularity of the data.
- * @property {string} participationFactor - The amount with which the final customer will participate in the energy community .
+ * @property {string} participationFactor - The factor with which the accounting point of the final customer will participate in the CESU .
  * @property {EnergyDirection} energyDirection - Indicates whether the final customer should produce or consume energy.
  */
 

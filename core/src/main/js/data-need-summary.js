@@ -145,7 +145,7 @@ class DataNeedSummary extends HTMLElement {
               `
             : ""}
 
-          <!-- For Energy Community data needs -->
+          <!-- For CESU data needs -->
           ${energyDirection
             ? /* HTML */ `
                 <dt>Energy Direction</dt>

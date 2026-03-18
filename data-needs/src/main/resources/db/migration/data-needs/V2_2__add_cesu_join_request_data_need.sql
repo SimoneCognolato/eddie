@@ -12,8 +12,8 @@ CREATE TABLE cesu_join_request_data_need
     enabled         bool        NOT NULL DEFAULT TRUE,
     max_granularity varchar(15) NOT NULL,
     min_granularity varchar(15) NOT NULL,
-    participation_factor int         NOT NULL
+    participation_factor int
         CHECK ( participation_factor BETWEEN 1 AND 100),
-    energy_direction     varchar(11) NOT NULL
+    energy_direction     varchar(11)
         CHECK ( energy_direction IN ('CONSUMPTION', 'PRODUCTION') )
 );

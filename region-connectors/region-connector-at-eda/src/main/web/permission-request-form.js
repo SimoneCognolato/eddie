@@ -82,7 +82,6 @@ class PermissionRequestForm extends PermissionRequestFormBase {
         ? formData.get("energy-direction")
         : null,
     };
-    console.debug(jsonData);
 
     this._isSubmitDisabled = true;
 
@@ -93,7 +92,7 @@ class PermissionRequestForm extends PermissionRequestFormBase {
   }
 
   render() {
-    const hasCesuJoinReqeust = this.dataNeedType.includes("cesu-join-request");
+    const hasCesuJoinRequest = this.dataNeedType.includes("cesu-join-request");
     return this._sentCount === 0
       ? html`
           <form id="request-form">
@@ -102,43 +101,55 @@ class PermissionRequestForm extends PermissionRequestFormBase {
               type="text"
               .helpText=${this.accountingPointId
                 ? "The service has already provided a Zählpunktnummer. If this value is incorrect, please contact the service provider."
-                : "Enter your 33-character Zählpunktnummer for the request to show up in your DSO portal. Leave blank to search for the generated Consent Request ID."}
+                : `Enter your 33-character Zählpunktnummer for the request to show up in your DSO portal. ${hasCesuJoinRequest ? "" : "Leave blank to search for the generated Consent Request ID."}`}
               name="meteringPointId"
               minlength="33"
               maxlength="33"
               placeholder="${this.companyId}..."
               .value="${this.accountingPointId ?? nothing}"
               .disabled="${!!this.accountingPointId}"
-              .required="${hasCesuJoinReqeust}"
+              .required="${hasCesuJoinRequest}"
             ></sl-input>
-            ${hasCesuJoinReqeust
+            ${hasCesuJoinRequest
               ? html`
-                <br />
-                <sl-radio-group
-                  label="Energy Direction"
-                  name="energy-direction"
-                  .value="${this.energyDirection ?? "PRDOUCTION"}"
-                  .required="${hasCesuJoinReqeust}"
-                  help-text="The DSO needs to know with which energy direction you want to participate in the CESU"
-                >
-                  <sl-radio value="PRODUCTION" .disabled="${!!this.energyDirection}">Production</sl-radio>
-                  <sl-radio value="CONSUMPTION" .disabled="${!!this.energyDirection}">Consumption</sl-radio>
-                </sl-radio-group>
-                <br />
-                <sl-input
-                  label="Participation Factor"
-                  type="number"
-                  help-text="The participation factor you want to use in the CESU"
-                  name="participation-factor"
-                  .value="${this.participationFactor ?? nothing}"
-                  .disabled="${!!this.participationFactor}"
-                  .required="${hasCesuJoinReqeust}"
-                >
-                  </sl-inpuit>
-              `
+                  <br />
+                  <sl-radio-group
+                    label="Energy Direction"
+                    name="energy-direction"
+                    .value="${this.energyDirection ?? "PRODUCTION"}"
+                    .help-text="${this.energyDirection
+                      ? "The service has already provided the required energy direction. If this value is incorrect, please contact the service provider."
+                      : "The DSO needs to know with which energy direction you want to participate in the CESU"}"
+                    required
+                  >
+                    <sl-radio
+                      value="PRODUCTION"
+                      .disabled="${!!this.energyDirection}"
+                      >Production
+                    </sl-radio>
+                    <sl-radio
+                      value="CONSUMPTION"
+                      .disabled="${!!this.energyDirection}"
+                      >Consumption
+                    </sl-radio>
+                  </sl-radio-group>
+                  <br />
+                  <sl-input
+                    label="Participation Factor"
+                    type="number"
+                    name="participation-factor"
+                    .help-text="${this.participationFactor
+                      ? "The service has already provided the required participation factor. If this value is incorrect, please contact the service provider."
+                      : "The participation factor you want to use in the CESU"}"
+                    .value="${this.participationFactor ?? nothing}"
+                    .disabled="${!!this.participationFactor}"
+                    required
+                  >
+                  </sl-input>
+                `
               : ""}
 
-            <br />
+            <br />;
 
             <div>
               <sl-button
@@ -148,6 +159,7 @@ class PermissionRequestForm extends PermissionRequestFormBase {
               >
                 Connect
               </sl-button>
+              ;
             </div>
           </form>
 
