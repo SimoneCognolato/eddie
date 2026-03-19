@@ -59,6 +59,10 @@ public class DePermissionRequest implements MeterReadingPermissionRequest {
     private final String dataNeedId;
 
     @Nullable
+    @Column(name = "latest_meter_reading")
+    private final LocalDate latestMeterReadingEndDate;
+
+    @Nullable
     private final String message;
 
     @Nullable
@@ -76,6 +80,7 @@ public class DePermissionRequest implements MeterReadingPermissionRequest {
             PermissionProcessStatus status,
             ZonedDateTime created,
             String dataNeedId,
+            @Nullable LocalDate latestMeterReadingEndDate,
             @Nullable String message,
             @Nullable String cause
     ) {
@@ -89,6 +94,7 @@ public class DePermissionRequest implements MeterReadingPermissionRequest {
         this.status = status;
         this.created = created;
         this.dataNeedId = dataNeedId;
+        this.latestMeterReadingEndDate = latestMeterReadingEndDate;
         this.message = message;
         this.cause = cause;
     }
@@ -104,6 +110,7 @@ public class DePermissionRequest implements MeterReadingPermissionRequest {
         this.status = null;
         this.created = null;
         this.dataNeedId = null;
+        this.latestMeterReadingEndDate = null;
         this.message = null;
         this.cause = null;
     }
@@ -170,6 +177,6 @@ public class DePermissionRequest implements MeterReadingPermissionRequest {
 
     @Override
     public Optional<LocalDate> latestMeterReadingEndDate() {
-        return Optional.empty();
+        return Optional.ofNullable(latestMeterReadingEndDate);
     }
 }
