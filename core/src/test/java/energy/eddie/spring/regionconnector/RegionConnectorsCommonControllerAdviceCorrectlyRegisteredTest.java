@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.spring.regionconnector;
@@ -109,15 +109,16 @@ class RegionConnectorsCommonControllerAdviceCorrectlyRegisteredTest {
         // When
         mockMvc.perform(post("/permission-request")
                                 // this will cause a MethodArgumentNotValidException
-                                .content("{\"connectionId\":\"\", \"dataNeedId\":\"\"}")
+                                // language=JSON
+                                .content("{\"connectionId\":\"\", \"dataNeedIds\": []}")
                                 .contentType(MediaType.APPLICATION_JSON))
                // Then
                .andExpect(status().isBadRequest())
                .andExpect(jsonPath(ERRORS_JSON_PATH + "[*].message", hasItems(
-                       "nif: must not be null or blank",
-                       "meteringPointId: must not be null or blank",
-                       "dataNeedId: must not be null or blank",
-                       "connectionId: must not be null or blank"
+                       "nif: must not be blank",
+                       "meteringPointId: must not be blank",
+                       "dataNeedIds: must not be empty",
+                       "connectionId: must not be blank"
                )));
     }
 }

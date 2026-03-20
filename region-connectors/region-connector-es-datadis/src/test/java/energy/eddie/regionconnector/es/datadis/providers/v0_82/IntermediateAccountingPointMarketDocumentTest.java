@@ -32,7 +32,7 @@ class IntermediateAccountingPointMarketDocumentTest {
         EsPermissionRequest permissionRequest = new DatadisPermissionRequestBuilder()
                 .setPermissionId("permissionId")
                 .setConnectionId("connectionId")
-                .setDataNeedId("dataNeedId")
+                .setDataNeedId("dataNeedIds")
                 .setNif("nif")
                 .setMeteringPointId("meteringPointId")
                 .setStart(LocalDate.now(ZONE_ID_SPAIN))

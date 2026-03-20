@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.es.datadis.permission.handlers;
@@ -43,14 +43,18 @@ public class ValidatedHandler implements EventHandler<EsValidatedEvent> {
 
     @Override
     public void accept(EsValidatedEvent permissionEvent) {
+        var bundleId = permissionEvent.bundleId();
         var permissionId = permissionEvent.permissionId();
-        LOGGER.info("Sending permission request {} to Datadis", permissionId);
-        var pr = repository.findByPermissionId(permissionId);
-        if (pr.isEmpty()) {
-            LOGGER.error("Got unknown permission request {}", permissionId);
+        if (bundleId != null) {
+            LOGGER.debug(
+                    "Got permission event {} that is part of a bundle {}, sending the authorization request in for all other permission requests in one bundle, skipping for now",
+                    permissionId,
+                    bundleId
+            );
             return;
         }
-        var permissionRequest = pr.get();
+        LOGGER.info("Sending permission request {} to Datadis", permissionId);
+        var permissionRequest = repository.getByPermissionId(permissionId);
         var authorizationRequest = authorizationRequestFactory.from(
                 permissionRequest.nif(),
                 permissionRequest.meteringPointId(),

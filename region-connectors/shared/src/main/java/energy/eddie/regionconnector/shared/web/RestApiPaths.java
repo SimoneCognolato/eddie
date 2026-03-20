@@ -6,6 +6,7 @@ package energy.eddie.regionconnector.shared.web;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @SuppressWarnings("java:S1075")
 // These paths should stay hardcoded, it does not make sense to make them configurable
@@ -46,5 +47,16 @@ public final class RestApiPaths {
                                    .queryParam("permission-id", permissionIds)
                                    .build()
                                    .toUri();
+    }
+
+    /**
+     * Utility method to create the url where connections status messages of specific permission requests can be consumed.
+     * This method is also supposed to stop bugs from occurring, when a list is accidentally passed to {@link #connectionStatusMessagesStreamFor(Object...)}.
+     *
+     * @param permissionIds the ID of the permission requests in question.
+     * @return endpoint where connection status messages can be consumed.
+     */
+    public static URI connectionStatusMessagesStreamFor(List<String> permissionIds) {
+        return connectionStatusMessagesStreamFor(permissionIds.toArray());
     }
 }

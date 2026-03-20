@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.es.datadis;
@@ -12,6 +12,7 @@ import energy.eddie.regionconnector.es.datadis.permission.request.DistributorCod
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 public class DatadisPermissionRequestBuilder {
@@ -31,6 +32,7 @@ public class DatadisPermissionRequestBuilder {
     private LocalDate latestMeterReadingEndDate;
     private boolean productionSupport;
     private AllowedGranularity allowedGranularity;
+    private UUID bundleId;
 
     public DatadisPermissionRequestBuilder setPermissionId(String permissionId) {
         this.permissionId = permissionId;
@@ -113,6 +115,11 @@ public class DatadisPermissionRequestBuilder {
         return this;
     }
 
+    public DatadisPermissionRequestBuilder setBundleId(UUID bundleId) {
+        this.bundleId = bundleId;
+        return this;
+    }
+
     public DatadisPermissionRequest build() {
         return new DatadisPermissionRequest(
                 permissionId,
@@ -130,7 +137,7 @@ public class DatadisPermissionRequestBuilder {
                 errorMessage,
                 productionSupport,
                 created,
-                allowedGranularity
-        );
+                allowedGranularity,
+                bundleId);
     }
 }

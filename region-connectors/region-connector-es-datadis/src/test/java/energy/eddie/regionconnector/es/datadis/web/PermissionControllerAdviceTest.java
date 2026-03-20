@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.es.datadis.web;
@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -36,7 +38,7 @@ class PermissionControllerAdviceTest {
         // Given
         when(controller.requestPermission(any()))
                 .thenThrow(new EsValidationException(new AttributeError("nif", "msg")));
-        var content = new PermissionRequestForCreation("cid", "dnid", "1000000T", "mid");
+        var content = new PermissionRequestForCreation("cid", Set.of("dnid"), "1000000T", "mid");
 
         // When
         mockMvc.perform(post("/permission-request")

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.es.datadis.services;
@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
@@ -26,6 +27,8 @@ class RetryServiceTest {
     private Outbox outbox;
     @Mock
     private EsPermissionRequestRepository repository;
+    @Mock
+    private BundleService bundleService;
     @InjectMocks
     private RetryService retryService;
 
@@ -42,5 +45,22 @@ class RetryServiceTest {
 
         // Then
         verify(outbox).commit(isA(EsValidatedEvent.class));
+    }
+
+    @Test
+    void testRetryForBundles_callsBundleServiceToRetry() {
+        // Given
+        var pr = new DatadisPermissionRequestBuilder()
+                .setBundleId(UUID.randomUUID())
+                .build();
+
+        when(repository.findByStatus(PermissionProcessStatus.UNABLE_TO_SEND))
+                .thenReturn(List.of(pr));
+
+        // When
+        retryService.retry();
+
+        // Then
+        verify(bundleService).sendBundledAuthorizationRequest(pr.bundleId());
     }
 }

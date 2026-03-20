@@ -1,18 +1,23 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.es.datadis.dtos;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+
+import java.util.Set;
 
 public record PermissionRequestForCreation(
-        @NotBlank(message = "must not be null or blank")
+        @NotBlank
         String connectionId,
-        @NotBlank(message = "must not be null or blank")
-        String dataNeedId,
-        @NotBlank(message = "must not be null or blank")
+        @NotEmpty
+        @Valid
+        Set<@NotBlank String> dataNeedIds,
+        @NotBlank
         String nif,
-        @NotBlank(message = "must not be null or blank")
+        @NotBlank
         String meteringPointId
 ) {
 }
