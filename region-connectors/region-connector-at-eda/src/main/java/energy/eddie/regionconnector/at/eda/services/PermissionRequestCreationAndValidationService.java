@@ -116,12 +116,25 @@ public class PermissionRequestCreationAndValidationService {
                 outbox.commit(new MalformedEvent(permissionId, new AttributeError(DATA_NEED_ID, message)));
                 throw new UnsupportedDataNeedException(REGION_CONNECTOR_ID, dataNeedId, message);
             }
-            case ValidatedHistoricalDataDataNeedResult validatedHistoricalDataDataNeedResult ->
-                    validateHistoricalValidatedEvent(
-                            permissionId, validatedHistoricalDataDataNeedResult
-                    );
+            case ValidatedHistoricalDataDataNeedResult result -> validateHistoricalValidatedEvent(
+                    permissionId, result
+            );
             case AccountingPointDataNeedResult ignored -> validatedEventFactory.createValidatedEvent(
-                    permissionId, LocalDate.now(AT_ZONE_ID), null, null
+                    permissionId, LocalDate.now(AT_ZONE_ID), null, null, calculation
+            );
+            case CESUJoinRequestDataNeedResult(
+                    var start,
+                    var supportedGranularities,
+                    var energyDirection,
+                    var participationFactor
+            ) -> validatedEventFactory.createValidatedEvent(
+                    permissionId,
+                    start,
+                    null,
+                    AllowedGranularity.valueOf(supportedGranularities.getFirst()),
+                    calculation,
+                    energyDirection.orElseGet(permissionRequest::energyDirection),
+                    participationFactor.orElseGet(permissionRequest::participationFactor)
             );
         };
         outbox.commit(event);
@@ -137,7 +150,8 @@ public class PermissionRequestCreationAndValidationService {
                 permissionId,
                 calculation.energyTimeframe().start(),
                 calculation.energyTimeframe().end(),
-                AllowedGranularity.valueOf(granularity.name())
+                AllowedGranularity.valueOf(granularity),
+                calculation
         );
     }
 }

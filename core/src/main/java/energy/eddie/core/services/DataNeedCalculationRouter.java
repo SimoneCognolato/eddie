@@ -127,6 +127,8 @@ public class DataNeedCalculationRouter {
                     Timeframe permissionTimeframe,
                     Timeframe energyTimeframe
             ) -> new DataNeedCalculation(true, granularities, permissionTimeframe, energyTimeframe);
+            case CESUJoinRequestDataNeedResult(var start, var supportedGranularities, var ignored1, var ignored2) ->
+                    new DataNeedCalculation(true, supportedGranularities, new Timeframe(start, null), null);
         };
     }
 }

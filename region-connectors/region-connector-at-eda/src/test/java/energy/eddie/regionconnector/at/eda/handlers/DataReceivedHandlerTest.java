@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda.handlers;
@@ -7,10 +7,10 @@ import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequest;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
 import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequest;
+import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequestBuilder;
 import energy.eddie.regionconnector.at.eda.permission.request.events.DataReceivedEvent;
 import energy.eddie.regionconnector.at.eda.permission.request.projections.MeterReadingTimeframe;
 import energy.eddie.regionconnector.at.eda.persistence.MeterReadingTimeframeRepository;
-import energy.eddie.regionconnector.at.eda.requests.restricted.enums.AllowedGranularity;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBus;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBusImpl;
 import energy.eddie.regionconnector.shared.services.FulfillmentService;
@@ -133,21 +133,11 @@ class DataReceivedHandlerTest {
     }
 
     private static EdaPermissionRequest createPermissionRequest(LocalDate meteringDataEnd) {
-        return new EdaPermissionRequest(
-                "cid",
-                "pid",
-                "dnid",
-                "cmRequestId",
-                "convId",
-                "mid",
-                "dsoId",
-                meteringDataEnd,
-                meteringDataEnd,
-                AllowedGranularity.PT15M,
-                PermissionProcessStatus.ACCEPTED,
-                "",
-                "consentId",
-                null
-        );
+        return new EdaPermissionRequestBuilder()
+                .setPermissionId("pid")
+                .setStart(meteringDataEnd)
+                .setEnd(meteringDataEnd)
+                .setStatus(PermissionProcessStatus.ACCEPTED)
+                .build();
     }
 }

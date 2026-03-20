@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda.handlers.integration.inbound;
 
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestProjection;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CCMOAnswerHandlerTest {
+class CMAnswerHandlerTest {
 
     @Captor
     private ArgumentCaptor<EdaAnswerEvent> edaAnswerEventCaptor;
@@ -44,13 +45,12 @@ class CCMOAnswerHandlerTest {
     private Outbox outbox;
 
     @InjectMocks
-    private CCMOAnswerHandler handler;
+    private CMAnswerHandler handler;
 
     @Test
-    void handleCCMOAnswer_whenValidatedRequest_emitsSentToPa() {
+    void handleCMAnswer_whenValidatedRequest_emitsSentToPa() {
         // Given
-        CMRequestStatus cmRequestStatus = cmRequestStatus(
-                List.of(ResponseCode.CmReqOnl.RECEIVED));
+        CMRequestStatus cmRequestStatus = cmRequestStatus(List.of(ResponseCode.KnownResponseCodes.RECEIVED.getCode()));
 
         var permissionRequests = List.of(
                 projection(PermissionProcessStatus.VALIDATED),
@@ -61,7 +61,7 @@ class CCMOAnswerHandlerTest {
                 .thenReturn(permissionRequests);
 
         // When
-        handler.handleCCMOAnswer(cmRequestStatus);
+        handler.handleCMAnswer(cmRequestStatus);
 
         // Then
         verify(outbox).commit(edaAnswerEventCaptor.capture());
@@ -87,7 +87,10 @@ class CCMOAnswerHandlerTest {
                 "pid", "connectionId", "cmRequestId", "conversationId",
                 LocalDate.now(ZoneId.systemDefault()), LocalDate.now(ZoneId.systemDefault()), "dnid", "dsoId", "meteringPointId",
                 "consentId", "message",
-                AllowedGranularity.PT15M.name(), s.name(), Instant.now()
-        );
+                AllowedGranularity.PT15M.name(),
+                s.name(),
+                Instant.now(),
+                EnergyDirection.CONSUMPTION,
+                100);
     }
 }

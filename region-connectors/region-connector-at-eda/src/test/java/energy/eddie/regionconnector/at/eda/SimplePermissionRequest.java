@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: 2023-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda;
 
 import energy.eddie.api.agnostic.DataSourceInformation;
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequest;
 import energy.eddie.regionconnector.at.eda.permission.request.EdaDataSourceInformation;
@@ -81,6 +82,16 @@ public record SimplePermissionRequest(String permissionId,
     @Override
     public AllowedGranularity granularity() {
         return granularity;
+    }
+
+    @Override
+    public Optional<Integer> participationFactor() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<EnergyDirection> energyDirection() {
+        return Optional.empty();
     }
 
     @Override

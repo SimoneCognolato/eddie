@@ -1,11 +1,12 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda.services;
 
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
-import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequest;
+import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequestBuilder;
 import energy.eddie.regionconnector.at.eda.permission.request.events.SimpleEvent;
 import energy.eddie.regionconnector.at.eda.requests.restricted.enums.AllowedGranularity;
 import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
@@ -58,11 +59,23 @@ class RetryServiceTest {
         // Given
         var start = LocalDate.now(ZoneOffset.UTC);
         var end = start.plusDays(10);
-        var permissionRequest = new EdaPermissionRequest("connectionId", "pid", "dnid", "cmRequestId",
-                                                         "conversationId", "mid", "dsoId", start, end,
-                                                         AllowedGranularity.PT15M,
-                                                         current, "",
-                                                         "consentId", ZonedDateTime.now(ZoneOffset.UTC));
+        var permissionRequest = new EdaPermissionRequestBuilder().setConnectionId("connectionId")
+                                                                 .setPermissionId("pid")
+                                                                 .setDataNeedId("dnid")
+                                                                 .setCmRequestId("cmRequestId")
+                                                                 .setConversationId("conversationId")
+                                                                 .setMeteringPointId("mid")
+                                                                 .setDsoId("dsoId")
+                                                                 .setStart(start)
+                                                                 .setEnd(end)
+                                                                 .setGranularity(AllowedGranularity.PT15M)
+                                                                 .setStatus(current)
+                                                                 .setMessage("")
+                                                                 .setConsentId("consentId")
+                                                                 .setCreated(ZonedDateTime.now(ZoneOffset.UTC))
+                                                                 .setEnergyDirection(EnergyDirection.CONSUMPTION)
+                                                                 .setParticipationFactor(1)
+                                                                 .build();
         when(repository.findByStatusIn(any()))
                 .thenReturn(List.of(permissionRequest));
 
@@ -80,11 +93,23 @@ class RetryServiceTest {
         // Given
         var start = LocalDate.now(ZoneOffset.UTC);
         var end = start.plusDays(10);
-        var permissionRequest = new EdaPermissionRequest("connectionId", "pid", "dnid", "cmRequestId",
-                                                         "conversationId", "mid", "dsoId", start, end,
-                                                         AllowedGranularity.PT15M,
-                                                         PermissionProcessStatus.CREATED, "",
-                                                         "consentId", ZonedDateTime.now(ZoneOffset.UTC));
+        var permissionRequest = new EdaPermissionRequestBuilder().setConnectionId("connectionId")
+                                                                 .setPermissionId("pid")
+                                                                 .setDataNeedId("dnid")
+                                                                 .setCmRequestId("cmRequestId")
+                                                                 .setConversationId("conversationId")
+                                                                 .setMeteringPointId("mid")
+                                                                 .setDsoId("dsoId")
+                                                                 .setStart(start)
+                                                                 .setEnd(end)
+                                                                 .setGranularity(AllowedGranularity.PT15M)
+                                                                 .setStatus(PermissionProcessStatus.CREATED)
+                                                                 .setMessage("")
+                                                                 .setConsentId("consentId")
+                                                                 .setCreated(ZonedDateTime.now(ZoneOffset.UTC))
+                                                                 .setEnergyDirection(EnergyDirection.CONSUMPTION)
+                                                                 .setParticipationFactor(1)
+                                                                 .build();
         when(repository.findByStatusIn(any()))
                 .thenReturn(List.of(permissionRequest));
 

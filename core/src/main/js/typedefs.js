@@ -12,7 +12,7 @@
  */
 
 /**
- * @typedef {"account" | "validated" | "inbound" | "outbound" } DataNeedType
+ * @typedef {"account" | "validated" | "inbound" | "outbound" | "cesu-join-request" } DataNeedType
  */
 
 /**
@@ -73,6 +73,18 @@
  */
 
 /**
+ * @typedef {"CONSUMPTION", "PRODUCTION" } EnergyDirection
+ */
+
+/**
+ * @typedef {DataNeed} CESUJoinRequestDataNeed
+ * @property {string} minGranularity - The minimum granularity of the data.
+ * @property {string} maxGranularity - The maximum granularity of the data.
+ * @property {string} participationFactor - The factor with which the accounting point of the final customer will participate in the CESU.
+ * @property {EnergyDirection} energyDirection - Indicates whether the final customer should produce or consume energy.
+ */
+
+/**
  * @typedef {"SMART_METER_P1_RAW", "SMART_METER_P1_CIM"} AiidaSchema
  */
 
@@ -90,7 +102,7 @@
  */
 
 /**
- * @typedef {ValidatedHistoricalDataDataNeed | AiidaDataNeed | AccountingPointDataNeed} DataNeedAttributes
+ * @typedef {ValidatedHistoricalDataDataNeed | AiidaDataNeed | AccountingPointDataNeed | CESUJoinRequestDataNeed} DataNeedAttributes
  */
 
 /**

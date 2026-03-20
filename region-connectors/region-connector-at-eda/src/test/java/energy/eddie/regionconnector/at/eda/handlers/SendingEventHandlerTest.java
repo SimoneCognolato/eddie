@@ -3,6 +3,7 @@
 
 package energy.eddie.regionconnector.at.eda.handlers;
 
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.agnostic.process.model.events.PermissionEvent;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.dataneeds.needs.AccountingPointDataNeed;
@@ -12,6 +13,7 @@ import energy.eddie.regionconnector.at.eda.EdaAdapter;
 import energy.eddie.regionconnector.at.eda.TransmissionException;
 import energy.eddie.regionconnector.at.eda.config.AtConfiguration;
 import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequest;
+import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequestBuilder;
 import energy.eddie.regionconnector.at.eda.permission.request.events.ValidatedEvent;
 import energy.eddie.regionconnector.at.eda.requests.CCMORequest;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBusImpl;
@@ -34,23 +36,28 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SendingEventHandlerTest {
-    private final EdaPermissionRequest permissionRequest = new EdaPermissionRequest(
-            "connId",
-            "pid",
-            "did",
-            "cmRequesId",
-            "convId",
-            null,
-            "dsoId",
-            LocalDate.now(AT_ZONE_ID),
-            null,
-            null,
-            PermissionProcessStatus.VALIDATED,
-            "",
-            null,
-            ZonedDateTime.now(AT_ZONE_ID)
-    );
-    private final AtConfiguration configuration = new AtConfiguration("AT00000");
+    private final EdaPermissionRequest permissionRequest = new EdaPermissionRequestBuilder().setConnectionId("connId")
+                                                                                            .setPermissionId("pid")
+                                                                                            .setDataNeedId("did")
+                                                                                            .setCmRequestId("cmRequesId")
+                                                                                            .setConversationId("convId")
+                                                                                            .setMeteringPointId(null)
+                                                                                            .setDsoId("dsoId")
+                                                                                            .setStart(LocalDate.now(
+                                                                                                    AT_ZONE_ID))
+                                                                                            .setEnd(null)
+                                                                                            .setGranularity(null)
+                                                                                            .setStatus(
+                                                                                                    PermissionProcessStatus.VALIDATED)
+                                                                                            .setMessage("")
+                                                                                            .setConsentId(null)
+                                                                                            .setCreated(ZonedDateTime.now(
+                                                                                                    AT_ZONE_ID))
+                                                                                            .setEnergyDirection(
+                                                                                                    EnergyDirection.CONSUMPTION)
+                                                                                            .setParticipationFactor(1)
+                                                                                            .build();
+    private final AtConfiguration configuration = new AtConfiguration("AT00000", null, null);
     @Mock
     private EdaAdapter edaAdapter;
     @Mock

@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda.handlers.integration.inbound;
 
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestProjection;
 
 import java.time.Instant;
@@ -22,8 +23,9 @@ public record AtPermissionRequestProjectionTest(
         String message,
         String granularity,
         String status,
-        Instant created
-) implements AtPermissionRequestProjection {
+        Instant created,
+        EnergyDirection energyDirection,
+        Integer participationFactor) implements AtPermissionRequestProjection {
     @Override public String getPermissionId() { return permissionId; }
     @Override public String getConnectionId() { return connectionId; }
     @Override public String getCmRequestId() { return cmRequestId; }
@@ -38,4 +40,10 @@ public record AtPermissionRequestProjectionTest(
     @Override public String getGranularity() { return granularity; }
     @Override public String getStatus() { return status; }
     @Override public Instant getCreated() { return created; }
+
+    @Override
+    public EnergyDirection getEnergyDirection() {return energyDirection;}
+
+    @Override
+    public Integer getParticipationFactor() {return participationFactor;}
 }

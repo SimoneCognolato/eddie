@@ -3,14 +3,16 @@
 
 package energy.eddie.regionconnector.at.eda.permission.request.dtos;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import energy.eddie.api.agnostic.data.needs.EnergyDirection;
+import energy.eddie.regionconnector.at.eda.dto.validation.DataNeedCombinationConstraint;
+import jakarta.validation.constraints.*;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 import static energy.eddie.regionconnector.at.eda.requests.DsoIdAndMeteringPoint.DSO_ID_LENGTH;
 
+@DataNeedCombinationConstraint
 public record PermissionRequestForCreation(
         @NotBlank
         String connectionId,
@@ -28,5 +30,20 @@ public record PermissionRequestForCreation(
                 message = "needs to be exactly " + DSO_ID_LENGTH + " characters long"
         )
         @NotBlank
-        String dsoId
-) {}
+        String dsoId,
+        @Nullable
+        EnergyDirection energyDirection,
+        @Nullable
+        @Max(100)
+        @Min(1)
+        Integer participationFactor
+) {
+    public PermissionRequestForCreation(
+            String connectionId,
+            String meteringPointId,
+            List<String> dataNeedIds,
+            String dsoId
+    ) {
+        this(connectionId, meteringPointId, dataNeedIds, dsoId, null, null);
+    }
+}
