@@ -24,8 +24,8 @@ Content-Type: application/json
 GET http://localhost:8080/region-connectors/at-eda/ponton/cm-request
 
 ### POST CM Notification - Answer
-@request-id=NKUHZPZF
-@conversation-id=CC100855T1773749081266
+@request-id=475UHAQY
+@conversation-id=CC100855T1773993810107
 POST http://localhost:8080/region-connectors/at-eda/ponton/cm-notification/ECON_ANSWER
 accept: */*
 Content-Type: application/xml
@@ -176,7 +176,7 @@ Content-Type: application/xml
         <ns0:ECType>CC</ns0:ECType>
         <ns0:ECDisModel>D</ns0:ECDisModel>
         <ns0:MPListData>
-            <ns0:MeteringPoint>AT0010000000000000000000000000000</ns0:MeteringPoint>
+            <ns0:MeteringPoint>{{metering-point-id}}</ns0:MeteringPoint>
             <ns0:ConsentId>AT0000000000000000000000000000000</ns0:ConsentId>
             <ns0:MPTimeData>
                 <ns0:DateFrom>2026-03-11</ns0:DateFrom>

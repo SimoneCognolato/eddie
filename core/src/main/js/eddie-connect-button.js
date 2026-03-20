@@ -362,12 +362,16 @@ class EddieConnectButton extends LitElement {
       this._dataNeedAttributes.map((dn) => dn.type).join(",")
     );
     // There should only ever be one cesu join request data need present in this collection
-    this._dataNeedAttributes
-      .filter(({ type }) => type === "cesu-join-request")
-      .forEach(({ participationFactor, energyDirection }) => {
-        !!participationFactor && element.setAttribute("participation-factor", participationFactor);
-        !!energyDirection && element.setAttribute("energy-direction", energyDirection);
-      });
+    const { participationFactor, energyDirection } =
+      this._dataNeedAttributes.find(
+        ({ type }) => type === "cesu-join-request"
+      ) ?? {};
+    if (participationFactor) {
+      element.setAttribute("participation-factor", participationFactor);
+    }
+    if (energyDirection) {
+      element.setAttribute("energy-direction", energyDirection);
+    }
 
     if (this.accountingPointId) {
       element.setAttribute("accounting-point-id", this.accountingPointId);

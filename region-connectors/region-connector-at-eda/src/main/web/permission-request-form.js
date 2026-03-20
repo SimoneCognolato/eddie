@@ -119,7 +119,7 @@ class PermissionRequestForm extends PermissionRequestFormBase {
                     .value="${this.energyDirection ?? "PRODUCTION"}"
                     .help-text="${this.energyDirection
                       ? "The service has already provided the required energy direction. If this value is incorrect, please contact the service provider."
-                      : "The DSO needs to know with which energy direction you want to participate in the CESU"}"
+                      : "The DSO needs to know with which energy direction you want to participate in the CESU."}"
                     required
                   >
                     <sl-radio
@@ -140,7 +140,7 @@ class PermissionRequestForm extends PermissionRequestFormBase {
                     name="participation-factor"
                     .help-text="${this.participationFactor
                       ? "The service has already provided the required participation factor. If this value is incorrect, please contact the service provider."
-                      : "The participation factor you want to use in the CESU"}"
+                      : "The participation factor you want to use in the CESU."}"
                     .value="${this.participationFactor ?? nothing}"
                     .disabled="${!!this.participationFactor}"
                     required
@@ -149,7 +149,7 @@ class PermissionRequestForm extends PermissionRequestFormBase {
                 `
               : ""}
 
-            <br />;
+            <br />
 
             <div>
               <sl-button
@@ -159,7 +159,6 @@ class PermissionRequestForm extends PermissionRequestFormBase {
               >
                 Connect
               </sl-button>
-              ;
             </div>
           </form>
 
