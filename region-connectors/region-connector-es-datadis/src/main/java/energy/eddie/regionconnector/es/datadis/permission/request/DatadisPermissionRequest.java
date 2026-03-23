@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.es.datadis.permission.request;
@@ -15,6 +15,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Entity
 @Table(schema = "es_datadis", name = "datadis_permission_request")
@@ -55,6 +56,8 @@ public class DatadisPermissionRequest implements EsPermissionRequest {
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "text", name = "allowed_granularity")
     private AllowedGranularity allowedGranularity;
+    @Column(name = "bundle_id")
+    private final UUID bundleId;
 
     // just for JPA
     @SuppressWarnings("NullAway.Init")
@@ -75,6 +78,7 @@ public class DatadisPermissionRequest implements EsPermissionRequest {
         productionSupport = false;
         created = null;
         allowedGranularity = null;
+        bundleId = null;
     }
 
     @SuppressWarnings("java:S107")
@@ -94,7 +98,8 @@ public class DatadisPermissionRequest implements EsPermissionRequest {
             @Nullable String errorMessage,
             boolean productionSupport,
             ZonedDateTime created,
-            AllowedGranularity allowedGranularity
+            AllowedGranularity allowedGranularity,
+            @Nullable UUID bundleId
     ) {
         this.permissionId = permissionId;
         this.connectionId = connectionId;
@@ -112,6 +117,7 @@ public class DatadisPermissionRequest implements EsPermissionRequest {
         this.productionSupport = productionSupport;
         this.created = created;
         this.allowedGranularity = allowedGranularity;
+        this.bundleId = bundleId;
     }
 
     @Override
@@ -209,5 +215,11 @@ public class DatadisPermissionRequest implements EsPermissionRequest {
     @Override
     public Optional<LocalDate> latestMeterReadingEndDate() {
         return Optional.ofNullable(this.latestMeterReadingEndDate);
+    }
+
+    @Nullable
+    @Override
+    public UUID bundleId() {
+        return bundleId;
     }
 }

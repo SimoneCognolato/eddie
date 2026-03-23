@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 import { html, nothing } from "lit";
@@ -49,14 +49,14 @@ class PermissionRequestForm extends PermissionRequestFormBase {
       connectionId: this.connectionId,
       meteringPointId: formData.get("meteringPointId"),
       nif: formData.get("nif"),
-      dataNeedId: this.dataNeedId,
+      dataNeedIds: this.dataNeedId.split(","),
     };
 
     this._isSubmitDisabled = true;
 
     this.createPermissionRequest(payload)
-      .then(({ permissionId }) => {
-        this.permissionId = permissionId;
+      .then(({ permissionIds }) => {
+        this.permissionId = permissionIds.join(",");
       })
       .catch((error) => {
         this._isSubmitDisabled = false;
@@ -65,7 +65,7 @@ class PermissionRequestForm extends PermissionRequestFormBase {
   }
 
   accepted() {
-    fetch(`${this.requestUrl}/${this.permissionId}/accepted`, {
+    fetch(`${this.requestUrl}/accepted?permission-id=${this.permissionId}`, {
       method: "PATCH",
       headers: {
         Authorization: "Bearer " + this.bearerToken,
@@ -81,7 +81,7 @@ class PermissionRequestForm extends PermissionRequestFormBase {
   }
 
   rejected() {
-    fetch(`${this.requestUrl}/${this.permissionId}/rejected`, {
+    fetch(`${this.requestUrl}/rejected?permission-id=${this.permissionId}`, {
       method: "PATCH",
       headers: {
         Authorization: "Bearer " + this.bearerToken,

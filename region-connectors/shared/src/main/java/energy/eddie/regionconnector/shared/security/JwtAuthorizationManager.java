@@ -15,7 +15,7 @@ import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -131,7 +131,9 @@ public class JwtAuthorizationManager implements AuthorizationManager<RequestAuth
         }
 
         if (permissionIdParameters != null) {
-            permissionIds.addAll(Arrays.asList(permissionIdParameters));
+            for (var parameter : permissionIdParameters) {
+                Collections.addAll(permissionIds, parameter.split(","));
+            }
         }
 
         return permissionIds;

@@ -166,9 +166,9 @@ class JwtAuthorizationManagerTest {
         // Given
         var mockRequest = createMockRequest("dispatcherServlet");
         var mockContext = new RequestAuthorizationContext(mockRequest, Map.of());
-        mockRequest.addParameter("permission-id", "myTestId");
+        mockRequest.addParameter("permission-id", "myTestId1,myTestId2");
         when(mockJwtUtil.getPermissions(anyString()))
-                .thenReturn(Map.of("aiida", List.of("myTestId"), "es-datadis", List.of("foo", "bar")));
+                .thenReturn(Map.of("aiida", List.of("myTestId1", "myTestId2"), "es-datadis", List.of("foo", "bar")));
 
         // When
         var res = headerAuthManager.authorize(null, mockContext);

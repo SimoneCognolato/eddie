@@ -44,7 +44,7 @@ class IntermediateValidatedHistoricalDocumentTest {
         EsPermissionRequest permissionRequest = new DatadisPermissionRequestBuilder()
                 .setPermissionId("permissionId")
                 .setConnectionId("connectionId")
-                .setDataNeedId("dataNeedId")
+                .setDataNeedId("dataNeedIds")
                 .setGranularity(Granularity.PT1H)
                 .setNif("nif")
                 .setMeteringPointId("meteringPointId")

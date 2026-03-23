@@ -5,6 +5,8 @@ package energy.eddie.regionconnector.es.datadis.services;
 
 import energy.eddie.api.agnostic.Granularity;
 import energy.eddie.api.agnostic.data.needs.*;
+import energy.eddie.api.agnostic.data.needs.MultipleDataNeedCalculationResult.CalculationResult;
+import energy.eddie.api.agnostic.data.needs.MultipleDataNeedCalculationResult.InvalidDataNeedCombination;
 import energy.eddie.api.agnostic.process.model.validation.AttributeError;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.dataneeds.exceptions.DataNeedNotFoundException;
@@ -24,14 +26,14 @@ import energy.eddie.regionconnector.es.datadis.persistence.EsPermissionRequestRe
 import energy.eddie.regionconnector.es.datadis.validation.IdentifierValidator;
 import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
 import energy.eddie.regionconnector.shared.exceptions.PermissionNotFoundException;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static energy.eddie.regionconnector.es.datadis.DatadisRegionConnectorMetadata.REGION_CONNECTOR_ID;
 import static energy.eddie.regionconnector.es.datadis.DatadisRegionConnectorMetadata.ZONE_ID_SPAIN;
@@ -39,12 +41,13 @@ import static energy.eddie.regionconnector.es.datadis.DatadisRegionConnectorMeta
 @Service
 public class PermissionRequestService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionRequestService.class);
-    private static final String DATA_NEED_ID = "dataNeedId";
+    private static final String DATA_NEED_ID = "dataNeedIds";
     private final EsPermissionRequestRepository repository;
     private final AccountingPointDataService accountingPointDataService;
     private final PermissionRequestConsumer permissionRequestConsumer;
     private final Outbox outbox;
     private final DataNeedCalculationService<DataNeed> calculationService;
+    private final BundleService bundleService;
 
     @Autowired
     public PermissionRequestService(
@@ -52,40 +55,63 @@ public class PermissionRequestService {
             AccountingPointDataService accountingPointDataService,
             PermissionRequestConsumer permissionRequestConsumer,
             Outbox outbox,
-            DataNeedCalculationService<DataNeed> calculationService
+            DataNeedCalculationService<DataNeed> calculationService,
+            BundleService bundleService
     ) {
         this.repository = repository;
         this.accountingPointDataService = accountingPointDataService;
         this.permissionRequestConsumer = permissionRequestConsumer;
         this.outbox = outbox;
         this.calculationService = calculationService;
+        this.bundleService = bundleService;
     }
 
-    public void acceptPermission(String permissionId) throws PermissionNotFoundException {
-        var permissionRequest = getPermissionRequestById(permissionId);
-        LOGGER.atInfo()
-              .addArgument(permissionRequest::permissionId)
-              .log("Got request to accept permission {}");
-        accountingPointDataService
-                .fetchAccountingPointDataForPermissionRequest(permissionRequest)
-                .doOnError(error -> permissionRequestConsumer.consumeError(error, permissionRequest))
-                .onErrorComplete()
-                .subscribe(accountingPointData ->
-                                   permissionRequestConsumer.acceptPermission(permissionRequest, accountingPointData)
-                );
+    public Set<String> acceptPermission(Set<String> permissionIds) {
+        var ids = new HashSet<String>();
+        for (String permissionId : permissionIds) {
+            try {
+                var permissionRequest = getPermissionRequestById(permissionId);
+                LOGGER.atInfo()
+                      .addArgument(permissionRequest::permissionId)
+                      .log("Got request to accept permission {}");
+                accountingPointDataService
+                        .fetchAccountingPointDataForPermissionRequest(permissionRequest)
+                        .doOnError(error -> permissionRequestConsumer.consumeError(error, permissionRequest))
+                        .onErrorComplete()
+                        .subscribe(accountingPointData ->
+                                           permissionRequestConsumer.acceptPermission(permissionRequest,
+                                                                                      accountingPointData)
+                        );
+                ids.add(permissionId);
+            } catch (Exception e) {
+                LOGGER.warn("Could not find permission request {} when accepting it", permissionId, e);
+            }
+        }
+        return ids;
     }
 
-    public void rejectPermission(String permissionId) throws PermissionNotFoundException {
-        var permissionRequest = getPermissionRequestById(permissionId);
-        LOGGER.atInfo()
-              .addArgument(permissionRequest::permissionId)
-              .log("Got request to reject permission {}");
-        outbox.commit(new EsSimpleEvent(permissionId, PermissionProcessStatus.REJECTED));
+    public Set<String> rejectPermission(Set<String> permissionIds) {
+        var ids = new HashSet<String>();
+        for (String permissionId : permissionIds) {
+            try {
+                var permissionRequest = getPermissionRequestById(permissionId);
+                LOGGER.atInfo()
+                      .addArgument(permissionRequest::permissionId)
+                      .log("Got request to reject permission {}");
+                outbox.commit(new EsSimpleEvent(permissionId, PermissionProcessStatus.REJECTED));
+                ids.add(permissionId);
+            } catch (Exception e) {
+                LOGGER.warn("Could not find permission request {} when rejecting it", permissionId, e);
+            }
+        }
+        return ids;
     }
 
     /**
-     * Creates a new permission request with the start and end date according to the data needs. It adds one day to the
+     * Creates multiple new permission requests with the start and end date according to the data needs. It adds one day to the
      * end date automatically to ensure that the end date is inclusive.
+     * If only one permission request is going to be created this method forwards all exceptions that might occur during the creation.
+     * If there are multiple permission requests to be created, it catches and logs the exception
      *
      * @param requestForCreation basis for the permission request.
      * @return a validated permission request, that was sent to the permission administrator.
@@ -95,9 +121,52 @@ public class PermissionRequestService {
     public CreatedPermissionRequest createAndSendPermissionRequest(
             PermissionRequestForCreation requestForCreation
     ) throws DataNeedNotFoundException, UnsupportedDataNeedException, EsValidationException {
-        LOGGER.info("Got request to create a new permission, request was: {}", requestForCreation);
+        var dataNeedIds = requestForCreation.dataNeedIds();
+        LOGGER.debug("Got request to create new permission requests with data need IDs: {}",
+                     requestForCreation.dataNeedIds());
+        if (dataNeedIds.size() == 1) {
+            var dataNeedId = dataNeedIds.iterator().next();
+            var calculation = calculationService.calculate(dataNeedId);
+            var permissionId = createPermissionRequest(requestForCreation, dataNeedId, calculation, null);
+            return new CreatedPermissionRequest(permissionId);
+        }
+        var calculations = calculationService.calculateAll(dataNeedIds);
+        if (calculations instanceof InvalidDataNeedCombination(Set<String> offendingDataNeedIds, String message)) {
+            throw new UnsupportedDataNeedException(REGION_CONNECTOR_ID,
+                                                   offendingDataNeedIds.iterator().next(),
+                                                   message);
+        }
+        var permissionIds = new ArrayList<String>(dataNeedIds.size());
+        var bundleId = UUID.randomUUID();
+        var calcs = (CalculationResult) calculations;
+        for (var dataNeed : calcs.result().entrySet()) {
+            try {
+                var permissionId = createPermissionRequest(requestForCreation,
+                                                           dataNeed.getKey(),
+                                                           dataNeed.getValue(),
+                                                           bundleId);
+                LOGGER.trace("Created permission request with id {}", permissionId);
+                permissionIds.add(permissionId);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to create permission request data need with ID {}", dataNeed.getKey(), e);
+            }
+        }
+        bundleService.sendBundledAuthorizationRequest(bundleId);
+        return new CreatedPermissionRequest(permissionIds);
+    }
+
+    public void terminatePermission(String permissionId) throws PermissionNotFoundException {
+        var permissionRequest = getPermissionRequestById(permissionId);
+        outbox.commit(new EsSimpleEvent(permissionRequest.permissionId(), PermissionProcessStatus.TERMINATED));
+    }
+
+    private String createPermissionRequest(
+            PermissionRequestForCreation requestForCreation,
+            String dataNeedId,
+            DataNeedCalculationResult calculation,
+            @Nullable UUID bundleId
+    ) throws EsValidationException, UnsupportedDataNeedException, DataNeedNotFoundException {
         var permissionId = UUID.randomUUID().toString();
-        var dataNeedId = requestForCreation.dataNeedId();
         outbox.commit(new EsCreatedEvent(permissionId,
                                          requestForCreation.connectionId(),
                                          dataNeedId,
@@ -109,7 +178,6 @@ public class PermissionRequestService {
             outbox.commit(new EsMalformedEvent(permissionId, List.of(error)));
             throw new EsValidationException(error);
         }
-        var calculation = calculationService.calculate(dataNeedId);
         switch (calculation) {
             case DataNeedNotFoundResult ignored -> {
                 outbox.commit(new EsMalformedEvent(
@@ -128,20 +196,16 @@ public class PermissionRequestService {
                                                        message);
             }
             case ValidatedHistoricalDataDataNeedResult vhdResult ->
-                    handleValidatedHistoricalDataNeed(vhdResult, permissionId);
-            case AccountingPointDataNeedResult ignored -> handleAccountingPointDataNeed(permissionId);
+                    handleValidatedHistoricalDataNeed(vhdResult, permissionId, bundleId);
+            case AccountingPointDataNeedResult ignored -> handleAccountingPointDataNeed(permissionId, bundleId);
             default -> {
-                var message = "Data Need not supported";
-                outbox.commit(new EsMalformedEvent(permissionId, List.of(new AttributeError(DATA_NEED_ID, message))));
+                String message = "Data Need with ID %s is not supported!".formatted(dataNeedId);
+                outbox.commit(new EsMalformedEvent(permissionId,
+                                                   List.of(new AttributeError(DATA_NEED_ID, message))));
                 throw new UnsupportedDataNeedException(REGION_CONNECTOR_ID, dataNeedId, message);
             }
         }
-        return new CreatedPermissionRequest(permissionId);
-    }
-
-    public void terminatePermission(String permissionId) throws PermissionNotFoundException {
-        var permissionRequest = getPermissionRequestById(permissionId);
-        outbox.commit(new EsSimpleEvent(permissionRequest.permissionId(), PermissionProcessStatus.TERMINATED));
+        return permissionId;
     }
 
     private EsPermissionRequest getPermissionRequestById(String permissionId) throws PermissionNotFoundException {
@@ -151,7 +215,8 @@ public class PermissionRequestService {
 
     private void handleValidatedHistoricalDataNeed(
             ValidatedHistoricalDataDataNeedResult calculation,
-            String permissionId
+            String permissionId,
+            @Nullable UUID bundleId
     ) {
         var allowedMeasurementType = allowedMeasurementType(calculation.granularities());
         var energyDataTimeframe = calculation.energyTimeframe();
@@ -159,17 +224,19 @@ public class PermissionRequestService {
                 permissionId,
                 energyDataTimeframe.start(),
                 energyDataTimeframe.end(),
-                allowedMeasurementType
+                allowedMeasurementType,
+                bundleId
         ));
     }
 
-    private void handleAccountingPointDataNeed(String permissionId) {
+    private void handleAccountingPointDataNeed(String permissionId, @Nullable UUID bundleId) {
         LocalDate today = LocalDate.now(ZONE_ID_SPAIN);
         outbox.commit(new EsValidatedEvent(
                 permissionId,
                 today,
                 today,
-                null
+                null,
+                bundleId
         ));
     }
 

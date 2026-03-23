@@ -9,7 +9,6 @@ import energy.eddie.regionconnector.es.datadis.dtos.CreatedPermissionRequest;
 import energy.eddie.regionconnector.es.datadis.dtos.PermissionRequestForCreation;
 import energy.eddie.regionconnector.es.datadis.exceptions.EsValidationException;
 import energy.eddie.regionconnector.es.datadis.services.PermissionRequestService;
-import energy.eddie.regionconnector.shared.exceptions.PermissionNotFoundException;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +23,15 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 
 import static energy.eddie.regionconnector.shared.web.RestApiPaths.PATH_PERMISSION_REQUEST;
 import static energy.eddie.regionconnector.shared.web.RestApiPaths.connectionStatusMessagesStreamFor;
 
 @RestController
 public class PermissionController {
-    public static final String PATH_PERMISSION_ACCEPTED = PATH_PERMISSION_REQUEST + "/{permissionId}/accepted";
-    public static final String PATH_PERMISSION_REJECTED = PATH_PERMISSION_REQUEST + "/{permissionId}/rejected";
+    public static final String PATH_PERMISSION_ACCEPTED = PATH_PERMISSION_REQUEST + "/accepted";
+    public static final String PATH_PERMISSION_REJECTED = PATH_PERMISSION_REQUEST + "/rejected";
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionController.class);
     private final PermissionRequestService service;
 
@@ -68,22 +68,22 @@ public class PermissionController {
     ) throws DataNeedNotFoundException, UnsupportedDataNeedException, EsValidationException {
         var permissionRequest = service.createAndSendPermissionRequest(requestForCreation);
 
-        var permissionId = permissionRequest.permissionId();
-        LOGGER.info("New Permission Request created with PermissionId {}", permissionId);
+        var permissionId = permissionRequest.permissionIds();
+        LOGGER.info("New Permission Requests created with IDs {}", permissionId);
 
         var location = connectionStatusMessagesStreamFor(permissionId);
         return ResponseEntity.created(location).body(permissionRequest);
     }
 
     @PatchMapping(value = PATH_PERMISSION_ACCEPTED)
-    public ResponseEntity<String> acceptPermission(@PathVariable String permissionId) throws PermissionNotFoundException {
-        service.acceptPermission(permissionId);
-        return ResponseEntity.ok(permissionId);
+    public ResponseEntity<Set<String>> acceptPermission(@RequestParam("permission-id") Set<String> permissionIds) {
+        var res = service.acceptPermission(permissionIds);
+        return ResponseEntity.ok(res);
     }
 
     @PatchMapping(value = PATH_PERMISSION_REJECTED)
-    public ResponseEntity<String> rejectPermission(@PathVariable String permissionId) throws PermissionNotFoundException {
-        service.rejectPermission(permissionId);
-        return ResponseEntity.ok(permissionId);
+    public ResponseEntity<Set<String>> rejectPermission(@RequestParam("permission-id") Set<String> permissionIds) {
+        var res = service.rejectPermission(permissionIds);
+        return ResponseEntity.ok(res);
     }
 }

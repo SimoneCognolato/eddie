@@ -9,7 +9,6 @@ import energy.eddie.regionconnector.es.datadis.health.DatadisApiHealthIndicator;
 import energy.eddie.regionconnector.es.datadis.persistence.EsPermissionEventRepository;
 import energy.eddie.regionconnector.es.datadis.persistence.EsPermissionRequestRepository;
 import energy.eddie.regionconnector.es.datadis.services.PermissionRequestService;
-import energy.eddie.regionconnector.shared.exceptions.PermissionNotFoundException;
 import energy.eddie.regionconnector.shared.security.JwtUtil;
 import energy.eddie.spring.regionconnector.extensions.RegionConnectorsCommonControllerAdvice;
 import org.junit.jupiter.api.Test;
@@ -27,10 +26,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
+import java.util.Set;
+
 import static energy.eddie.api.agnostic.GlobalConfig.ERRORS_JSON_PATH;
 import static energy.eddie.regionconnector.shared.web.RestApiPaths.connectionStatusMessagesStreamFor;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -61,28 +61,29 @@ class PermissionControllerTest {
         String permissionId = "ValidId";
 
         // When
-        mockMvc.perform(patch("/permission-request/{permissionId}/accepted", permissionId)
+        mockMvc.perform(patch("/permission-request/accepted")
+                                .queryParam("permission-id", permissionId)
                                 .accept(MediaType.APPLICATION_JSON))
                // Then
                .andExpect(status().isOk());
 
-        verify(mockService).acceptPermission(permissionId);
+        verify(mockService).acceptPermission(Set.of(permissionId));
     }
 
     @Test
-    void acceptPermission_permissionDoesNotExist_returnsNotFound() throws Exception {
+    void acceptPermission_permissionDoesNotExist_returnsResultWithoutPermission() throws Exception {
         // Given
         String nonExistingId = "123";
-        var ex = new PermissionNotFoundException(nonExistingId);
-        doThrow(ex).when(mockService).acceptPermission(anyString());
+        when(mockService.acceptPermission(any()))
+                .thenReturn(Set.of());
 
         // When
-        mockMvc.perform(patch("/permission-request/{permissionId}/accepted", nonExistingId)
+        mockMvc.perform(patch("/permission-request/accepted")
+                                .queryParam("permission-id", nonExistingId)
                                 .accept(MediaType.APPLICATION_JSON))
                // Then
-               .andExpect(status().isNotFound())
-               .andExpect(jsonPath(ERRORS_JSON_PATH, iterableWithSize(1)))
-               .andExpect(jsonPath(ERRORS_JSON_PATH + "[0].message", is("No permission with ID '123' found.")));
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$", iterableWithSize(0)));
     }
 
     @Test
@@ -91,28 +92,28 @@ class PermissionControllerTest {
         String permissionId = "ValidId";
 
         // When
-        mockMvc.perform(patch("/permission-request/{permissionId}/rejected", permissionId)
+        mockMvc.perform(patch("/permission-request/rejected")
+                                .queryParam("permission-id", permissionId)
                                 .accept(MediaType.APPLICATION_JSON))
                // Then
                .andExpect(status().isOk());
 
-        verify(mockService).rejectPermission(permissionId);
+        verify(mockService).rejectPermission(Set.of(permissionId));
     }
 
     @Test
-    void rejectPermission_permissionDoesNotExist_returnsNotFound() throws Exception {
+    void rejectPermission_permissionDoesNotExist_returnsResultWithoutPermission() throws Exception {
         // Given
         String nonExistingId = "123";
-        var ex = new PermissionNotFoundException(nonExistingId);
-        doThrow(ex).when(mockService).rejectPermission(anyString());
+        when(mockService.rejectPermission(any())).thenReturn(Set.of());
 
         // When
-        mockMvc.perform(patch("/permission-request/{permissionId}/rejected", nonExistingId)
+        mockMvc.perform(patch("/permission-request/rejected")
+                                .queryParam("permission-id", nonExistingId)
                                 .accept(MediaType.APPLICATION_JSON))
                // Then
-               .andExpect(status().isNotFound())
-               .andExpect(jsonPath(ERRORS_JSON_PATH, iterableWithSize(1)))
-               .andExpect(jsonPath(ERRORS_JSON_PATH + "[0].message", is("No permission with ID '123' found.")));
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$", iterableWithSize(0)));
     }
 
     @Test
@@ -125,9 +126,26 @@ class PermissionControllerTest {
                .andExpect(status().isBadRequest())
                .andExpect(jsonPath(ERRORS_JSON_PATH + "[*].message", allOf(
                        iterableWithSize(3),
-                       hasItem("nif: must not be null or blank"),
-                       hasItem("meteringPointId: must not be null or blank"),
-                       hasItem("dataNeedId: must not be null or blank")
+                       hasItem("nif: must not be blank"),
+                       hasItem("meteringPointId: must not be blank"),
+                       hasItem("dataNeedIds: must not be empty")
+               )));
+    }
+
+    @Test
+    void requestPermission_invalidDataNeedsField_returnsBadRequest() throws Exception {
+        mockMvc.perform(post("/permission-request")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                // language=JSON
+                                .content(
+                                        "{\"connectionId\": \"Hello World\", \"dataNeedIds\": [null, \"\"], \"meteringPointId\":  \"mid\", \"nif\": \"NOICE\"}"))
+               // Then
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath(ERRORS_JSON_PATH + "[*].message", allOf(
+                       iterableWithSize(2),
+                       hasItem("dataNeedIds[]: must not be blank"),
+                       hasItem("dataNeedIds[]: must not be blank")
                )));
     }
 
@@ -156,8 +174,8 @@ class PermissionControllerTest {
         ObjectNode jsonNode = mapper.createObjectNode()
                                     .put("connectionId", "   ")
                                     .put("meteringPointId", "   ")
-                                    .put("dataNeedId", "")
                                     .put("nif", "");
+        jsonNode.putArray("dataNeedIds");
 
         mockMvc.perform(post("/permission-request")
                                 .content(mapper.writeValueAsString(jsonNode))
@@ -168,10 +186,10 @@ class PermissionControllerTest {
                .andExpect(status().isBadRequest())
                .andExpect(jsonPath(ERRORS_JSON_PATH + "[*].message", allOf(
                        iterableWithSize(4),
-                       hasItem("connectionId: must not be null or blank"),
-                       hasItem("nif: must not be null or blank"),
-                       hasItem("meteringPointId: must not be null or blank"),
-                       hasItem("dataNeedId: must not be null or blank")
+                       hasItem("connectionId: must not be blank"),
+                       hasItem("nif: must not be blank"),
+                       hasItem("meteringPointId: must not be blank"),
+                       hasItem("dataNeedIds: must not be empty")
                )));
     }
 
@@ -186,18 +204,21 @@ class PermissionControllerTest {
         ObjectNode jsonNode = mapper.createObjectNode()
                                     .put("connectionId", "ConnId")
                                     .put("meteringPointId", "SomeId")
-                                    .put("dataNeedId", "BLA_BLU_BLE")
                                     .put("nif", "NOICE");
+        jsonNode
+                .putArray("dataNeedIds")
+                .add("SomeId");
 
         // When
         var expectedUri = connectionStatusMessagesStreamFor(testPermissionId).toString();
+        var content = mapper.writeValueAsString(jsonNode);
         mockMvc.perform(post("/permission-request")
-                                .content(mapper.writeValueAsString(jsonNode))
+                                .content(content)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .accept(MediaType.APPLICATION_JSON))
                // Then
                .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.permissionId").value(testPermissionId))
+               .andExpect(jsonPath("$.permissionIds[0]").value(testPermissionId))
                .andExpect(header().string(HttpHeaders.LOCATION, expectedUri));
 
         verify(mockService).createAndSendPermissionRequest(any());

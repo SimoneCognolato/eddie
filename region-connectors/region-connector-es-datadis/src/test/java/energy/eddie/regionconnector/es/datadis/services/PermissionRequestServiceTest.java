@@ -5,6 +5,7 @@ package energy.eddie.regionconnector.es.datadis.services;
 
 import energy.eddie.api.agnostic.Granularity;
 import energy.eddie.api.agnostic.data.needs.*;
+import energy.eddie.api.agnostic.data.needs.MultipleDataNeedCalculationResult.InvalidDataNeedCombination;
 import energy.eddie.api.agnostic.process.model.events.PermissionEvent;
 import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.dataneeds.exceptions.DataNeedNotFoundException;
@@ -40,11 +41,14 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static energy.eddie.api.agnostic.data.needs.MultipleDataNeedCalculationResult.CalculationResult;
 import static energy.eddie.regionconnector.es.datadis.DatadisRegionConnectorMetadata.ZONE_ID_SPAIN;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -60,6 +64,8 @@ class PermissionRequestServiceTest {
     private Outbox outbox;
     @Mock
     private DataNeedCalculationService<DataNeed> calculationService;
+    @Mock
+    private BundleService bundleService;
     @InjectMocks
     private PermissionRequestService service;
     @Captor
@@ -74,13 +80,17 @@ class PermissionRequestServiceTest {
     }
 
     @Test
-    void acceptPermission_nonExistingId_throws() {
+    void acceptPermission_nonExistingId_returnsAcceptedPermissionRequests() {
         // Given
         var permissionId = "nonExisting";
         when(repository.findByPermissionId(permissionId)).thenReturn(Optional.empty());
 
-        // When, Then
-        assertThrows(PermissionNotFoundException.class, () -> service.acceptPermission(permissionId));
+        // When
+        var res = service.acceptPermission(Set.of(permissionId));
+
+        // Then
+        assertThat(res).isEmpty();
+        verify(outbox, never()).commit(any());
     }
 
     @Test
@@ -97,7 +107,7 @@ class PermissionRequestServiceTest {
         );
 
         // When
-        assertDoesNotThrow(() -> service.acceptPermission(permissionId));
+        assertDoesNotThrow(() -> service.acceptPermission(Set.of(permissionId)));
 
         // Then
         verify(permissionRequestConsumer).acceptPermission(permissionRequest, accountingPointData);
@@ -115,20 +125,24 @@ class PermissionRequestServiceTest {
         );
 
         // When
-        assertDoesNotThrow(() -> service.acceptPermission(permissionId));
+        assertDoesNotThrow(() -> service.acceptPermission(Set.of(permissionId)));
 
         // Then
         verify(permissionRequestConsumer).consumeError(any(), eq(permissionRequest));
     }
 
     @Test
-    void rejectPermission_nonExistingId_throws() {
+    void rejectPermission_nonExistingId_returnsChangedPermissionRequests() {
         // Given
         var permissionId = "nonExisting";
         when(repository.findByPermissionId(permissionId)).thenReturn(Optional.empty());
 
-        // When, Then
-        assertThrows(PermissionNotFoundException.class, () -> service.rejectPermission(permissionId));
+        // When
+        var res = service.rejectPermission(Set.of(permissionId));
+
+        // Then
+        assertThat(res).isEmpty();
+        verify(outbox, never()).commit(any());
     }
 
     @Test
@@ -139,7 +153,7 @@ class PermissionRequestServiceTest {
         when(repository.findByPermissionId(permissionId)).thenReturn(Optional.of(permissionRequest));
 
         // When
-        assertDoesNotThrow(() -> service.rejectPermission(permissionId));
+        assertDoesNotThrow(() -> service.rejectPermission(Set.of(permissionId)));
 
         // Then
         verify(outbox).commit(assertArg(event -> assertEquals(PermissionProcessStatus.REJECTED, event.status())));
@@ -149,7 +163,7 @@ class PermissionRequestServiceTest {
     @MethodSource
     void createAndSendPermissionRequest_emitsCreatedAndValidated(List<Granularity> granularities) throws DataNeedNotFoundException, UnsupportedDataNeedException, EsValidationException {
         // Given
-        var creationRequest = new PermissionRequestForCreation("cid", "dnid", "00000000T", "mid");
+        var creationRequest = new PermissionRequestForCreation("cid", Set.of("dnid"), "00000000T", "mid");
         var now = LocalDate.now(ZONE_ID_SPAIN);
         when(calculationService.calculate("dnid"))
                 .thenReturn(new ValidatedHistoricalDataDataNeedResult(
@@ -175,7 +189,7 @@ class PermissionRequestServiceTest {
         // Given
         ArgumentCaptor<EsCreatedEvent> createdCaptor = ArgumentCaptor.forClass(EsCreatedEvent.class);
         ArgumentCaptor<EsValidatedEvent> validatedCaptor = ArgumentCaptor.forClass(EsValidatedEvent.class);
-        var creationRequest = new PermissionRequestForCreation("cid", "dnid", "00000000T", "mid");
+        var creationRequest = new PermissionRequestForCreation("cid", Set.of("dnid"), "00000000T", "mid");
         var today = LocalDate.now(ZONE_ID_SPAIN);
         var now = LocalDate.now(ZoneOffset.UTC);
         when(calculationService.calculate("dnid"))
@@ -195,9 +209,85 @@ class PermissionRequestServiceTest {
     }
 
     @Test
+    void createAndSendPermissionRequestWithMultiplePermissionRequests_emitsCreatedAndValidated_forMultipleDataNeeds() throws DataNeedNotFoundException, UnsupportedDataNeedException, EsValidationException {
+        // Given
+        ArgumentCaptor<EsCreatedEvent> createdCaptor = ArgumentCaptor.forClass(EsCreatedEvent.class);
+        ArgumentCaptor<EsValidatedEvent> validatedCaptor = ArgumentCaptor.forClass(EsValidatedEvent.class);
+        var creationRequest = new PermissionRequestForCreation("cid", Set.of("dnid1", "dnid2"), "00000000T", "mid");
+        var today = LocalDate.now(ZONE_ID_SPAIN);
+        var now = LocalDate.now(ZoneOffset.UTC);
+        var timeframe = new Timeframe(now, now);
+        when(calculationService.calculateAll(Set.of("dnid1", "dnid2")))
+                .thenReturn(new CalculationResult(
+                        Map.of(
+                                "dnid1",
+                                new AccountingPointDataNeedResult(timeframe),
+                                "dnid2",
+                                new ValidatedHistoricalDataDataNeedResult(List.of(Granularity.PT1H),
+                                                                          timeframe,
+                                                                          timeframe)
+                        )
+                ));
+
+        // When
+        service.createAndSendPermissionRequest(creationRequest);
+
+        // Then
+        verify(outbox, times(2)).commit(createdCaptor.capture());
+        verify(outbox, times(2)).commit(validatedCaptor.capture());
+
+        var res = validatedCaptor.getValue();
+        assertAll(
+                () -> assertNotNull(createdCaptor.getValue()),
+                () -> assertEquals(today, res.end()),
+                () -> assertNotNull(res.bundleId())
+        );
+        verify(bundleService).sendBundledAuthorizationRequest(res.bundleId());
+    }
+
+    @Test
+    void createAndSendPermissionRequestWithMultiplePermissionRequests_forMultipleDataNeeds_catchesExceptions() throws DataNeedNotFoundException, UnsupportedDataNeedException, EsValidationException {
+        // Given
+        ArgumentCaptor<EsCreatedEvent> createdCaptor = ArgumentCaptor.forClass(EsCreatedEvent.class);
+        ArgumentCaptor<EsValidatedEvent> validatedCaptor = ArgumentCaptor.forClass(EsValidatedEvent.class);
+        var creationRequest = new PermissionRequestForCreation("cid", Set.of("dnid1", "dnid2"), "00000000T", "mid");
+        var now = LocalDate.now(ZoneOffset.UTC);
+        var timeframe = new Timeframe(now, now);
+        when(calculationService.calculateAll(Set.of("dnid1", "dnid2")))
+                .thenReturn(new CalculationResult(
+                        Map.of(
+                                "dnid1",
+                                new AccountingPointDataNeedResult(timeframe),
+                                "dnid2",
+                                new DataNeedNotFoundResult()
+                        )
+                ));
+
+        // When
+        var res = service.createAndSendPermissionRequest(creationRequest);
+
+        // Then
+        verify(outbox, times(2)).commit(createdCaptor.capture());
+        verify(outbox, times(1)).commit(validatedCaptor.capture());
+        assertEquals(1, res.permissionIds().size());
+    }
+
+    @Test
+    void createAndSendPermissionRequestWithMultiplePermissionRequests_forInvalidMultipleDataNeedsCombination_throws() {
+        // Given
+        var creationRequest = new PermissionRequestForCreation("cid", Set.of("dnid1", "dnid2"), "00000000T", "mid");
+        when(calculationService.calculateAll(Set.of("dnid1", "dnid2")))
+                .thenReturn(new InvalidDataNeedCombination(Set.of("dnid1"), "Invalid"));
+
+        // When & Then
+        assertThrows(UnsupportedDataNeedException.class, () -> service.createAndSendPermissionRequest(creationRequest));
+        verify(outbox, never()).commit(any());
+    }
+
+    @Test
     void createAndSendPermissionRequest_withAiidaDataNeed_throws() {
         // Given
-        var mockCreationRequest = new PermissionRequestForCreation("cid", "dnid", "00000000T", "mid");
+        var mockCreationRequest = new PermissionRequestForCreation("cid", Set.of("dnid"), "00000000T", "mid");
         var timeframe = new Timeframe(LocalDate.now(ZONE_ID_SPAIN), LocalDate.now(ZONE_ID_SPAIN));
         when(calculationService.calculate("dnid")).thenReturn(new AiidaDataNeedResult(Set.of(), Set.of(), timeframe));
 
@@ -211,7 +301,7 @@ class PermissionRequestServiceTest {
     @Test
     void createAndSendPermissionRequest_withUnknownDataNeed_throws() {
         // Given
-        var mockCreationRequest = new PermissionRequestForCreation("cid", "dnid", "00000000T", "mid");
+        var mockCreationRequest = new PermissionRequestForCreation("cid", Set.of("dnid"), "00000000T", "mid");
         when(calculationService.calculate("dnid")).thenReturn(new DataNeedNotFoundResult());
 
         // When, Then
@@ -224,7 +314,7 @@ class PermissionRequestServiceTest {
     @Test
     void createAndSendPermissionRequest_withInvalidNif_throws() {
         // Given
-        var mockCreationRequest = new PermissionRequestForCreation("cid", "dnid", "10000000T", "mid");
+        var mockCreationRequest = new PermissionRequestForCreation("cid", Set.of("dnid"), "10000000T", "mid");
 
         // When, Then
         assertThrows(EsValidationException.class,
@@ -236,7 +326,7 @@ class PermissionRequestServiceTest {
     @Test
     void createAndSendPermissionRequest_withInvalidDataNeed_throws() {
         // Given
-        var mockCreationRequest = new PermissionRequestForCreation("cid", "dnid", "00000000T", "mid");
+        var mockCreationRequest = new PermissionRequestForCreation("cid", Set.of("dnid"), "00000000T", "mid");
         when(calculationService.calculate("dnid"))
                 .thenReturn(new DataNeedNotSupportedResult(""));
         // When, Then
@@ -273,7 +363,7 @@ class PermissionRequestServiceTest {
     @Test
     void testCreatePermissionRequest_emitsMalformedOnCESUJoinRequestDataNeed() {
         // Given
-        var request = new PermissionRequestForCreation("cid", "dnid", "00000000T", "meteringPointId");
+        var request = new PermissionRequestForCreation("cid", Set.of("dnid"), "00000000T", "meteringPointId");
         when(calculationService.calculate("dnid"))
                 .thenReturn(new CESUJoinRequestDataNeedResult(LocalDate.now(ZONE_ID_SPAIN), List.of()));
         // When

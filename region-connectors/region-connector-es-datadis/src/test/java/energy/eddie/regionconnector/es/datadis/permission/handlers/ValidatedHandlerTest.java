@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.es.datadis.permission.handlers;
@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,13 +49,12 @@ class ValidatedHandlerTest {
     private ValidatedHandler validatedHandler;
 
     @Test
-    void testAccept_withUnknownPermissionRequest_doesNothing() {
+    void testAccept_withBundleIdPermissionRequest_doesNothing() {
         // Given
         var now = LocalDate.now(ZoneOffset.UTC);
-        when(repository.findByPermissionId("pid")).thenReturn(Optional.empty());
 
         // When
-        eventBus.emit(new EsValidatedEvent("pid", now, now, AllowedGranularity.PT1H));
+        eventBus.emit(new EsValidatedEvent("pid", now, now, AllowedGranularity.PT1H, UUID.randomUUID()));
 
         // Then
         verifyNoInteractions(outbox);
@@ -73,12 +72,12 @@ class ValidatedHandlerTest {
                 .setStatus(PermissionProcessStatus.VALIDATED)
                 .build();
 
-        when(repository.findByPermissionId("pid")).thenReturn(Optional.of(pr));
+        when(repository.getByPermissionId("pid")).thenReturn(pr);
         when(authorizationApi.postAuthorizationRequest(any()))
                 .thenReturn(Mono.just(AuthorizationRequestResponse.fromResponse("ok")));
 
         // When
-        eventBus.emit(new EsValidatedEvent("pid", now, now, AllowedGranularity.PT1H));
+        eventBus.emit(new EsValidatedEvent("pid", now, now, AllowedGranularity.PT1H, null));
 
         // Then
         verify(outbox).commit(assertArg(event -> assertEquals(PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR,
@@ -97,12 +96,12 @@ class ValidatedHandlerTest {
                 .setStatus(PermissionProcessStatus.VALIDATED)
                 .build();
 
-        when(repository.findByPermissionId("pid")).thenReturn(Optional.of(pr));
+        when(repository.getByPermissionId("pid")).thenReturn(pr);
         when(authorizationApi.postAuthorizationRequest(any()))
                 .thenReturn(Mono.error(new DatadisApiException("error", HttpResponseStatus.BAD_REQUEST, "blb")));
 
         // When
-        eventBus.emit(new EsValidatedEvent("pid", now, now, AllowedGranularity.PT1H));
+        eventBus.emit(new EsValidatedEvent("pid", now, now, AllowedGranularity.PT1H, null));
 
         // Then
         verify(outbox).commit(assertArg(event -> assertEquals(PermissionProcessStatus.UNABLE_TO_SEND, event.status())));
