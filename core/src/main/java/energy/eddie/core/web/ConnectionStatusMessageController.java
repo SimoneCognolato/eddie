@@ -3,7 +3,7 @@
 
 package energy.eddie.core.web;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
 import energy.eddie.core.services.PermissionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +30,7 @@ public class ConnectionStatusMessageController {
     ) {
         var messages = permissionService
                 .getConnectionStatusMessageStream()
-                .filter(message -> permissionId.contains(message.permissionId()));
+                .filter(message -> permissionId.contains(message.getPermissionId()));
 
         return ResponseEntity.ok()
                              // Tell reverse proxies like Nginx not to buffer the response

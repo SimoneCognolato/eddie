@@ -24,10 +24,10 @@ class PermissionRequestForm extends PermissionRequestFormBase {
   constructor() {
     super();
     this.addEventListener("eddie-request-status", (event) => {
-      const {
-        additionalInformation: { shortUrlIdentifier },
-      } = event.detail;
-      this._shortUrlIdentifier = shortUrlIdentifier;
+      const shortUrlIdentifierEntry = event.detail.extension?.find(
+        (kv) => kv.key === "shortUrlIdentifier"
+      );
+      this._shortUrlIdentifier ??= shortUrlIdentifierEntry?.value;
     });
   }
 

@@ -8,6 +8,7 @@ import energy.eddie.api.agnostic.data.needs.DataNeedCalculationService;
 import energy.eddie.api.agnostic.process.model.events.PermissionEventRepository;
 import energy.eddie.api.cim.config.CommonInformationModelConfiguration;
 import energy.eddie.api.v0.RegionConnectorMetadata;
+import energy.eddie.cim.agnostic.KeyValuePair;
 import energy.eddie.dataneeds.needs.DataNeed;
 import energy.eddie.dataneeds.rules.DataNeedRuleSet;
 import energy.eddie.dataneeds.services.DataNeedsService;
@@ -46,6 +47,7 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.EnumFeature;
 
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static energy.eddie.regionconnector.be.fluvius.FluviusRegionConnectorMetadata.REGION_CONNECTOR_ID;
@@ -94,14 +96,15 @@ public class FluviusBeanConfig {
     @Bean
     public ConnectionStatusMessageHandler<FluviusPermissionRequest> connectionStatusMessageHandler(
             EventBus eventBus,
-            BePermissionRequestRepository repository,
-            ObjectMapper jacksonObjectMapper
+            BePermissionRequestRepository repository
     ) {
         return new ConnectionStatusMessageHandler<>(
                 eventBus,
                 repository,
                 pr -> "",
-                pr -> jacksonObjectMapper.createObjectNode().put("shortUrlIdentifier", pr.shortUrlIdentifier())
+                pr -> List.of(
+                        new KeyValuePair().withKey("shortUrlIdentifier")
+                                          .withValue(pr.shortUrlIdentifier()))
         );
     }
 

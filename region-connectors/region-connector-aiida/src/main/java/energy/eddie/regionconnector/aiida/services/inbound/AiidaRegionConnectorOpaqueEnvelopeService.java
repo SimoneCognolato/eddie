@@ -4,8 +4,8 @@
 package energy.eddie.regionconnector.aiida.services.inbound;
 
 import energy.eddie.api.agnostic.aiida.AiidaSchema;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
 import energy.eddie.api.agnostic.opaque.RegionConnectorOpaqueEnvelopeService;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.regionconnector.aiida.services.MqttService;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ public class AiidaRegionConnectorOpaqueEnvelopeService implements RegionConnecto
 
     @Override
     public void opaqueEnvelopeArrived(OpaqueEnvelope opaqueEnvelope) {
-        var permissionId = opaqueEnvelope.permissionId();
+        var permissionId = opaqueEnvelope.getPermissionId();
 
         LOGGER.info("Received opaque message with permissionId '{}'", permissionId);
 

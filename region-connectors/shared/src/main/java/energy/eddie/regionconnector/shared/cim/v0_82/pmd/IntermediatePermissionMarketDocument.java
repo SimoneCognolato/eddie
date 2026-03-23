@@ -94,7 +94,7 @@ public class IntermediatePermissionMarketDocument<T extends PermissionRequest> {
         EsmpDateTime now = EsmpDateTime.now(clock);
         EsmpDateTime created = new EsmpDateTime(permissionRequest.created());
         EsmpTimeInterval interval = new EsmpTimeInterval(permissionRequest.start(), permissionRequest.end(), zoneId);
-        var codingScheme = CimUtils.getCodingSchemePmd(permissionRequest.dataSourceInformation().countryCode());
+        var codingScheme = CimUtils.getCodingSchemePmd(permissionRequest.dataSourceInformation().getCountryCode());
 
         var pmd = new PermissionMarketDocumentComplexType()
                 .withMRID(permissionRequest.permissionId())
@@ -113,7 +113,7 @@ public class IntermediatePermissionMarketDocument<T extends PermissionRequest> {
                 .withReceiverMarketParticipantMRID(
                         new PartyIDStringComplexType()
                                 .withCodingScheme(codingScheme)
-                                .withValue(permissionRequest.dataSourceInformation().permissionAdministratorId())
+                                .withValue(permissionRequest.dataSourceInformation().getPermissionAdministratorId())
                 )
                 .withPeriodTimeInterval(
                         new ESMPDateTimeIntervalComplexType()
@@ -143,7 +143,7 @@ public class IntermediatePermissionMarketDocument<T extends PermissionRequest> {
                                                                                 .withCreatedDateTime(now.toString())
                                                                                 .withDescription(status.toString())
                                                                                 .withType(permissionRequest.dataSourceInformation()
-                                                                                                           .regionConnectorId())
+                                                                                                           .getRegionConnectorId())
                                                                                 .withStatus(getStatusTypeList())
                                                                 )
                                                 )

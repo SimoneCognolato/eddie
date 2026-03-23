@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 import net.ltgt.gradle.errorprone.CheckSeverity
@@ -27,6 +27,8 @@ dependencies {
     implementation(libs.reactor.core)
 
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.mockito)
+    testImplementation(libs.assertj.core)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

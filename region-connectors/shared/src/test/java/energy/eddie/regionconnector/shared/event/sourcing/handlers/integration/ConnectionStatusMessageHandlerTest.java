@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.event.sourcing.handlers.integration;
@@ -7,6 +7,8 @@ package energy.eddie.regionconnector.shared.event.sourcing.handlers.integration;
 import energy.eddie.api.agnostic.process.model.PermissionRequest;
 import energy.eddie.api.agnostic.process.model.persistence.PermissionRequestRepository;
 import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.KeyValuePair;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBus;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBusImpl;
 import energy.eddie.regionconnector.shared.permission.requests.SimplePermissionRequest;
@@ -15,8 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.test.StepVerifier;
-import tools.jackson.databind.node.JsonNodeFactory;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -45,11 +47,11 @@ class ConnectionStatusMessageHandlerTest {
         StepVerifier.create(handler.getConnectionStatusMessageStream())
                     .then(handler::close)
                     .assertNext(csm -> assertAll(
-                            () -> assertEquals(permissionRequest.connectionId(), csm.connectionId()),
-                            () -> assertEquals(permissionRequest.permissionId(), csm.permissionId()),
-                            () -> assertEquals(permissionRequest.dataNeedId(), csm.dataNeedId()),
-                            () -> assertEquals(PermissionProcessStatus.VALIDATED, csm.status()),
-                            () -> assertEquals("", csm.message())
+                            () -> assertEquals(permissionRequest.connectionId(), csm.getConnectionId()),
+                            () -> assertEquals(permissionRequest.permissionId(), csm.getPermissionId()),
+                            () -> assertEquals(permissionRequest.dataNeedId(), csm.getDataNeedId()),
+                            () -> assertEquals(Status.VALIDATED, csm.getStatus()),
+                            () -> assertEquals("", csm.getMessage())
                     ))
                     .verifyComplete();
     }
@@ -86,16 +88,17 @@ class ConnectionStatusMessageHandlerTest {
     }
 
     @Test
-    void testAccept_emitsAdditionalInformation() {
+    void testAccept_emitsExtension() {
         // Given
         var permissionRequest = new SimplePermissionRequest("pid", "cid", "dnid", PermissionProcessStatus.VALIDATED);
         when(repository.findByPermissionId("pid")).thenReturn(Optional.of(permissionRequest));
         EventBus eventBus = new EventBusImpl();
+        var keyValuePair = new KeyValuePair().withKey("key")
+                                             .withValue("value");
         var handler = new ConnectionStatusMessageHandler<>(eventBus,
                                                            repository,
                                                            pr -> "",
-                                                           pr -> JsonNodeFactory.instance.objectNode()
-                                                                                         .put("key", "value"));
+                                                           pr -> List.of(keyValuePair));
 
         // When
         eventBus.emit(new SimpleEvent("pid", PermissionProcessStatus.VALIDATED));
@@ -103,10 +106,9 @@ class ConnectionStatusMessageHandlerTest {
         // Then
         StepVerifier.create(handler.getConnectionStatusMessageStream())
                     .then(handler::close)
-                    .assertNext(csm -> assertEquals("value",
-                                                    Objects.requireNonNull(csm.additionalInformation())
-                                                           .get("key")
-                                                           .asString()))
+                    .assertNext(csm -> assertEquals(keyValuePair,
+                                                    Objects.requireNonNull(csm.getExtensions())
+                                                           .getFirst()))
                     .verifyComplete();
     }
 }

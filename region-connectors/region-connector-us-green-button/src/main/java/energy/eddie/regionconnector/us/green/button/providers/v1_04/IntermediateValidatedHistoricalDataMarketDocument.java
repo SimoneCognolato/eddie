@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.us.green.button.providers.v1_04;
@@ -100,7 +100,7 @@ class IntermediateValidatedHistoricalDataMarketDocument {
         var flowDirection = getDirection(readingType.getFlowDirection());
         var scale = ReadingTypeValueConverter.v104UnitOfMeasureTypeList(readingType).scale();
         var seriesPeriods = getSeriesPeriods(readingType, intervalBlock, scale);
-        var permissionAdmin = permissionRequest.dataSourceInformation().permissionAdministratorId();
+        var permissionAdmin = permissionRequest.dataSourceInformation().getPermissionAdministratorId();
         var clientId = greenButtonConfiguration.clientIds().getOrDefault(permissionAdmin, "");
         var meterUid = Query.intervalBlockSelfToUsagePointId(optionalIntervalBlockVal);
 

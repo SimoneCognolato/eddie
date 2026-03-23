@@ -3,9 +3,9 @@
 
 package energy.eddie.core.services.agnostic;
 
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
 import energy.eddie.api.agnostic.opaque.RegionConnectorOpaqueEnvelopeService;
 import energy.eddie.api.agnostic.outbound.OpaqueEnvelopeOutboundConnector;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public class OpaqueEnvelopeRouter implements AutoCloseable {
     }
 
     private void route(OpaqueEnvelope opaqueEnvelope) {
-        var regionConnectorId = opaqueEnvelope.regionConnectorId();
+        var regionConnectorId = opaqueEnvelope.getRegionConnectorId();
         LOGGER.info("Will route OpaqueEnvelope for region connector ID {}", regionConnectorId);
 
         if (!routeIfServicePresent(regionConnectorId, opaqueEnvelope)) {

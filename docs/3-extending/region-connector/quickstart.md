@@ -425,29 +425,15 @@ This is often just a simple POJO with static attributes, since a lot of times th
 ```java
 package energy.eddie.regionconnector.foo.bar.permission.request;
 
-import energy.eddie.api.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.DataSourceInformation;
 import energy.eddie.regionconnector.foo.bar.FooBarRegionConnectorMetadata;
 
-public class FooBarDataSourceInformation implements DataSourceInformation {
-
-  @Override
-  public String countryCode() {
-    return "Foo";
-  }
-
-  @Override
-  public String regionConnectorId() {
-    return FooBarRegionConnectorMetadata.REGION_CONNECTOR_ID;
-  }
-
-  @Override
-  public String meteredDataAdministratorId() {
-    return "foo-bar";
-  }
-
-  @Override
-  public String permissionAdministratorId() {
-    return "foo-bar";
+public class FooBarDataSourceInformation extends DataSourceInformation {
+  public FooBarDataSourceInformation(    ) {
+    this.countryCode = "Foo";
+    this.regionConnectorId = FooBarRegionConnectorMetadata.REGION_CONNECTOR_ID;
+    this.meteredDataAdministratorId = "foo-bar";
+    this.permissionAdministratorId = "foo-bar";
   }
 }
 ```
@@ -1235,7 +1221,7 @@ public class FooBarRawDataProvider implements RawDataProvider {
 
   private RawDataMessage toRawDataMessage(IdentifiableValidatedHistoricalData identifiableData) {
     String rawString = // TODO: serialize identifiableData.payload() to a String
-    return new RawDataMessage(identifiableData.permissionRequest(), rawString);
+    return RawDataMessageFactory.create(identifiableData.permissionRequest(), rawString);
   }
 }
 ```

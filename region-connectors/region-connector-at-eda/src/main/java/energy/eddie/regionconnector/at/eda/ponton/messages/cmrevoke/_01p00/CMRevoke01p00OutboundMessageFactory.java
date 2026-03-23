@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda.ponton.messages.cmrevoke._01p00;
@@ -35,7 +35,7 @@ public class CMRevoke01p00OutboundMessageFactory implements CMRevokeOutboundMess
         String senderId = ccmoRevoke.eligiblePartyId();
         String receiverId = ccmoRevoke.permissionRequest()
                                       .dataSourceInformation()
-                                      .meteredDataAdministratorId();
+                                      .getMeteredDataAdministratorId();
 
         OutboundMetaData outboundMetaData = OutboundMetaData.newBuilder()
                                                             .setSenderId(new SenderId(senderId))

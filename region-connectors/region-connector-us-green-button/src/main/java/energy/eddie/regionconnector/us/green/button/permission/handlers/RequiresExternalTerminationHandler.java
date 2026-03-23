@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.us.green.button.permission.handlers;
@@ -40,7 +40,7 @@ public class RequiresExternalTerminationHandler implements EventHandler<Permissi
     public void accept(PermissionEvent permissionEvent) {
         var permissionId = permissionEvent.permissionId();
         var pr = repository.getByPermissionId(permissionId);
-        api.revoke(pr.authorizationUid(), pr.dataSourceInformation().meteredDataAdministratorId())
+        api.revoke(pr.authorizationUid(), pr.dataSourceInformation().getMeteredDataAdministratorId())
            .subscribe(res -> outbox.commit(new UsSimpleEvent(permissionId,
                                                              PermissionProcessStatus.EXTERNALLY_TERMINATED)),
                       err -> handleError(err, permissionId));

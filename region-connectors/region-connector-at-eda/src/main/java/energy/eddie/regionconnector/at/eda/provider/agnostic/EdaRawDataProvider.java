@@ -3,8 +3,9 @@
 
 package energy.eddie.regionconnector.at.eda.provider.agnostic;
 
-import energy.eddie.api.agnostic.RawDataMessage;
+import energy.eddie.api.agnostic.RawDataMessageFactory;
 import energy.eddie.api.agnostic.RawDataProvider;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.regionconnector.at.eda.dto.IdentifiableConsumptionRecord;
 import energy.eddie.regionconnector.at.eda.dto.IdentifiableECMPList;
 import energy.eddie.regionconnector.at.eda.dto.IdentifiableMasterData;
@@ -76,7 +77,7 @@ public class EdaRawDataProvider implements RawDataProvider {
         }
         String rawXml = writer.toString();
         return Flux.fromIterable(identifiableConsumptionRecord.permissionRequests())
-                   .map(permissionRequest -> new RawDataMessage(permissionRequest, rawXml));
+                   .map(permissionRequest -> RawDataMessageFactory.create(permissionRequest, rawXml));
     }
 
     private Mono<RawDataMessage> mapToRawDataMessage(IdentifiableMasterData identifiableMasterData) {
@@ -89,7 +90,7 @@ public class EdaRawDataProvider implements RawDataProvider {
         }
         String rawXml = writer.toString();
         var permissionRequest = identifiableMasterData.permissionRequest();
-        var msg = new RawDataMessage(permissionRequest, rawXml);
+        var msg = RawDataMessageFactory.create(permissionRequest, rawXml);
         return Mono.just(msg);
     }
 
@@ -102,7 +103,7 @@ public class EdaRawDataProvider implements RawDataProvider {
             return Mono.empty();
         }
         String rawXml = writer.toString();
-        var msg = new RawDataMessage(ecmpList.permissionRequest(), rawXml);
+        var msg = RawDataMessageFactory.create(ecmpList.permissionRequest(), rawXml);
         return Mono.just(msg);
     }
 }

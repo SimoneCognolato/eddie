@@ -1,12 +1,15 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.api.v0;
 
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.cim.v0_82.pmd.StatusTypeList;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class PermissionProcessStatusTest {
@@ -18,5 +21,27 @@ class PermissionProcessStatusTest {
         // When
         // Then
         assertNotNull(StatusTypeList.fromValue(status.name()));
+    }
+
+    @ParameterizedTest
+    @EnumSource(PermissionProcessStatus.class)
+    void permissionProcessStatus_hasSameConstantsAsAgnosticStatus(PermissionProcessStatus status) {
+        // Given
+        // When
+        // Then
+        assertNotNull(Status.valueOf(status.name()));
+    }
+
+    @Test
+    void toAgnosticDto_returnsExpectedStatus() {
+        // Given
+        var status = PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR;
+
+        // When
+        var agnosticStatus = status.toAgnosticDto();
+
+        // Then
+        assertNotNull(agnosticStatus);
+        assertEquals(Status.SENT_TO_PERMISSION_ADMINISTRATOR, agnosticStatus);
     }
 }

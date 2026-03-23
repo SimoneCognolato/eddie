@@ -44,10 +44,11 @@ class PermissionRequestForm extends PermissionRequestFormBase {
     super.connectedCallback();
     this._dataNeedIds = this.dataNeedId.split(",");
     this.addEventListener("eddie-request-status", (event) => {
-      const {
-        additionalInformation: { cmRequestId },
-        status,
-      } = event.detail;
+      const cmRequestIdEntry = event.detail.extension?.find(
+        (kv) => kv.key === "cmRequestId"
+      );
+      const cmRequestId = cmRequestIdEntry?.value;
+      const status = event.detail.status;
 
       if (status === "CREATED") {
         this._createdCount += 1;

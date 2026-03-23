@@ -1,33 +1,20 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.fr.enedis.permission.request;
 
-import energy.eddie.api.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.DataSourceInformation;
 import energy.eddie.regionconnector.fr.enedis.EnedisRegionConnectorMetadata;
 
-public class EnedisDataSourceInformation implements DataSourceInformation {
+public class EnedisDataSourceInformation extends DataSourceInformation {
     private static final EnedisRegionConnectorMetadata regionConnectorMetadata = EnedisRegionConnectorMetadata.getInstance();
 
     private static final String ENEDIS = "Enedis";
 
-    @Override
-    public String countryCode() {
-        return regionConnectorMetadata.countryCode();
-    }
-
-    @Override
-    public String regionConnectorId() {
-        return regionConnectorMetadata.id();
-    }
-
-    @Override
-    public String meteredDataAdministratorId() {
-        return ENEDIS;
-    }
-
-    @Override
-    public String permissionAdministratorId() {
-        return ENEDIS;
+    public EnedisDataSourceInformation() {
+        this.countryCode = regionConnectorMetadata.countryCode();
+        this.regionConnectorId = regionConnectorMetadata.id();
+        this.permissionAdministratorId = ENEDIS;
+        this.meteredDataAdministratorId = ENEDIS;
     }
 }

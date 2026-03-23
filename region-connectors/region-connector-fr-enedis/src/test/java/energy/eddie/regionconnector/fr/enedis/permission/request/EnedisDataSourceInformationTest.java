@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.fr.enedis.permission.request;
@@ -13,7 +13,7 @@ class EnedisDataSourceInformationTest {
     void countryCode() {
         var enedisdataSourceInformation = new EnedisDataSourceInformation();
 
-        var countryCode = enedisdataSourceInformation.countryCode();
+        var countryCode = enedisdataSourceInformation.getCountryCode();
 
         assertEquals("FR", countryCode);
     }
@@ -22,7 +22,7 @@ class EnedisDataSourceInformationTest {
     void permissionAdministratorId() {
         var enedisdataSourceInformation = new EnedisDataSourceInformation();
 
-        var permissionAdministratorId = enedisdataSourceInformation.permissionAdministratorId();
+        var permissionAdministratorId = enedisdataSourceInformation.getPermissionAdministratorId();
 
         assertEquals("Enedis", permissionAdministratorId);
     }
@@ -31,7 +31,7 @@ class EnedisDataSourceInformationTest {
     void meteredDataAdministratorId() {
         var enedisdataSourceInformation = new EnedisDataSourceInformation();
 
-        var meteredDataAdministratorId = enedisdataSourceInformation.meteredDataAdministratorId();
+        var meteredDataAdministratorId = enedisdataSourceInformation.getMeteredDataAdministratorId();
 
         assertEquals("Enedis", meteredDataAdministratorId);
     }
@@ -40,7 +40,7 @@ class EnedisDataSourceInformationTest {
     void regionConnectorId() {
         var enedisdataSourceInformation = new EnedisDataSourceInformation();
 
-        var regionConnectorId = enedisdataSourceInformation.regionConnectorId();
+        var regionConnectorId = enedisdataSourceInformation.getRegionConnectorId();
 
         assertEquals("fr-enedis", regionConnectorId);
     }

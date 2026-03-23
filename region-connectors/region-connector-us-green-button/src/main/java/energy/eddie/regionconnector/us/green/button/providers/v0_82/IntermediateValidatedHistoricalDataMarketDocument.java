@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.us.green.button.providers.v0_82;
@@ -59,7 +59,7 @@ class IntermediateValidatedHistoricalDataMarketDocument {
         LOGGER.info("Mapping validated historical data of permission request {} to CIM", permissionId);
         var query = new Query(syndFeed, unmarshaller);
         var now = EsmpDateTime.now();
-        var permissionAdmin = permissionRequest.dataSourceInformation().permissionAdministratorId();
+        var permissionAdmin = permissionRequest.dataSourceInformation().getPermissionAdministratorId();
         var clientId = greenButtonConfiguration.clientIds().getOrDefault(permissionAdmin, "");
         var readings = query.findAllByTitle("ReadingType");
         var vhds = new ArrayList<ValidatedHistoricalDataEnvelope>(readings.size());

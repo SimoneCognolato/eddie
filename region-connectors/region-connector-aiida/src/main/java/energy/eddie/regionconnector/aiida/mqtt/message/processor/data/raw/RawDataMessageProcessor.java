@@ -3,9 +3,10 @@
 
 package energy.eddie.regionconnector.aiida.mqtt.message.processor.data.raw;
 
-import energy.eddie.api.agnostic.RawDataMessage;
+import energy.eddie.api.agnostic.RawDataMessageFactory;
 import energy.eddie.api.agnostic.aiida.AiidaRecordDto;
 import energy.eddie.api.agnostic.aiida.AiidaSchema;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.regionconnector.aiida.exceptions.PermissionInvalidException;
 import energy.eddie.regionconnector.aiida.mqtt.message.processor.BaseMessageProcessor;
 import energy.eddie.regionconnector.aiida.mqtt.topic.MqttTopicType;
@@ -40,7 +41,7 @@ public class RawDataMessageProcessor extends BaseMessageProcessor {
         var permissionId = aiidaRecordDto.permissionId().toString();
         var permissionRequest = getAndValidatePermissionRequest(permissionId);
 
-        var rawDataMessage = new RawDataMessage(
+        var rawDataMessage = RawDataMessageFactory.create(
                 permissionRequest,
                 new String(message.getPayload(), StandardCharsets.UTF_8)
         );

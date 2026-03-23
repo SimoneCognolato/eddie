@@ -8,6 +8,7 @@ import energy.eddie.api.agnostic.data.needs.DataNeedCalculationService;
 import energy.eddie.api.agnostic.process.model.PermissionRequest;
 import energy.eddie.api.agnostic.process.model.events.PermissionEventRepository;
 import energy.eddie.api.cim.config.CommonInformationModelConfiguration;
+import energy.eddie.cim.agnostic.KeyValuePair;
 import energy.eddie.dataneeds.needs.DataNeed;
 import energy.eddie.dataneeds.rules.DataNeedRuleSet;
 import energy.eddie.dataneeds.services.DataNeedsService;
@@ -44,9 +45,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.reactive.function.client.WebClient;
-import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static energy.eddie.regionconnector.at.eda.EdaRegionConnectorMetadata.AT_ZONE_ID;
@@ -125,14 +126,15 @@ public class AtEdaBeanConfig {
     @Bean
     public ConnectionStatusMessageHandler<AtPermissionRequest> connectionStatusMessageHandler(
             EventBus eventBus,
-            AtPermissionRequestRepository repository,
-            ObjectMapper objectMapper
+            AtPermissionRequestRepository repository
     ) {
         return new ConnectionStatusMessageHandler<>(
                 eventBus,
                 repository,
                 AtPermissionRequest::message,
-                pr -> objectMapper.createObjectNode().put("cmRequestId", pr.cmRequestId())
+                pr -> List.of(
+                        new KeyValuePair().withKey("cmRequestId")
+                                          .withValue(pr.cmRequestId()))
         );
     }
 

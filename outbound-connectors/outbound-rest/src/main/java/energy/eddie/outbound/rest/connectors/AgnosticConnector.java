@@ -3,12 +3,12 @@
 
 package energy.eddie.outbound.rest.connectors;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.RawDataMessage;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
 import energy.eddie.api.agnostic.outbound.ConnectionStatusMessageOutboundConnector;
 import energy.eddie.api.agnostic.outbound.OpaqueEnvelopeOutboundConnector;
 import energy.eddie.api.agnostic.outbound.RawDataOutboundConnector;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

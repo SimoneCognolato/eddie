@@ -1,15 +1,15 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.outbound.rest.web;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.cim.testing.XmlValidator;
 import energy.eddie.cim.v0_82.vhd.ValidatedHistoricalDataEnvelope;
 import energy.eddie.cim.v0_82.vhd.ValidatedHistoricalDataMarketDocumentComplexType;
 import energy.eddie.outbound.rest.RestOutboundBeanConfig;
-import energy.eddie.outbound.rest.TestDataSourceInformation;
 import energy.eddie.outbound.rest.dto.ConnectionStatusMessages;
 import energy.eddie.outbound.rest.dto.ValidatedHistoricalDataMarketDocuments;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -108,7 +108,7 @@ class FallbackXmlMessageConverterTest {
                         <timestamp>2025-07-23T06:09:19.066591086Z</timestamp>
                         <status>CREATED</status>
                         <message></message>
-                        <additionalInformation/>
+                        <extension/>
                     </ConnectionStatusMessage>
                 </ConnectionStatusMessages>
                 """;
@@ -139,14 +139,17 @@ class FallbackXmlMessageConverterTest {
     @Test
     void write_connectionStatusMessage_doesNotThrow() {
         // Given
+        var dataSourceInformation = new DataSourceInformation().withCountryCode("AT")
+                                                               .withRegionConnectorId("at-eda")
+                                                               .withPermissionAdministratorId("eda")
+                                                               .withMeteredDataAdministratorId("eda");
+
         var csm = new ConnectionStatusMessages(List.of(
-                new ConnectionStatusMessage(
-                        "cid",
-                        "pid",
-                        "dnid",
-                        new TestDataSourceInformation("AT", "at-eda", "eda", "eda"),
-                        PermissionProcessStatus.CREATED
-                )
+                new ConnectionStatusMessage().withConnectionId("cid")
+                                             .withPermissionId("pid")
+                                             .withDataNeedId("dnid")
+                                             .withDataSourceInformation(dataSourceInformation)
+                                             .withStatus(Status.CREATED)
         ));
         var msg = new MockHttpOutputMessage();
 

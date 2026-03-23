@@ -40,7 +40,7 @@ public record CCMORequest(
     ) {
         this(
                 new DsoIdAndMeteringPoint(
-                        permissionRequest.dataSourceInformation().permissionAdministratorId(),
+                        permissionRequest.dataSourceInformation().getPermissionAdministratorId(),
                         permissionRequest.meteringPointId().orElse(null)
                 ),
                 new CCMOTimeFrame(permissionRequest.start(), permissionRequest.end()),

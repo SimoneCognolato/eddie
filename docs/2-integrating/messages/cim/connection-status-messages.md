@@ -14,7 +14,7 @@ classDiagram
         +String timestamp
         +String status
         +String? message
-        +Object? additionalInformation
+        +List~KeyValuePair~ extension
     }
 
     class DataSourceInformation {
@@ -24,6 +24,12 @@ classDiagram
         +String regionConnectorId
     }
 
+    class KeyValuePair {
+        +String key
+        +String value
+    }
+    
     ConnectionStatusMessage "1" --> "1" DataSourceInformation: contains
+    ConnectionStatusMessage "1" --> "0..*" KeyValuePair: contains
 ```
 

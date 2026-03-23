@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.es.datadis.permission.request;
@@ -18,7 +18,7 @@ class DatadisDataSourceInformationTest {
     void countryCode() {
         var datadisdataSourceInformation = new DatadisDataSourceInformation(mock(EsPermissionRequest.class));
 
-        var countryCode = datadisdataSourceInformation.countryCode();
+        var countryCode = datadisdataSourceInformation.getCountryCode();
 
         assertEquals("ES", countryCode);
     }
@@ -27,7 +27,7 @@ class DatadisDataSourceInformationTest {
     void permissionAdministratorId() {
         var datadisdataSourceInformation = new DatadisDataSourceInformation(mock(EsPermissionRequest.class));
 
-        var permissionAdministratorId = datadisdataSourceInformation.permissionAdministratorId();
+        var permissionAdministratorId = datadisdataSourceInformation.getPermissionAdministratorId();
 
         assertEquals("Datadis", permissionAdministratorId);
     }
@@ -38,7 +38,7 @@ class DatadisDataSourceInformationTest {
         when(permissionRequest.distributorCode()).thenReturn(Optional.of(DistributorCode.VIESGO));
         var datadisdataSourceInformation = new DatadisDataSourceInformation(permissionRequest);
 
-        var meteredDataAdministratorId = datadisdataSourceInformation.meteredDataAdministratorId();
+        var meteredDataAdministratorId = datadisdataSourceInformation.getMeteredDataAdministratorId();
 
         assertEquals(DistributorCode.VIESGO.toString(), meteredDataAdministratorId);
     }
@@ -47,7 +47,7 @@ class DatadisDataSourceInformationTest {
     void regionConnectorId() {
         var datadisdataSourceInformation = new DatadisDataSourceInformation(mock(EsPermissionRequest.class));
 
-        var regionConnectorId = datadisdataSourceInformation.regionConnectorId();
+        var regionConnectorId = datadisdataSourceInformation.getRegionConnectorId();
 
         assertEquals("es-datadis", regionConnectorId);
     }

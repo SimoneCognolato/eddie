@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda.ponton.messages.cmrevoke._01p10;
@@ -34,7 +34,7 @@ public class CMRevoke01p10OutboundMessageFactory implements CMRevokeOutboundMess
         var senderId = ccmoRevoke.eligiblePartyId();
         var receiverId = ccmoRevoke.permissionRequest()
                                    .dataSourceInformation()
-                                   .meteredDataAdministratorId();
+                                   .getMeteredDataAdministratorId();
 
         var outboundMetaData = OutboundMetaData.newBuilder()
                                                .setSenderId(new SenderId(senderId))

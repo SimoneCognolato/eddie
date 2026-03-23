@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.eda.ponton.messages.cmrevoke._01p00;
@@ -27,7 +27,7 @@ public record CMRevoke01p00(
         var eligiblePartyId = ccmoRevoke.eligiblePartyId();
         var permissionRequest = ccmoRevoke.permissionRequest();
         String receiver = permissionRequest.dataSourceInformation()
-                                           .permissionAdministratorId();
+                                           .getPermissionAdministratorId();
         return new CMRevoke()
                 .withMarketParticipantDirectory(
                         new MarketParticipantDirectory()

@@ -3,9 +3,9 @@
 
 package energy.eddie.regionconnector.at.eda;
 
-import energy.eddie.api.agnostic.DataSourceInformation;
 import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.DataSourceInformation;
 import energy.eddie.regionconnector.at.api.AtPermissionRequest;
 import energy.eddie.regionconnector.at.eda.permission.request.EdaDataSourceInformation;
 import energy.eddie.regionconnector.at.eda.requests.restricted.enums.AllowedGranularity;

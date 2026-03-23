@@ -3,9 +3,9 @@
 
 package energy.eddie.outbound.rest.web;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.RawDataMessage;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.outbound.rest.connectors.AgnosticConnector;
 import energy.eddie.outbound.rest.dto.ConnectionStatusMessages;
 import energy.eddie.outbound.rest.dto.RawDataMessages;
@@ -81,7 +81,7 @@ public class AgnosticController {
                                                 "timestamp": "2025-07-23T10:31:30.225890564Z",
                                                 "status": "FULFILLED",
                                                 "message": "Permission request is fulfilled",
-                                                "additionalInformation": null
+                                                "extension": null
                                               }
                                             """
                             )
@@ -122,7 +122,7 @@ public class AgnosticController {
                                                         "timestamp": "2025-07-23T10:31:30.225890564Z",
                                                         "status": "FULFILLED",
                                                         "message": "Permission request is fulfilled",
-                                                        "additionalInformation": null
+                                                        "extension": null
                                                       }]
                                                     """
                                     )
@@ -147,7 +147,7 @@ public class AgnosticController {
                                                                 <timestamp>2025-07-23T10:31:30.225890564Z</timestamp>
                                                                 <status>FULFILLED</status>
                                                                 <message>Permission request is fulfilled</message>
-                                                                <additionalInformation/>
+                                                                <extension/>
                                                             </ConnectionStatusMessage>
                                                         </ConnectionStatusMessages>
                                                     """

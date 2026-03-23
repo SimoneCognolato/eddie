@@ -101,7 +101,7 @@ class SendingEventHandlerTest {
                 () -> assertEquals(permissionRequest.conversationId(), ccmoRequest.messageId()),
                 () -> assertEquals(permissionRequest.start(), ccmoRequest.start()),
                 () -> assertTrue(ccmoRequest.end().isEmpty()),
-                () -> assertEquals(permissionRequest.dataSourceInformation().permissionAdministratorId(),
+                () -> assertEquals(permissionRequest.dataSourceInformation().getPermissionAdministratorId(),
                                    ccmoRequest.dsoIdAndMeteringPoint().dsoId()
                 ),
                 () -> assertTrue(ccmoRequest.dsoIdAndMeteringPoint().meteringPoint().isEmpty())

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.dk.energinet.permission.request;
@@ -13,7 +13,7 @@ class EnerginetDataSourceInformationTest {
     void countryCode() {
         var energinetdataSourceInformation = new EnerginetDataSourceInformation();
 
-        var countryCode = energinetdataSourceInformation.countryCode();
+        var countryCode = energinetdataSourceInformation.getCountryCode();
 
         assertEquals("DK", countryCode);
     }
@@ -22,7 +22,7 @@ class EnerginetDataSourceInformationTest {
     void regionConnectorId() {
         var energinetdataSourceInformation = new EnerginetDataSourceInformation();
 
-        var regionConnectorId = energinetdataSourceInformation.regionConnectorId();
+        var regionConnectorId = energinetdataSourceInformation.getRegionConnectorId();
 
         assertEquals("dk-energinet", regionConnectorId);
     }
@@ -31,7 +31,7 @@ class EnerginetDataSourceInformationTest {
     void permissionAdministratorId() {
         var energinetdataSourceInformation = new EnerginetDataSourceInformation();
 
-        var permissionAdministratorId = energinetdataSourceInformation.permissionAdministratorId();
+        var permissionAdministratorId = energinetdataSourceInformation.getPermissionAdministratorId();
 
         assertEquals("Energinet", permissionAdministratorId);
     }
@@ -40,7 +40,7 @@ class EnerginetDataSourceInformationTest {
     void meteredDataAdministratorId() {
         var energinetdataSourceInformation = new EnerginetDataSourceInformation();
 
-        var meteredDataAdministratorId = energinetdataSourceInformation.meteredDataAdministratorId();
+        var meteredDataAdministratorId = energinetdataSourceInformation.getMeteredDataAdministratorId();
 
         assertEquals("Energinet", meteredDataAdministratorId);
     }

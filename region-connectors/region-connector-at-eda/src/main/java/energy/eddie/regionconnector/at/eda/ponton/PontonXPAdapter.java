@@ -139,7 +139,7 @@ public class PontonXPAdapter implements EdaAdapter {
     public void sendCMRevoke(CCMORevoke revoke) throws TransmissionException {
         try {
             LOGGER.atInfo()
-                  .addArgument(() -> revoke.permissionRequest().dataSourceInformation().permissionAdministratorId())
+                  .addArgument(() -> revoke.permissionRequest().dataSourceInformation().getPermissionAdministratorId())
                   .addArgument(() -> revoke.permissionRequest().consentId())
                   .log("Sending CMRevoke to DSO '{}' with ConsentId '{}'");
             pontonMessengerConnection.sendCMRevoke(revoke);

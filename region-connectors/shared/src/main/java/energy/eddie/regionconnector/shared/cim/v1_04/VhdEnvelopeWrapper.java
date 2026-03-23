@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.cim.v1_04;
@@ -27,11 +27,12 @@ public class VhdEnvelopeWrapper {
                 .withMarketDocument(vhdMarketDocument)
                 .withMessageDocumentHeaderCreationDateTime(ZonedDateTime.now(ZoneOffset.UTC))
                 .withMessageDocumentHeaderMetaInformationDocumentType(DocumentType.VALIDATED_HISTORICAL_DATA_MARKET_DOCUMENT.description())
-                .withMessageDocumentHeaderMetaInformationRegionConnector(permissionRequest.dataSourceInformation().regionConnectorId())
+                .withMessageDocumentHeaderMetaInformationRegionConnector(permissionRequest.dataSourceInformation()
+                                                                                          .getRegionConnectorId())
                 .withMessageDocumentHeaderMetaInformationDataNeedId(permissionRequest.dataNeedId())
                 .withMessageDocumentHeaderMetaInformationConnectionId(permissionRequest.connectionId())
                 .withMessageDocumentHeaderMetaInformationPermissionId(permissionRequest.permissionId())
                 .withMessageDocumentHeaderMetaInformationRegionCountry(getCodingSchemeVhdV104(permissionRequest.dataSourceInformation()
-                                                                                                               .countryCode()));
+                                                                                                               .getCountryCode()));
     }
 }

@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.outbound.rest.persistence;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.outbound.rest.RestTestConfig;
-import energy.eddie.outbound.rest.TestDataSourceInformation;
 import energy.eddie.outbound.rest.model.ConnectionStatusMessageModel;
 import energy.eddie.outbound.rest.persistence.specifications.InsertionTimeSpecification;
 import energy.eddie.outbound.rest.persistence.specifications.JsonPathSpecification;
@@ -44,30 +44,25 @@ class ConnectionStatusMessageRepositoryTest {
     void specificationForJsonPath_returnsCorrectConnectionStatusMessage() {
         // Given
         var spec = new JsonPathSpecification<ConnectionStatusMessageModel>("permissionId", "pid");
-        var payload = new ConnectionStatusMessage(
-                "cid",
-                "pid",
-                "dnid",
-                new TestDataSourceInformation(
-                        "at",
-                        "at-eda",
-                        "eda",
-                        "eda"
-                ),
-                PermissionProcessStatus.ACCEPTED
-        );
-        var otherPayload = new ConnectionStatusMessage(
-                "cid",
-                "other-pid",
-                "dnid",
-                new TestDataSourceInformation(
-                        "at",
-                        "at-eda",
-                        "eda",
-                        "eda"
-                ),
-                PermissionProcessStatus.ACCEPTED
-        );
+        var dataSourceInformation = new DataSourceInformation().withCountryCode("at")
+                                                               .withRegionConnectorId("at-eda")
+                                                               .withPermissionAdministratorId("eda")
+                                                               .withMeteredDataAdministratorId("eda");
+        var payload = new ConnectionStatusMessage().withConnectionId("cid")
+                                                   .withPermissionId("pid")
+                                                   .withDataNeedId("dnid")
+                                                   .withDataSourceInformation(dataSourceInformation)
+                                                   .withStatus(Status.ACCEPTED);
+
+        var otherDataSourceInformation = new DataSourceInformation().withCountryCode("at")
+                                                                    .withRegionConnectorId("at-eda")
+                                                                    .withPermissionAdministratorId("eda")
+                                                                    .withMeteredDataAdministratorId("eda");
+        var otherPayload = new ConnectionStatusMessage().withConnectionId("cid")
+                                                        .withPermissionId("other-pid")
+                                                        .withDataNeedId("dnid")
+                                                        .withDataSourceInformation(otherDataSourceInformation)
+                                                        .withStatus(Status.ACCEPTED);
         var csm = connectionStatusMessageRepository.save(new ConnectionStatusMessageModel(payload));
         connectionStatusMessageRepository.save(new ConnectionStatusMessageModel(otherPayload));
 
@@ -85,30 +80,26 @@ class ConnectionStatusMessageRepositoryTest {
         // Given
         var spec = new JsonPathSpecification<ConnectionStatusMessageModel>(List.of("dataSourceInformation",
                                                                                    "countryCode"), "be");
-        var payload = new ConnectionStatusMessage(
-                "cid",
-                "pid",
-                "dnid",
-                new TestDataSourceInformation(
-                        "be",
-                        "be-fluvius",
-                        "fluvius",
-                        "fluvius"
-                ),
-                PermissionProcessStatus.ACCEPTED
-        );
-        var otherPayload = new ConnectionStatusMessage(
-                "cid",
-                "other-pid",
-                "dnid",
-                new TestDataSourceInformation(
-                        "at",
-                        "at-eda",
-                        "eda",
-                        "eda"
-                ),
-                PermissionProcessStatus.ACCEPTED
-        );
+
+        var dataSourceInformation = new DataSourceInformation().withCountryCode("be")
+                                                               .withRegionConnectorId("be-fluvius")
+                                                               .withPermissionAdministratorId("fluvius")
+                                                               .withMeteredDataAdministratorId("fluvius");
+        var payload = new ConnectionStatusMessage().withConnectionId("cid")
+                                                   .withPermissionId("pid")
+                                                   .withDataNeedId("dnid")
+                                                   .withDataSourceInformation(dataSourceInformation)
+                                                   .withStatus(Status.ACCEPTED);
+
+        var otherDataSourceInformation = new DataSourceInformation().withCountryCode("at")
+                                                                    .withRegionConnectorId("at-eda")
+                                                                    .withPermissionAdministratorId("eda")
+                                                                    .withMeteredDataAdministratorId("eda");
+        var otherPayload = new ConnectionStatusMessage().withConnectionId("cid")
+                                                        .withPermissionId("other-pid")
+                                                        .withDataNeedId("dnid")
+                                                        .withDataSourceInformation(otherDataSourceInformation)
+                                                        .withStatus(Status.ACCEPTED);
         var csm = connectionStatusMessageRepository.save(new ConnectionStatusMessageModel(payload));
         connectionStatusMessageRepository.save(new ConnectionStatusMessageModel(otherPayload));
 
@@ -124,18 +115,15 @@ class ConnectionStatusMessageRepositoryTest {
     @Test
     void specificationFromTo_returnsCorrectConnectionStatusMessage() {
         // Given
-        var payload = new ConnectionStatusMessage(
-                "cid",
-                "pid",
-                "dnid",
-                new TestDataSourceInformation(
-                        "be",
-                        "be-fluvius",
-                        "fluvius",
-                        "fluvius"
-                ),
-                PermissionProcessStatus.ACCEPTED
-        );
+        var dataSourceInformation = new DataSourceInformation().withCountryCode("be")
+                                                               .withRegionConnectorId("be-fluvius")
+                                                               .withPermissionAdministratorId("fluvius")
+                                                               .withMeteredDataAdministratorId("fluvius");
+        var payload = new ConnectionStatusMessage().withConnectionId("cid")
+                                                   .withPermissionId("pid")
+                                                   .withDataNeedId("dnid")
+                                                   .withDataSourceInformation(dataSourceInformation)
+                                                   .withStatus(Status.ACCEPTED);
         connectionStatusMessageRepository.save(new ConnectionStatusMessageModel(payload));
         var now = ZonedDateTime.now(ZoneOffset.UTC);
         var from = now.minusMinutes(1);
@@ -153,18 +141,15 @@ class ConnectionStatusMessageRepositoryTest {
     @Test
     void specificationFromTo_returnsNoConnectionStatusMessage() {
         // Given
-        var payload = new ConnectionStatusMessage(
-                "cid",
-                "pid",
-                "dnid",
-                new TestDataSourceInformation(
-                        "be",
-                        "be-fluvius",
-                        "fluvius",
-                        "fluvius"
-                ),
-                PermissionProcessStatus.ACCEPTED
-        );
+        var dataSourceInformation = new DataSourceInformation().withCountryCode("be")
+                                                               .withRegionConnectorId("be-fluvius")
+                                                               .withPermissionAdministratorId("fluvius")
+                                                               .withMeteredDataAdministratorId("fluvius");
+        var payload = new ConnectionStatusMessage().withConnectionId("cid")
+                                                   .withPermissionId("pid")
+                                                   .withDataNeedId("dnid")
+                                                   .withDataSourceInformation(dataSourceInformation)
+                                                   .withStatus(Status.ACCEPTED);
         connectionStatusMessageRepository.save(new ConnectionStatusMessageModel(payload));
         var now = ZonedDateTime.now(ZoneOffset.UTC);
         var from = now.minusDays(1);

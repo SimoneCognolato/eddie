@@ -3,10 +3,10 @@
 
 package energy.eddie.outbound.kafka;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.DataSourceInformation;
-import energy.eddie.api.agnostic.RawDataMessage;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.RawDataMessage;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.cim.v0_82.ap.AccountingPointEnvelope;
 import energy.eddie.cim.v0_82.pmd.MessageDocumentHeaderComplexType;
 import energy.eddie.cim.v0_82.pmd.MessageDocumentHeaderMetaInformationComplexType;
@@ -15,7 +15,6 @@ import energy.eddie.cim.v0_82.vhd.ValidatedHistoricalDataEnvelope;
 import energy.eddie.cim.v1_04.rtd.RTDEnvelope;
 import energy.eddie.cim.v1_04.vhd.VHDEnvelope;
 import energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope;
-import energy.eddie.outbound.shared.testing.MockDataSourceInformation;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -39,10 +38,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Tag("Integration")
 class KafkaConnectorTest {
-    private final DataSourceInformation dataSourceInformation = new MockDataSourceInformation("AT",
-                                                                                              "at-eda",
-                                                                                              "paid",
-                                                                                              "mdaid");
+    private final DataSourceInformation dataSourceInformation = new DataSourceInformation()
+            .withCountryCode("AT")
+            .withRegionConnectorId("at-eda")
+            .withPermissionAdministratorId("paid")
+            .withMeteredDataAdministratorId("mdaid");
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private EmbeddedKafkaBroker embeddedKafka;
@@ -52,11 +52,11 @@ class KafkaConnectorTest {
     @Test
     void testConnectionStatusMessages_areProducedToKafka() {
         // Given
-        var csm = new ConnectionStatusMessage("cid",
-                                              "pid",
-                                              "dnid",
-                                              dataSourceInformation,
-                                              PermissionProcessStatus.ACCEPTED);
+        var csm = new ConnectionStatusMessage().withConnectionId("cid")
+                                               .withPermissionId("pid")
+                                               .withDataNeedId("dnid")
+                                               .withDataSourceInformation(dataSourceInformation)
+                                               .withStatus(Status.ACCEPTED);
         kafkaConnector.setConnectionStatusMessageStream(Flux.just(csm));
         var consumerProps = KafkaTestUtils.consumerProps(embeddedKafka, "testGroup", true);
         var consumer = new DefaultKafkaConsumerFactory<String, Object>(consumerProps).createConsumer();
@@ -156,14 +156,12 @@ class KafkaConnectorTest {
     @Test
     void testRawData_areProducedToKafka() {
         // Given
-        var data = new RawDataMessage(
-                "pid",
-                "cid",
-                "dnid",
-                dataSourceInformation,
-                ZonedDateTime.now(ZoneOffset.UTC),
-                "blblblb"
-        );
+        var data = new RawDataMessage().withPermissionId("pid")
+                                       .withConnectionId("cid")
+                                       .withDataNeedId("dnid")
+                                       .withDataSourceInformation(dataSourceInformation)
+                                       .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                       .withRawPayload("blblblb");
         kafkaConnector.setRawDataStream(Flux.just(data));
         var consumerProps = KafkaTestUtils.consumerProps(embeddedKafka, "testGroup", true);
         var consumer = new DefaultKafkaConsumerFactory<>(consumerProps,

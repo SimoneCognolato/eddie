@@ -5,7 +5,7 @@ package energy.eddie.outbound.amqp;
 
 import com.rabbitmq.client.amqp.Connection;
 import com.rabbitmq.client.amqp.Publisher;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.cim.serde.MessageSerde;
 import energy.eddie.cim.serde.SerializationException;
 import energy.eddie.cim.serde.XmlMessageSerde;
@@ -20,6 +20,7 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -216,7 +217,13 @@ class AmqpInboundTest {
                                   .build();
 
         var id = "test-id";
-        var envelope = new OpaqueEnvelope(id, id, id, id, id, ZonedDateTime.now(), "test-payload");
+        var envelope = new OpaqueEnvelope().withConnectionId(id)
+                                           .withPermissionId(id)
+                                           .withDataNeedId(id)
+                                           .withMessageId(id)
+                                           .withRegionConnectorId(id)
+                                           .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                           .withPayload("test-payload");
 
         var msg = publisher.message(serde.serialize(envelope));
         // When

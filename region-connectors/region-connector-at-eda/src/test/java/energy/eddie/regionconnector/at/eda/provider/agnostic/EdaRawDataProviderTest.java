@@ -75,22 +75,22 @@ class EdaRawDataProviderTest {
                     })
                     // Then
                     .assertNext(rawData -> {
-                        assertEquals(expectedString1, rawData.permissionId());
-                        assertEquals(expectedString1, rawData.connectionId());
-                        assertEquals(expectedString1, rawData.dataNeedId());
-                        assertThat(rawData.rawPayload()).startsWith("<?xml");
+                        assertEquals(expectedString1, rawData.getPermissionId());
+                        assertEquals(expectedString1, rawData.getConnectionId());
+                        assertEquals(expectedString1, rawData.getDataNeedId());
+                        assertThat(rawData.getRawPayload()).startsWith("<?xml");
                     })
                     .assertNext(rawData -> {
-                        assertEquals(expectedString2, rawData.permissionId());
-                        assertEquals(expectedString2, rawData.connectionId());
-                        assertEquals(expectedString2, rawData.dataNeedId());
-                        assertThat(rawData.rawPayload()).startsWith("<?xml");
+                        assertEquals(expectedString2, rawData.getPermissionId());
+                        assertEquals(expectedString2, rawData.getConnectionId());
+                        assertEquals(expectedString2, rawData.getDataNeedId());
+                        assertThat(rawData.getRawPayload()).startsWith("<?xml");
                     })
                     .assertNext(rawData -> {
-                        assertEquals(expectedString3, rawData.permissionId());
-                        assertEquals(expectedString3, rawData.connectionId());
-                        assertEquals(expectedString3, rawData.dataNeedId());
-                        assertThat(rawData.rawPayload()).startsWith("<?xml");
+                        assertEquals(expectedString3, rawData.getPermissionId());
+                        assertEquals(expectedString3, rawData.getConnectionId());
+                        assertEquals(expectedString3, rawData.getDataNeedId());
+                        assertThat(rawData.getRawPayload()).startsWith("<?xml");
                     })
                     .expectComplete()
                     .verify(Duration.ofSeconds(2));
@@ -134,10 +134,10 @@ class EdaRawDataProviderTest {
                     })
                     // Then
                     .assertNext(rawData -> {
-                        assertEquals(expectedString, rawData.permissionId());
-                        assertEquals(expectedString, rawData.connectionId());
-                        assertEquals(expectedString, rawData.dataNeedId());
-                        assertThat(rawData.rawPayload()).startsWith("<?xml");
+                        assertEquals(expectedString, rawData.getPermissionId());
+                        assertEquals(expectedString, rawData.getConnectionId());
+                        assertEquals(expectedString, rawData.getDataNeedId());
+                        assertThat(rawData.getRawPayload()).startsWith("<?xml");
                     })
                     .expectNextCount(1)
                     .expectComplete()

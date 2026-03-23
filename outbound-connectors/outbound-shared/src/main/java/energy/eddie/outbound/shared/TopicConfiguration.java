@@ -9,7 +9,7 @@ public class TopicConfiguration {
     public TopicConfiguration(String eddieId) {this.eddieId = eddieId;}
 
     /**
-     * Endpoint for {@link energy.eddie.api.agnostic.RawDataMessage}.
+     * Endpoint for {@link energy.eddie.cim.agnostic.RawDataMessage}.
      * Used to emit messages to the eligible party.
      */
     public String rawDataMessage() {
@@ -19,7 +19,7 @@ public class TopicConfiguration {
     }
 
     /**
-     * Endpoint for {@link energy.eddie.api.agnostic.ConnectionStatusMessage}.
+     * Endpoint for {@link energy.eddie.cim.agnostic.ConnectionStatusMessage}.
      * Used to emit messages to the eligible party.
      */
     public String connectionStatusMessage() {

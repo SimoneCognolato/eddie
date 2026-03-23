@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.us.green.button.services.historical.collection;
@@ -47,7 +47,9 @@ public class HistoricalCollectionService {
      */
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public Flux<MeterReading> persistMetersForPermissionRequest(UsGreenButtonPermissionRequest permissionRequest) {
-        return api.fetchMeters(Pages.NO_SLURP, List.of(permissionRequest.authorizationUid()), permissionRequest.dataSourceInformation().meteredDataAdministratorId())
+        return api.fetchMeters(Pages.NO_SLURP,
+                               List.of(permissionRequest.authorizationUid()),
+                               permissionRequest.dataSourceInformation().getMeteredDataAdministratorId())
                   .map(dataNeedMatcher::filterMetersNotMeetingDataNeedCriteria)
                   .flatMap(Flux::fromIterable)
                   .mapNotNull(meter -> persistMeter(meter, permissionRequest.permissionId()));
@@ -63,7 +65,8 @@ public class HistoricalCollectionService {
     public Mono<Void> triggerHistoricalDataCollection(List<MeterReading> meters, UsGreenButtonPermissionRequest permissionRequest) {
         var permissionId = permissionRequest.permissionId();
         var meterUids = meters.stream().map(MeterReading::meterUid).toList();
-        return api.collectHistoricalData(meterUids, permissionRequest.dataSourceInformation().meteredDataAdministratorId())
+        return api.collectHistoricalData(meterUids,
+                                         permissionRequest.dataSourceInformation().getMeteredDataAdministratorId())
                   .map(HistoricalCollectionResponse::meters)
                   .doOnSuccess(activatedMeters -> removeNotActivatedMeters(activatedMeters,
                                                                            meterUids,

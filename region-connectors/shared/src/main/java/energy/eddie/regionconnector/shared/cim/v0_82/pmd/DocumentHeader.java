@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.cim.v0_82.pmd;
@@ -16,7 +16,7 @@ import java.time.ZonedDateTime;
 public record DocumentHeader(PermissionRequest permissionRequest, DocumentType documentType) {
 
     public MessageDocumentHeaderComplexType permissionMarketDocumentHeader() {
-        var codingScheme = CimUtils.getCodingSchemePmd(permissionRequest.dataSourceInformation().countryCode());
+        var codingScheme = CimUtils.getCodingSchemePmd(permissionRequest.dataSourceInformation().getCountryCode());
         return new MessageDocumentHeaderComplexType()
                 .withCreationDateTime(ZonedDateTime.now(ZoneOffset.UTC))
                 .withMessageDocumentHeaderMetaInformation(
@@ -28,7 +28,7 @@ public record DocumentHeader(PermissionRequest permissionRequest, DocumentType d
                                 .withMessageDocumentHeaderRegion(
                                         new MessageDocumentHeaderRegionComplexType()
                                                 .withConnector(permissionRequest.dataSourceInformation()
-                                                                                .regionConnectorId())
+                                                                                .getRegionConnectorId())
                                                 .withCountry(codingScheme)
                                 )
                 );

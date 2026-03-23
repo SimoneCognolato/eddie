@@ -3,9 +3,9 @@
 
 package energy.eddie.core.services.agnostic;
 
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
 import energy.eddie.api.agnostic.opaque.RegionConnectorOpaqueEnvelopeService;
 import energy.eddie.api.agnostic.outbound.OpaqueEnvelopeOutboundConnector;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.test.publisher.TestPublisher;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static org.mockito.Mockito.*;
@@ -89,7 +90,13 @@ class OpaqueEnvelopeRouterTest {
 
     private static OpaqueEnvelope envelopeFor(String regionConnectorId) {
         var id = "test-id";
-        return new OpaqueEnvelope(regionConnectorId, id, id, id, id, ZonedDateTime.now(), "test-payload");
+        return new OpaqueEnvelope().withConnectionId(id)
+                                   .withPermissionId(id)
+                                   .withDataNeedId(id)
+                                   .withMessageId(id)
+                                   .withRegionConnectorId(regionConnectorId)
+                                   .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                   .withPayload("test-payload");
     }
 
     private record PlainOpaqueEnvelopeOutboundConnector(

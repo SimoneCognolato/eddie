@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.cim.v0_82.ap;
@@ -24,7 +24,7 @@ public class APEnvelope {
     }
 
     public AccountingPointEnvelope wrap() {
-        var codingScheme = CimUtils.getCodingSchemeAp(permissionRequest.dataSourceInformation().countryCode());
+        var codingScheme = CimUtils.getCodingSchemeAp(permissionRequest.dataSourceInformation().getCountryCode());
         var header = new energy.eddie.cim.v0_82.ap.MessageDocumentHeaderComplexType()
                 .withCreationDateTime(ZonedDateTime.now(ZoneOffset.UTC))
                 .withMessageDocumentHeaderMetaInformation(
@@ -36,7 +36,7 @@ public class APEnvelope {
                                 .withMessageDocumentHeaderRegion(
                                         new MessageDocumentHeaderRegionComplexType()
                                                 .withConnector(permissionRequest.dataSourceInformation()
-                                                                                .regionConnectorId())
+                                                                                .getRegionConnectorId())
                                                 .withCountry(codingScheme)
                                 )
                 );

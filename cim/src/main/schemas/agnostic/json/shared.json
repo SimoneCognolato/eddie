@@ -32,6 +32,21 @@
         "permissionAdministratorId",
         "regionConnectorId"
       ]
+    },
+    "keyValuePair": {
+      "type": "object",
+      "key": {
+        "description": "Key of the key-value pair",
+        "type": "string"
+      },
+      "value": {
+        "description": "Value of the key-value pair",
+        "type": "string"
+      },
+      "required": [
+        "key",
+        "value"
+      ]
     }
   }
 }

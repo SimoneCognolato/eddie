@@ -3,11 +3,11 @@
 
 package energy.eddie.regionconnector.aiida.mqtt;
 
-import energy.eddie.api.agnostic.RawDataMessage;
 import energy.eddie.api.agnostic.aiida.AiidaConnectionStatusMessageDto;
 import energy.eddie.api.agnostic.aiida.AiidaRecordDto;
 import energy.eddie.api.agnostic.aiida.AiidaSchema;
 import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope;
 import energy.eddie.regionconnector.aiida.AiidaBeanConfig;
 import energy.eddie.regionconnector.aiida.mqtt.callback.MqttMessageCallback;
@@ -170,8 +170,8 @@ class MqttMessageCallbackTest {
                         }
                     })
                     .assertNext(msg -> {
-                        assertEquals(PERMISSION_ID.toString(), msg.permissionId());
-                        assertEquals(payload, msg.rawPayload());
+                        assertEquals(PERMISSION_ID.toString(), msg.getPermissionId());
+                        assertEquals(payload, msg.getRawPayload());
                     })
                     .thenCancel()
                     .verify();

@@ -3,10 +3,7 @@
 
 package energy.eddie.outbound.kafka;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.RawDataMessage;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.*;
 import energy.eddie.cim.serde.MessageSerde;
 import energy.eddie.cim.serde.SerdeFactory;
 import energy.eddie.cim.serde.SerdeInitializationException;
@@ -17,12 +14,10 @@ import energy.eddie.cim.v0_82.vhd.ValidatedHistoricalDataEnvelope;
 import energy.eddie.cim.v0_82.vhd.ValidatedHistoricalDataMarketDocumentComplexType;
 import energy.eddie.cim.v0_91_08.RTREnvelope;
 import energy.eddie.cim.v1_04.rtd.RTDEnvelope;
-import energy.eddie.outbound.shared.testing.MockDataSourceInformation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
@@ -30,7 +25,8 @@ import java.time.ZonedDateTime;
 
 import static energy.eddie.cim.CommonInformationModelVersions.V0_82;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -42,25 +38,34 @@ class CustomSerializerTest {
     @Test
     void testSerialize_StatusMessageData() throws SerdeInitializationException {
         var customSerializer = new CustomSerializer(SerdeFactory.getInstance().create("json"));
-        String topic = "test";
-        ZonedDateTime now = ZonedDateTime.of(2023, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
-        ConnectionStatusMessage data = new ConnectionStatusMessage("connectionId",
-                                                                   "permissionId",
-                                                                   "dataNeedId",
-                                                                   new MockDataSourceInformation("cc",
-                                                                                                 "rc",
-                                                                                                 "pa",
-                                                                                                 "mda"),
-                                                                   now,
-                                                                   PermissionProcessStatus.ACCEPTED,
-                                                                   "Granted",
-                                                                   new ObjectMapper().createObjectNode()
-                                                                                     .put("test", "value"));
-        byte[] expected = "{\"connectionId\":\"connectionId\",\"permissionId\":\"permissionId\",\"dataNeedId\":\"dataNeedId\",\"dataSourceInformation\":{\"countryCode\":\"cc\",\"meteredDataAdministratorId\":\"mda\",\"permissionAdministratorId\":\"pa\",\"regionConnectorId\":\"rc\"},\"timestamp\":\"2023-01-01T00:00:00Z\",\"status\":\"ACCEPTED\",\"message\":\"Granted\",\"additionalInformation\":{\"test\":\"value\"}}"
-                .getBytes(StandardCharsets.UTF_8);
+        var topic = "test";
+        var now = ZonedDateTime.of(2023, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+        var dataSourceInformation = new DataSourceInformation()
+                .withCountryCode("cc")
+                .withRegionConnectorId("rc")
+                .withPermissionAdministratorId("pa")
+                .withMeteredDataAdministratorId("mda");
+
+        var keyValuePair = new KeyValuePair().withKey("key")
+                                             .withValue("value");
+
+        var data = new ConnectionStatusMessage().withConnectionId("connectionId")
+                                                .withPermissionId("permissionId")
+                                                .withDataNeedId("dataNeedId")
+                                                .withDataSourceInformation(dataSourceInformation)
+                                                .withTimestamp(now)
+                                                .withStatus(Status.ACCEPTED)
+                                                .withMessage("Granted")
+                                                .withExtensions(keyValuePair);
+
+        String expectedString = "{\"connectionId\":\"connectionId\",\"permissionId\":\"permissionId\",\"dataNeedId\":\"dataNeedId\",\"dataSourceInformation\":{\"countryCode\":\"cc\",\"meteredDataAdministratorId\":\"mda\",\"permissionAdministratorId\":\"pa\",\"regionConnectorId\":\"rc\"},\"timestamp\":\"2023-01-01T00:00:00Z\",\"status\":\"ACCEPTED\",\"message\":\"Granted\",\"extension\":[{\"value\":\"value\",\"key\":\"key\"}]}";
 
         byte[] result = customSerializer.serialize(topic, data);
-        assertArrayEquals(expected, result);
+
+        assertThat(result)
+                .isNotNull()
+                .asString(StandardCharsets.UTF_8)
+                .isEqualTo(expectedString);
 
         customSerializer.close();
     }
@@ -191,15 +196,19 @@ class CustomSerializerTest {
     void givenRawDataMessage_serializes_asExpected() throws SerdeInitializationException {
         // Given
         var customSerializer = new CustomSerializer(SerdeFactory.getInstance().create("json"));
-        var expectedString = "{\"permissionId\":\"foo\",\"connectionId\":\"bar\",\"dataNeedId\":\"id1\",\"dataSourceInformation\":{\"countryCode\":\"TEST\",\"meteredDataAdministratorId\":\"tEsT\",\"permissionAdministratorId\":\"TeSt\",\"regionConnectorId\":\"test\"},\"timestamp\":\"2024-01-16T12:00:00Z\",\"rawPayload\":\"rawPayload with <xml> and <html> stuff and special Ϸ ϲ ℻ characters\"}";
+        var expectedString = "{\"connectionId\":\"bar\",\"dataNeedId\":\"id1\",\"dataSourceInformation\":{\"countryCode\":\"TEST\",\"meteredDataAdministratorId\":\"tEsT\",\"permissionAdministratorId\":\"TeSt\",\"regionConnectorId\":\"test\"},\"permissionId\":\"foo\",\"rawPayload\":\"rawPayload with <xml> and <html> stuff and special Ϸ ϲ ℻ characters\",\"timestamp\":\"2024-01-16T12:00:00Z\"}";
         var topic = "myTest";
-        var dataSourceInformation = new MockDataSourceInformation("TEST", "test", "TeSt", "tEsT");
-        var message = new RawDataMessage("foo",
-                                         "bar",
-                                         "id1",
-                                         dataSourceInformation,
-                                         ZonedDateTime.parse("2024-01-16T12:00:00Z"),
-                                         "rawPayload with <xml> and <html> stuff and special Ϸ ϲ ℻ characters");
+        var dataSourceInformation = new DataSourceInformation().withCountryCode("TEST")
+                                                               .withRegionConnectorId("test")
+                                                               .withPermissionAdministratorId("TeSt")
+                                                               .withMeteredDataAdministratorId("tEsT");
+        var message = new RawDataMessage().withPermissionId("foo")
+                                          .withConnectionId("bar")
+                                          .withDataNeedId("id1")
+                                          .withDataSourceInformation(dataSourceInformation)
+                                          .withTimestamp(ZonedDateTime.parse("2024-01-16T12:00:00Z"))
+                                          .withRawPayload(
+                                                  "rawPayload with <xml> and <html> stuff and special Ϸ ϲ ℻ characters");
 
         // When
         var result = customSerializer.serialize(topic, message);
@@ -218,15 +227,16 @@ class CustomSerializerTest {
     void givenOpaqueEnvelope_serializes_asExpected() throws SerdeInitializationException {
         // Given
         var customSerializer = new CustomSerializer(SerdeFactory.getInstance().create("json"));
-        var expectedString = "{\"regionConnectorId\":\"aiida\",\"permissionId\":\"foo\",\"connectionId\":\"bar\",\"dataNeedId\":\"id1\",\"messageId\":\"msg-1\",\"timestamp\":\"2024-01-16T12:00:00Z\",\"payload\":\"rawPayload with <xml> and <html> stuff and special Ϸ ϲ ℻ characters\"}";
+        var expectedString = "{\"connectionId\":\"bar\",\"dataNeedId\":\"id1\",\"messageId\":\"msg-1\",\"payload\":\"rawPayload with <xml> and <html> stuff and special Ϸ ϲ ℻ characters\",\"permissionId\":\"foo\",\"regionConnectorId\":\"aiida\",\"timestamp\":\"2024-01-16T12:00:00Z\"}";
         var topic = "myTest";
-        var message = new OpaqueEnvelope("aiida",
-                                         "foo",
-                                         "bar",
-                                         "id1",
-                                         "msg-1",
-                                         ZonedDateTime.parse("2024-01-16T12:00:00Z"),
-                                         "rawPayload with <xml> and <html> stuff and special Ϸ ϲ ℻ characters");
+        var message = new OpaqueEnvelope().withRegionConnectorId("aiida")
+                                          .withPermissionId("foo")
+                                          .withConnectionId("bar")
+                                          .withDataNeedId("id1")
+                                          .withMessageId("msg-1")
+                                          .withTimestamp(ZonedDateTime.parse("2024-01-16T12:00:00Z"))
+                                          .withPayload(
+                                                  "rawPayload with <xml> and <html> stuff and special Ϸ ϲ ℻ characters");
 
         // When
         var result = customSerializer.serialize(topic, message);

@@ -1,22 +1,25 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.event.sourcing.handlers.integration;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
 import energy.eddie.api.agnostic.ConnectionStatusMessageProvider;
 import energy.eddie.api.agnostic.process.model.PermissionRequest;
 import energy.eddie.api.agnostic.process.model.events.InternalPermissionEvent;
 import energy.eddie.api.agnostic.process.model.events.PermissionEvent;
 import energy.eddie.api.agnostic.process.model.persistence.PermissionRequestRepository;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.KeyValuePair;
 import energy.eddie.regionconnector.shared.event.sourcing.EventBus;
 import energy.eddie.regionconnector.shared.event.sourcing.handlers.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
-import tools.jackson.databind.JsonNode;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -27,7 +30,7 @@ public class ConnectionStatusMessageHandler<T extends PermissionRequest> impleme
     private final Sinks.Many<ConnectionStatusMessage> messages = Sinks.many().multicast().onBackpressureBuffer();
     private final PermissionRequestRepository<T> repository;
     private final Function<T, String> messageFunc;
-    private final Function<T, JsonNode> additionalDataFunc;
+    private final Function<T, List<KeyValuePair>> extensionFunc;
 
     public ConnectionStatusMessageHandler(
             EventBus eventBus,
@@ -41,11 +44,11 @@ public class ConnectionStatusMessageHandler<T extends PermissionRequest> impleme
             EventBus eventBus,
             PermissionRequestRepository<T> repository,
             Function<T, String> messageFunc,
-            Function<T, JsonNode> additionalDataFunc
+            Function<T, List<KeyValuePair>> extensionFunc
     ) {
         this.repository = repository;
         this.messageFunc = messageFunc;
-        this.additionalDataFunc = additionalDataFunc;
+        this.extensionFunc = extensionFunc;
         eventBus.filteredFlux(PermissionEvent.class)
                 .subscribe(this::accept);
     }
@@ -67,16 +70,16 @@ public class ConnectionStatusMessageHandler<T extends PermissionRequest> impleme
         }
         LOGGER.trace("Publishing connection status message for permission id {} with status {}", permissionId, status);
         var permissionRequest = optionalRequest.get();
+
         messages.tryEmitNext(
-                new ConnectionStatusMessage(
-                        permissionRequest.connectionId(),
-                        permissionId,
-                        permissionRequest.dataNeedId(),
-                        permissionRequest.dataSourceInformation(),
-                        status,
-                        messageFunc.apply(permissionRequest),
-                        additionalDataFunc.apply(permissionRequest)
-                )
+                new ConnectionStatusMessage().withConnectionId(permissionRequest.connectionId())
+                                             .withPermissionId(permissionId)
+                                             .withDataNeedId(permissionRequest.dataNeedId())
+                                             .withDataSourceInformation(permissionRequest.dataSourceInformation())
+                                             .withStatus(status.toAgnosticDto())
+                                             .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                             .withMessage(messageFunc.apply(permissionRequest))
+                                             .withExtensions(extensionFunc.apply(permissionRequest))
         );
     }
 

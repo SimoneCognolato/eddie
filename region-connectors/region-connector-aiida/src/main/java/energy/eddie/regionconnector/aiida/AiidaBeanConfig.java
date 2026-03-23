@@ -3,11 +3,11 @@
 
 package energy.eddie.regionconnector.aiida;
 
-import energy.eddie.api.agnostic.RawDataMessage;
 import energy.eddie.api.agnostic.aiida.AiidaConnectionStatusMessageDto;
 import energy.eddie.api.agnostic.data.needs.DataNeedCalculationService;
 import energy.eddie.api.agnostic.process.model.events.PermissionEventRepository;
 import energy.eddie.api.cim.config.CommonInformationModelConfiguration;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope;
 import energy.eddie.dataneeds.needs.DataNeed;
 import energy.eddie.dataneeds.rules.DataNeedRuleSet;

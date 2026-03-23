@@ -11,7 +11,7 @@
 
     <!-- connection status message types -->
     <xs:complexType name="connectionStatusMessage">
-        <xs:all>
+        <xs:sequence>
             <xs:element type="xs:string" name="connectionId"/>
             <xs:element type="ns1:uuid" name="permissionId"/>
             <xs:element type="ns1:uuid" name="dataNeedId"/>
@@ -19,14 +19,8 @@
             <xs:element type="xs:dateTime" name="timestamp"/>
             <xs:element type="ns1:status" name="status"/>
             <xs:element type="xs:string" name="message" minOccurs="0"/>
-            <xs:element name="additionalInformation" minOccurs="0">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-        </xs:all>
+            <xs:element name="extension" type="ns1:KeyValuePair" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
     </xs:complexType>
     <xs:simpleType name="status" final="restriction">
         <xs:restriction base="xs:string">
@@ -48,6 +42,13 @@
             <xs:enumeration value="EXTERNALLY_TERMINATED"/>
         </xs:restriction>
     </xs:simpleType>
+    <xs:complexType name="KeyValuePair">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="key" type="xs:string" use="required"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
 
     <!-- raw data message types -->
     <xs:complexType name="rawDataMessage">
@@ -86,7 +87,6 @@
             <xs:element type="xs:string" name="meteredDataAdministratorId"/>
             <xs:element type="xs:string" name="permissionAdministratorId"/>
             <xs:element type="xs:string" name="regionConnectorId"/>
-            <xs:any minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 </xs:schema>

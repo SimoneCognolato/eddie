@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.us.green.button.services.utility.events;
@@ -82,7 +82,7 @@ public class MeterEventCallbacks {
                         permissionId);
             return Mono.empty();
         }
-        return api.fetchMeter(meterUid, permissionRequest.dataSourceInformation().meteredDataAdministratorId())
+        return api.fetchMeter(meterUid, permissionRequest.dataSourceInformation().getMeteredDataAdministratorId())
                   .filter(meter -> dataNeedMatcher.isRelevantEnergyType(meter, permissionRequest))
                   .doOnSuccess(meter -> {
                       if (LOGGER.isInfoEnabled() && !permissionRequest.allowedMeters().contains(meterUid)) {

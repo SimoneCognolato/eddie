@@ -3,8 +3,8 @@
 
 package energy.eddie.outbound.rest;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.cim.v0_82.ap.AccountingPointEnvelope;
 import energy.eddie.cim.v0_82.pmd.PermissionEnvelope;
 import energy.eddie.cim.v0_82.vhd.ValidatedHistoricalDataEnvelope;

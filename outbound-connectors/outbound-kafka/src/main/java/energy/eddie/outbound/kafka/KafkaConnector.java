@@ -3,8 +3,6 @@
 
 package energy.eddie.outbound.kafka;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.RawDataMessage;
 import energy.eddie.api.agnostic.outbound.ConnectionStatusMessageOutboundConnector;
 import energy.eddie.api.agnostic.outbound.RawDataOutboundConnector;
 import energy.eddie.api.v0_82.outbound.AccountingPointEnvelopeOutboundConnector;
@@ -14,6 +12,8 @@ import energy.eddie.api.v1_04.outbound.NearRealTimeDataMarketDocumentOutboundCon
 import energy.eddie.api.v1_04.outbound.ValidatedHistoricalDataMarketDocumentOutboundConnector;
 import energy.eddie.api.v1_12.outbound.AcknowledgementMarketDocumentOutboundConnector;
 import energy.eddie.api.v1_12.outbound.NearRealTimeDataMarketDocumentOutboundConnectorV1_12;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.cim.v0_82.ap.AccountingPointEnvelope;
 import energy.eddie.cim.v0_82.ap.MessageDocumentHeaderMetaInformationComplexType;
 import energy.eddie.cim.v0_82.pmd.PermissionEnvelope;
@@ -156,8 +156,8 @@ public class KafkaConnector implements
         );
         sendToKafka(toSend, "Could not produce connection status message");
         LOGGER.debug("Produced connection status {} message for permission request {}",
-                     statusMessage.status(),
-                     statusMessage.permissionId());
+                     statusMessage.getStatus(),
+                     statusMessage.getPermissionId());
     }
 
     private void producePermissionMarketDocument(PermissionEnvelope permissionMarketDocument) {
@@ -227,10 +227,10 @@ public class KafkaConnector implements
 
     private void produceRawDataMessage(RawDataMessage message) {
         var toSend = new ProducerRecord<String, Object>(config.rawDataMessage(),
-                                                        message.connectionId(),
+                                                        message.getConnectionId(),
                                                         message);
         sendToKafka(toSend, "Could not produce raw data message");
-        LOGGER.debug("Produced raw data message for permission request {}", message.permissionId());
+        LOGGER.debug("Produced raw data message for permission request {}", message.getPermissionId());
     }
 
     private void produceAccountingPointEnvelope(AccountingPointEnvelope marketDocument) {

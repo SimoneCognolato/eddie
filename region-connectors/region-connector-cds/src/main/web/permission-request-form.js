@@ -24,7 +24,10 @@ class PermissionRequestForm extends PermissionRequestFormBase {
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener("eddie-request-status", (event) => {
-      this._redirectUri ??= event.detail.additionalInformation?.redirectUri;
+      const uriEntry = event.detail.extension?.find(
+        (kv) => kv.key === "redirectUri"
+      );
+      this._redirectUri ??= uriEntry?.value;
     });
   }
 

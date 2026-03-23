@@ -3,7 +3,7 @@
 
 package energy.eddie.regionconnector.aiida.streams;
 
-import energy.eddie.api.agnostic.RawDataMessage;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;

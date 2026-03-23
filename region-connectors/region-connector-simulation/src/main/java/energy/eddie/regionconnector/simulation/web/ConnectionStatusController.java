@@ -1,13 +1,13 @@
-// SPDX-FileCopyrightText: 2023-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.simulation.web;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
 import energy.eddie.api.agnostic.Granularity;
 import energy.eddie.api.agnostic.data.needs.EnergyType;
 import energy.eddie.api.agnostic.process.model.PermissionRequest;
 import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
 import energy.eddie.dataneeds.duration.RelativeDuration;
 import energy.eddie.dataneeds.needs.ValidatedHistoricalDataDataNeed;
 import energy.eddie.regionconnector.shared.cim.v0_82.pmd.IntermediatePermissionMarketDocument;
@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Period;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 @RestController
 public class ConnectionStatusController {
@@ -50,14 +51,12 @@ public class ConnectionStatusController {
                                  .body("Mandatory attribute missing (connectionId,connectionStatus,dataNeedId) on ConnectionStatusMessage");
         }
         streams.publish(
-                new ConnectionStatusMessage(
-                        req.connectionId,
-                        req.permissionId,
-                        req.dataNeedId,
-                        new SimulationDataSourceInformation(),
-                        req.connectionStatus,
-                        req.connectionStatus.toString()
-                )
+                new ConnectionStatusMessage().withConnectionId(req.connectionId)
+                                             .withPermissionId(req.permissionId)
+                                             .withDataNeedId(req.dataNeedId)
+                                             .withDataSourceInformation(new SimulationDataSourceInformation())
+                                             .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                             .withStatus(req.connectionStatus.toAgnosticDto())
         );
         streams.publish(
                 new IntermediatePermissionMarketDocument<PermissionRequest>(

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.agnostic;
@@ -39,9 +39,9 @@ class JsonRawDataProviderTest {
                         publisher2.complete();
                     })
                     // When
-                    .assertNext(res -> assertEquals("\"" + i1.payload() + "\"", res.rawPayload()))
-                    .assertNext(res -> assertEquals("\"" + i2.payload() + "\"", res.rawPayload()))
-                    .assertNext(res -> assertEquals("\"" + i3.payload() + "\"", res.rawPayload()))
+                    .assertNext(res -> assertEquals("\"" + i1.payload() + "\"", res.getRawPayload()))
+                    .assertNext(res -> assertEquals("\"" + i2.payload() + "\"", res.getRawPayload()))
+                    .assertNext(res -> assertEquals("\"" + i3.payload() + "\"", res.getRawPayload()))
                     .verifyComplete();
 
         // Clean-Up

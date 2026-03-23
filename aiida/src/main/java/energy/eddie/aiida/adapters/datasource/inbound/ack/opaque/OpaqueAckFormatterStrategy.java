@@ -5,7 +5,7 @@ package energy.eddie.aiida.adapters.datasource.inbound.ack.opaque;
 
 import energy.eddie.aiida.adapters.datasource.inbound.ack.BaseAckFormatterStrategy;
 import energy.eddie.aiida.models.record.InboundRecord;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope;
 import energy.eddie.cim.v1_12.ack.AcknowledgementMarketDocument;
 import energy.eddie.cim.v1_12.ack.MessageDocumentHeader;
@@ -27,7 +27,7 @@ public class OpaqueAckFormatterStrategy extends BaseAckFormatterStrategy {
 
         var header = new MessageDocumentHeader()
                 .withCreationDateTime(now)
-                .withMetaInformation(toMetaInformation(inboundRecord.dataSource(), opaqueEnvelope.connectionId()));
+                .withMetaInformation(toMetaInformation(inboundRecord.dataSource(), opaqueEnvelope.getConnectionId()));
 
         return new AcknowledgementEnvelope()
                 .withMessageDocumentHeader(header)
@@ -38,7 +38,7 @@ public class OpaqueAckFormatterStrategy extends BaseAckFormatterStrategy {
         return new AcknowledgementMarketDocument()
                 .withMRID(UUID.randomUUID().toString())
                 .withCreatedDateTime(now)
-                .withReceivedMarketDocumentCreatedDateTime(opaqueEnvelope.timestamp())
-                .withReceivedMarketDocumentMRID(opaqueEnvelope.messageId());
+                .withReceivedMarketDocumentCreatedDateTime(opaqueEnvelope.getTimestamp())
+                .withReceivedMarketDocumentMRID(opaqueEnvelope.getMessageId());
     }
 }

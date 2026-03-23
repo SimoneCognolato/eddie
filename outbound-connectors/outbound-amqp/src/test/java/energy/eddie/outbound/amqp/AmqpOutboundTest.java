@@ -4,9 +4,10 @@
 package energy.eddie.outbound.amqp;
 
 import com.rabbitmq.client.amqp.Connection;
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.RawDataMessage;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.RawDataMessage;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.cim.serde.XmlMessageSerde;
 import energy.eddie.cim.v0_82.ap.AccountingPointEnvelope;
 import energy.eddie.cim.v0_82.pmd.MessageDocumentHeaderComplexType;
@@ -18,7 +19,6 @@ import energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope;
 import energy.eddie.outbound.shared.Headers;
 import energy.eddie.outbound.shared.TopicConfiguration;
 import energy.eddie.outbound.shared.TopicStructure;
-import energy.eddie.outbound.shared.testing.MockDataSourceInformation;
 import org.junit.jupiter.api.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.rabbitmq.RabbitMQContainer;
@@ -37,10 +37,11 @@ class AmqpOutboundTest {
     private static final RabbitMQContainer rabbit = new RabbitMQContainer(
             DockerImageName.parse("rabbitmq:4-management-alpine")
     );
-    private final MockDataSourceInformation dataSourceInformation = new MockDataSourceInformation("AT",
-                                                                                                  "at-eda",
-                                                                                                  "paid",
-                                                                                                  "mdaid");
+    private final DataSourceInformation dataSourceInformation = new DataSourceInformation()
+            .withCountryCode("AT")
+            .withRegionConnectorId("at-eda")
+            .withPermissionAdministratorId("paid")
+            .withMeteredDataAdministratorId("mdaid");
     private final TopicConfiguration config = new TopicConfiguration("eddie");
     private Connection connection;
     private AmqpOutbound amqpOutbound;
@@ -76,11 +77,11 @@ class AmqpOutboundTest {
         CountDownLatch latch = new CountDownLatch(1);
         TestPublisher<ConnectionStatusMessage> csmPublisher = TestPublisher.create();
         amqpOutbound.setConnectionStatusMessageStream(csmPublisher.flux());
-        var connectionStatusMessage = new ConnectionStatusMessage("cid",
-                                                                  "pid",
-                                                                  "dnid",
-                                                                  dataSourceInformation,
-                                                                  PermissionProcessStatus.ACCEPTED);
+        var connectionStatusMessage = new ConnectionStatusMessage().withPermissionId("pid")
+                                                                   .withConnectionId("cid")
+                                                                   .withDataNeedId("dnid")
+                                                                   .withDataSourceInformation(dataSourceInformation)
+                                                                   .withStatus(Status.ACCEPTED);
         // When
         csmPublisher.emit(connectionStatusMessage);
 
@@ -110,12 +111,12 @@ class AmqpOutboundTest {
         CountDownLatch latch = new CountDownLatch(1);
         TestPublisher<RawDataMessage> publisher = TestPublisher.create();
         amqpOutbound.setRawDataStream(publisher.flux());
-        var message = new RawDataMessage("pid",
-                                         "cid",
-                                         "dnid",
-                                         dataSourceInformation,
-                                         ZonedDateTime.now(ZoneOffset.UTC),
-                                         "");
+        var message = new RawDataMessage().withPermissionId("pid")
+                                          .withConnectionId("cid")
+                                          .withDataNeedId("dnid")
+                                          .withDataSourceInformation(dataSourceInformation)
+                                          .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                          .withRawPayload("");
         // When
         publisher.emit(message);
 

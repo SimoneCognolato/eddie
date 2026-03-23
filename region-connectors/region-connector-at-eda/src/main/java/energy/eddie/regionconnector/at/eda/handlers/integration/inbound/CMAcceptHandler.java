@@ -110,7 +110,7 @@ public class CMAcceptHandler {
                 permissionRequest.connectionId(),
                 permissionRequest.dataNeedId(),
                 permissionRequest.created(),
-                new EdaDataSourceInformation(permissionRequest.dataSourceInformation().meteredDataAdministratorId()),
+                new EdaDataSourceInformation(permissionRequest.dataSourceInformation().getMeteredDataAdministratorId()),
                 consentData.meteringPoint().orElse(null)
         ));
         outbox.commit(new ValidatedEvent(

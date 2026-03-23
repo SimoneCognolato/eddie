@@ -1,13 +1,14 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.outbound.metric.service;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
 import energy.eddie.api.agnostic.outbound.PermissionEventRepositories;
 import energy.eddie.api.agnostic.process.model.events.PermissionEvent;
 import energy.eddie.api.agnostic.process.model.events.PermissionEventRepository;
 import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.dataneeds.services.DataNeedsService;
 import energy.eddie.outbound.metric.connectors.AgnosticConnector;
 import energy.eddie.outbound.metric.model.MeanCountRecord;
@@ -46,16 +47,18 @@ public class PermissionRequestMetricsService {
 
     public void upsertMetric(ConnectionStatusMessage csm) {
 
-        PermissionProcessStatus status = csm.status();
-        if(status.equals(PermissionProcessStatus.CREATED)) {
+        var status = csm.getStatus();
+        if (status.equals(Status.CREATED)) {
             return;
         }
 
-        String regionConnectorId = csm.dataSourceInformation().regionConnectorId();
-        String permissionId = csm.permissionId();
+        var dataSourceInfo = csm.getDataSourceInformation();
+
+        String regionConnectorId = dataSourceInfo.getRegionConnectorId();
+        String permissionId = csm.getPermissionId();
         List<PermissionEvent> permissionEvents = getCurrentAndPreviousPermissionEvents(
                 permissionId,
-                csm.timestamp(),
+                csm.getTimestamp(),
                 regionConnectorId
         );
 
@@ -68,9 +71,9 @@ public class PermissionRequestMetricsService {
         long durationMilliseconds = Duration.between(prevPermissionEvent.eventCreated(), currentPermissionEventCreated)
                 .toMillis();
         PermissionProcessStatus prevEventStatus = prevPermissionEvent.status();
-        String dataNeedType = dataNeedsService.getById(csm.dataNeedId()).type();
-        String permissionAdministratorId = csm.dataSourceInformation().permissionAdministratorId();
-        String countryCode = csm.dataSourceInformation().countryCode();
+        String dataNeedType = dataNeedsService.getById(csm.getDataNeedId()).type();
+        String permissionAdministratorId = dataSourceInfo.getPermissionAdministratorId();
+        String countryCode = dataSourceInfo.getCountryCode();
         PermissionRequestStatusDurationModel prStatusDuration =  new PermissionRequestStatusDurationModel(
                 permissionId,
                 prevEventStatus,

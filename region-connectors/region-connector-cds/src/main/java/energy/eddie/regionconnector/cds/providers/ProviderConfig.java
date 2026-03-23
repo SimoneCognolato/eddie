@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.cds.providers;
@@ -26,11 +26,10 @@ public class ProviderConfig {
     @Bean
     public ConnectionStatusMessageProvider connectionStatusMessageProvider(
             EventBus eventBus,
-            CdsPermissionRequestRepository repository,
-            ObjectMapper objectMapper
+            CdsPermissionRequestRepository repository
     ) {
-        var redirectUriJsonNode = new RedirectUriJsonNode(objectMapper);
-        return new ConnectionStatusMessageHandler<>(eventBus, repository, pr -> "", redirectUriJsonNode);
+        var additionalDataFunc = new RedirectUriExtension();
+        return new ConnectionStatusMessageHandler<>(eventBus, repository, pr -> "", additionalDataFunc);
     }
 
     @SuppressWarnings("ReactiveStreamsUnusedPublisher")

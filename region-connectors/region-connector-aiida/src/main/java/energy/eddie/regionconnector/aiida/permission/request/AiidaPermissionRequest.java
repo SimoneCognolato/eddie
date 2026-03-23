@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: 2023-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.aiida.permission.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import energy.eddie.api.agnostic.DataSourceInformation;
 import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.DataSourceInformation;
 import energy.eddie.regionconnector.aiida.AiidaRegionConnectorMetadata;
 import energy.eddie.regionconnector.aiida.permission.request.api.AiidaPermissionRequestInterface;
 import jakarta.annotation.Nullable;

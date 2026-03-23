@@ -5,9 +5,6 @@ package energy.eddie.outbound.amqp;
 
 import com.rabbitmq.client.amqp.Connection;
 import com.rabbitmq.client.amqp.Publisher;
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.MessageWithHeaders;
-import energy.eddie.api.agnostic.RawDataMessage;
 import energy.eddie.api.agnostic.outbound.ConnectionStatusMessageOutboundConnector;
 import energy.eddie.api.agnostic.outbound.RawDataOutboundConnector;
 import energy.eddie.api.v0_82.outbound.AccountingPointEnvelopeOutboundConnector;
@@ -17,6 +14,8 @@ import energy.eddie.api.v1_04.outbound.NearRealTimeDataMarketDocumentOutboundCon
 import energy.eddie.api.v1_04.outbound.ValidatedHistoricalDataMarketDocumentOutboundConnector;
 import energy.eddie.api.v1_12.outbound.AcknowledgementMarketDocumentOutboundConnector;
 import energy.eddie.api.v1_12.outbound.NearRealTimeDataMarketDocumentOutboundConnectorV1_12;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.cim.serde.MessageSerde;
 import energy.eddie.cim.v0_82.ap.AccountingPointEnvelope;
 import energy.eddie.cim.v0_82.pmd.PermissionEnvelope;
@@ -151,11 +150,19 @@ public class AmqpOutbound implements
         }
     }
 
-    private static Map<String, String> toHeaders(MessageWithHeaders raw) {
+    private static Map<String, String> toHeaders(RawDataMessage raw) {
         return Map.of(
-                Headers.PERMISSION_ID, raw.permissionId(),
-                Headers.CONNECTION_ID, raw.connectionId(),
-                Headers.DATA_NEED_ID, raw.dataNeedId()
+                Headers.PERMISSION_ID, raw.getPermissionId(),
+                Headers.CONNECTION_ID, raw.getConnectionId(),
+                Headers.DATA_NEED_ID, raw.getDataNeedId()
+        );
+    }
+
+    private static Map<String, String> toHeaders(ConnectionStatusMessage raw) {
+        return Map.of(
+                Headers.PERMISSION_ID, raw.getPermissionId(),
+                Headers.CONNECTION_ID, raw.getConnectionId(),
+                Headers.DATA_NEED_ID, raw.getDataNeedId()
         );
     }
 

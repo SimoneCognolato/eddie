@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.services;
@@ -56,7 +56,7 @@ public class MeterReadingPermissionUpdateAndFulfillmentService {
     ) {
         if (needsToBeUpdated(permissionRequest, meterReadingEndDate)) {
             LOGGER.atInfo()
-                  .addArgument(() -> permissionRequest.dataSourceInformation().regionConnectorId())
+                  .addArgument(() -> permissionRequest.dataSourceInformation().getRegionConnectorId())
                   .addArgument(permissionRequest::permissionId)
                   .addArgument(permissionRequest::latestMeterReadingEndDate)
                   .addArgument(meterReadingEndDate)
@@ -66,7 +66,7 @@ public class MeterReadingPermissionUpdateAndFulfillmentService {
         }
 
         LOGGER.atDebug()
-              .addArgument(() -> permissionRequest.dataSourceInformation().regionConnectorId())
+              .addArgument(() -> permissionRequest.dataSourceInformation().getRegionConnectorId())
               .addArgument(permissionRequest::permissionId)
               .addArgument(permissionRequest::latestMeterReadingEndDate)
               .addArgument(meterReadingEndDate)

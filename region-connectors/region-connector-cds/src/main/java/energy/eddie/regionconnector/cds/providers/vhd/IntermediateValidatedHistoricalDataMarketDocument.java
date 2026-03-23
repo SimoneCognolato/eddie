@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.cds.providers.vhd;
@@ -134,7 +134,7 @@ class IntermediateValidatedHistoricalDataMarketDocument {
 
     @Nullable
     private CodingSchemeTypeList getCodingScheme() {
-        return CimUtils.getCodingSchemeVhd(permissionRequest.dataSourceInformation().countryCode());
+        return CimUtils.getCodingSchemeVhd(permissionRequest.dataSourceInformation().getCountryCode());
     }
 
     @SuppressWarnings("DuplicatedCode")

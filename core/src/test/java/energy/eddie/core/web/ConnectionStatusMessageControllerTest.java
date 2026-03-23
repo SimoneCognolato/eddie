@@ -3,8 +3,8 @@
 
 package energy.eddie.core.web;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.core.security.JwtIssuerFilter;
 import energy.eddie.core.services.PermissionService;
 import org.junit.jupiter.api.Test;
@@ -34,9 +34,9 @@ class ConnectionStatusMessageControllerTest {
 
     @Test
     void connectionStatusMessageByPermissionIds_sendsStatus() {
-        var message1 = statusMessage("1", PermissionProcessStatus.CREATED);
-        var message2 = statusMessage("2", PermissionProcessStatus.SENT_TO_PERMISSION_ADMINISTRATOR);
-        var message3 = statusMessage("3", PermissionProcessStatus.VALIDATED);
+        var message1 = statusMessage("1", Status.CREATED);
+        var message2 = statusMessage("2", Status.SENT_TO_PERMISSION_ADMINISTRATOR);
+        var message3 = statusMessage("3", Status.VALIDATED);
 
         given(permissionService.getConnectionStatusMessageStream())
                 .willReturn(Flux.just(message1, message2, message3));
@@ -53,17 +53,15 @@ class ConnectionStatusMessageControllerTest {
 
         StepVerifier.create(result)
                     // only check status to avoid time zone issues
-                    .expectNextMatches(message -> message1.status().equals(message.status()))
-                    .expectNextMatches(message -> message3.status().equals(message.status()))
+                    .expectNextMatches(message -> message1.getStatus().equals(message.getStatus()))
+                    .expectNextMatches(message -> message3.getStatus().equals(message.getStatus()))
                     .verifyComplete();
     }
 
-    private ConnectionStatusMessage statusMessage(String pid, PermissionProcessStatus status) {
-        return new ConnectionStatusMessage(
-                "1",
-                pid,
-                "1",
-                null,
-                status);
+    private ConnectionStatusMessage statusMessage(String pid, Status status) {
+        return new ConnectionStatusMessage().withConnectionId("1")
+                                            .withPermissionId(pid)
+                                            .withDataNeedId("1")
+                                            .withStatus(status);
     }
 }

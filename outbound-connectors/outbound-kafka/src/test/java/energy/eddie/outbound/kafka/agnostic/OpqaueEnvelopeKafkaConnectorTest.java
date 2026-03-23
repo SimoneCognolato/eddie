@@ -3,8 +3,8 @@
 
 package energy.eddie.outbound.kafka.agnostic;
 
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
 import energy.eddie.api.agnostic.outbound.OpaqueEnvelopeOutboundConnector;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.outbound.kafka.KafkaTestConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.Tag;
@@ -16,6 +16,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.concurrent.ExecutionException;
 
@@ -29,13 +30,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("Integration")
 class OpaqueEnvelopeKafkaConnectorTest {
     private static final String ID = "test-id";
-    private static final OpaqueEnvelope ENVELOPE = new OpaqueEnvelope(ID,
-                                                                      ID,
-                                                                      ID,
-                                                                      ID,
-                                                                      ID,
-                                                                      ZonedDateTime.now(),
-                                                                      "test-payload");
+    private static final OpaqueEnvelope ENVELOPE = new OpaqueEnvelope().withConnectionId(ID)
+                                                                       .withPermissionId(ID)
+                                                                       .withDataNeedId(ID)
+                                                                       .withMessageId(ID)
+                                                                       .withRegionConnectorId(ID)
+                                                                       .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                                                       .withPayload("test-payload");
 
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
@@ -54,7 +55,7 @@ class OpaqueEnvelopeKafkaConnectorTest {
         var result = opaqueConnector.getOpaqueEnvelopes().blockFirst();
         assertAll(
                 () -> assertNotNull(result),
-                () -> assertEquals(ID, result.messageId())
+                () -> assertEquals(ID, result.getMessageId())
         );
     }
 

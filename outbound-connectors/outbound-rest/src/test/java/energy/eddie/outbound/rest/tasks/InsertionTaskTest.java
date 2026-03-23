@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.outbound.rest.tasks;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.outbound.rest.model.ConnectionStatusMessageModel;
 import energy.eddie.outbound.rest.persistence.ConnectionStatusMessageRepository;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,10 @@ class InsertionTaskTest {
     @Test
     void insertsConnectionStatusMessages() {
         // Given
-        var csm = new ConnectionStatusMessage("cid", "pid", "dnid", null, PermissionProcessStatus.CREATED);
+        var csm = new ConnectionStatusMessage().withConnectionId("cid")
+                                               .withPermissionId("pid")
+                                               .withDataNeedId("dnid")
+                                               .withStatus(Status.ACCEPTED);
 
         // When
         new InsertionTask<>(Flux.just(csm), repository, ConnectionStatusMessageModel::new);

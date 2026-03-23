@@ -3,10 +3,10 @@
 
 package energy.eddie.outbound.rest.web;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.RawDataMessage;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.RawDataMessage;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.outbound.rest.RestTestConfig;
 import energy.eddie.outbound.rest.connectors.AgnosticConnector;
 import energy.eddie.outbound.rest.model.ConnectionStatusMessageModel;
@@ -51,8 +51,8 @@ class AgnosticControllerTest {
     @Test
     @DirtiesContext
     void connectionStatusMessageSSE_returnsMessages() {
-        var message1 = statusMessage(PermissionProcessStatus.CREATED);
-        var message2 = statusMessage(PermissionProcessStatus.VALIDATED);
+        var message1 = statusMessage(Status.CREATED);
+        var message2 = statusMessage(Status.VALIDATED);
 
         agnosticConnector.setConnectionStatusMessageStream(Flux.just(message1, message2));
 
@@ -67,15 +67,15 @@ class AgnosticControllerTest {
 
         StepVerifier.create(result)
                     .then(agnosticConnector::close)
-                    .expectNextMatches(message -> message1.status().equals(message.status()))
-                    .expectNextMatches(message -> message2.status().equals(message.status()))
+                    .expectNextMatches(message -> message1.getStatus().equals(message.getStatus()))
+                    .expectNextMatches(message -> message2.getStatus().equals(message.getStatus()))
                     .verifyComplete();
     }
 
     @SuppressWarnings("DataFlowIssue")
     @Test
     void connectionStatusMessage_returnsMessages() {
-        var msg = new ConnectionStatusMessageModel(statusMessage(PermissionProcessStatus.CREATED));
+        var msg = new ConnectionStatusMessageModel(statusMessage(Status.CREATED));
         given(csmRepository.findAll(ArgumentMatchers.<PredicateSpecification<ConnectionStatusMessageModel>>any()))
                 .willReturn(List.of(msg));
 
@@ -92,7 +92,7 @@ class AgnosticControllerTest {
         StepVerifier.create(result)
                     .assertNext(next -> {
                         assertNotNull(next.getFirst());
-                        assertEquals(msg.payload().status(), next.getFirst().status());
+                        assertEquals(msg.payload().getStatus(), next.getFirst().getStatus());
                     })
                     .verifyComplete();
     }
@@ -100,8 +100,16 @@ class AgnosticControllerTest {
     @Test
     @DirtiesContext
     void rawDataMessageSSE_returnsMessages() {
-        var message1 = new RawDataMessage("pid", "cid", "dnid", null, ZonedDateTime.now(ZoneOffset.UTC), "{}");
-        var message2 = new RawDataMessage("other-pid", "cid", "dnid", null, ZonedDateTime.now(ZoneOffset.UTC), "[]");
+        var message1 = new RawDataMessage().withPermissionId("pid")
+                                           .withConnectionId("cid")
+                                           .withDataNeedId("dnid")
+                                           .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                           .withRawPayload("{}");
+        var message2 = new RawDataMessage().withPermissionId("other-pid")
+                                           .withConnectionId("cid")
+                                           .withDataNeedId("dnid")
+                                           .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                           .withRawPayload("[]");
 
         agnosticConnector.setRawDataStream(Flux.just(message1, message2));
 
@@ -116,15 +124,19 @@ class AgnosticControllerTest {
 
         StepVerifier.create(result)
                     .then(agnosticConnector::close)
-                    .expectNextMatches(message -> message1.permissionId().equals(message.permissionId()))
-                    .expectNextMatches(message -> message2.permissionId().equals(message.permissionId()))
+                    .expectNextMatches(message -> message1.getPermissionId().equals(message.getPermissionId()))
+                    .expectNextMatches(message -> message2.getPermissionId().equals(message.getPermissionId()))
                     .verifyComplete();
     }
 
     @SuppressWarnings("DataFlowIssue")
     @Test
     void rawDataMessage_returnsMessages() {
-        var message = new RawDataMessage("pid", "cid", "dnid", null, ZonedDateTime.now(ZoneOffset.UTC), "{}");
+        var message = new RawDataMessage().withPermissionId("pid")
+                                          .withConnectionId("cid")
+                                          .withDataNeedId("dnid")
+                                          .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                          .withRawPayload("{}");
         var msg = new RawDataMessageModel(message);
         given(rawDataRepository.findAll(ArgumentMatchers.<PredicateSpecification<RawDataMessageModel>>any()))
                 .willReturn(List.of(msg));
@@ -142,7 +154,7 @@ class AgnosticControllerTest {
         StepVerifier.create(result)
                     .assertNext(next -> {
                         assertNotNull(next.getFirst());
-                        assertEquals(msg.payload().permissionId(), next.getFirst().permissionId());
+                        assertEquals(msg.payload().getPermissionId(), next.getFirst().getPermissionId());
                     })
                     .verifyComplete();
     }
@@ -150,7 +162,13 @@ class AgnosticControllerTest {
     @Test
     void opaqueEnvelope_returnsAccepted() {
         var id = "test-id";
-        var envelope = new OpaqueEnvelope(id, id, id, id, id, ZonedDateTime.now(), "test-payload");
+        var envelope = new OpaqueEnvelope().withConnectionId(id)
+                                           .withPermissionId(id)
+                                           .withDataNeedId(id)
+                                           .withMessageId(id)
+                                           .withRegionConnectorId(id)
+                                           .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                           .withPayload("test-payload");
 
         webTestClient.post()
                      .uri("/agnostic/opaque-envelope")
@@ -161,16 +179,7 @@ class AgnosticControllerTest {
                      .isAccepted();
     }
 
-    private ConnectionStatusMessage statusMessage(PermissionProcessStatus status) {
-        return new ConnectionStatusMessage(
-                "1",
-                "1",
-                "1",
-                null,
-                ZonedDateTime.now(ZoneOffset.UTC),
-                status,
-                "",
-                null
-        );
+    private ConnectionStatusMessage statusMessage(Status status) {
+        return new ConnectionStatusMessage().withStatus(status);
     }
 }

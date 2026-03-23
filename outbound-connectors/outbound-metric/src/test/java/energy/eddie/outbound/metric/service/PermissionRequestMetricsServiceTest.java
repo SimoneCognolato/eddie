@@ -1,20 +1,21 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.outbound.metric.service;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
 import energy.eddie.api.agnostic.outbound.PermissionEventRepositories;
 import energy.eddie.api.agnostic.process.model.events.PermissionEvent;
 import energy.eddie.api.agnostic.process.model.events.PermissionEventRepository;
 import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.Status;
 import energy.eddie.dataneeds.needs.DataNeed;
 import energy.eddie.dataneeds.services.DataNeedsService;
 import energy.eddie.outbound.metric.connectors.AgnosticConnector;
 import energy.eddie.outbound.metric.model.PermissionRequestStatusDurationModel;
 import energy.eddie.outbound.metric.repositories.PermissionRequestMetricsRepository;
 import energy.eddie.outbound.metric.repositories.PermissionRequestStatusDurationRepository;
-import energy.eddie.outbound.shared.testing.MockDataSourceInformation;
 import energy.eddie.outbound.shared.testing.MockPermissionEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,32 +54,32 @@ class PermissionRequestMetricsServiceTest {
     @Mock
     private DataNeed dataNeed;
 
-    private final MockDataSourceInformation dataSourceInformation = new MockDataSourceInformation(
-            "AT",
-            "at-eda",
-            "paId",
-            "mdaId"
-    );
+    private final DataSourceInformation dataSourceInformation = new DataSourceInformation()
+            .withCountryCode("AT")
+            .withRegionConnectorId("at-eda")
+            .withPermissionAdministratorId("paId")
+            .withMeteredDataAdministratorId("mdaid");
 
     @Test
     void upsertMetricTest() {
         // Given
         var permissionId = "pid";
-        var regionConnectorId = dataSourceInformation.regionConnectorId();
+        var regionConnectorId = dataSourceInformation.getRegionConnectorId();
         var now = ZonedDateTime.now(ZoneOffset.UTC);
 
-        var csm = mock(ConnectionStatusMessage.class);
-        when(csm.status()).thenReturn(PermissionProcessStatus.VALIDATED);
-        when(csm.timestamp()).thenReturn(now);
-        when(csm.permissionId()).thenReturn("pid");
-        when(csm.dataNeedId()).thenReturn("dnId");
-        when(csm.dataSourceInformation()).thenReturn(dataSourceInformation);
+        var csm = new ConnectionStatusMessage().withPermissionId(permissionId)
+                                               .withDataNeedId("dnId")
+                                               .withConnectionId("cid")
+                                               .withTimestamp(now)
+                                               .withDataSourceInformation(dataSourceInformation)
+                                               .withStatus(Status.VALIDATED);
 
         var prevEvent = new MockPermissionEvent(permissionId, PermissionProcessStatus.CREATED, now.minusSeconds(2));
         var currEvent = new MockPermissionEvent(permissionId, PermissionProcessStatus.VALIDATED);
         List<PermissionEvent> permissionEvents = List.of(currEvent, prevEvent);
 
-        when(permissionEventRepository.findTop2ByPermissionIdAndEventCreatedLessThanEqualOrderByEventCreatedDesc(permissionId,
+        when(permissionEventRepository.findTop2ByPermissionIdAndEventCreatedLessThanEqualOrderByEventCreatedDesc(
+                permissionId,
                 now)).thenReturn(permissionEvents);
         when(repositories.getPermissionEventRepositoryByRegionConnectorId(regionConnectorId))
                 .thenReturn(Optional.of(permissionEventRepository));
@@ -109,7 +110,7 @@ class PermissionRequestMetricsServiceTest {
                 anyDouble(),
                 eq(100.0),
                 eq(1),
-                eq(PermissionProcessStatus.CREATED.name()),
+                eq(Status.CREATED.name()),
                 eq("dnType"),
                 eq("paId"),
                 eq("at-eda"),
@@ -133,13 +134,12 @@ class PermissionRequestMetricsServiceTest {
         );
 
         // When
-        var csm = new ConnectionStatusMessage(
-                "cid",
-                "pid",
-                "dnId",
-                dataSourceInformation,
-                PermissionProcessStatus.CREATED
-        );
+        var csm = new ConnectionStatusMessage().withPermissionId("pid")
+                                               .withDataNeedId("dnId")
+                                               .withConnectionId("cid")
+                                               .withTimestamp(ZonedDateTime.now(ZoneOffset.UTC))
+                                               .withDataSourceInformation(dataSourceInformation)
+                                               .withStatus(Status.CREATED);
         csmPublisher.emit(csm);
 
         // Then

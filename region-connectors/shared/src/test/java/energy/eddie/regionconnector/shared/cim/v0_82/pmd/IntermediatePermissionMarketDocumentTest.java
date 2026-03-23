@@ -1,13 +1,13 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.cim.v0_82.pmd;
 
-import energy.eddie.api.agnostic.DataSourceInformation;
 import energy.eddie.api.agnostic.Granularity;
 import energy.eddie.api.agnostic.data.needs.EnergyType;
 import energy.eddie.api.agnostic.process.model.PermissionRequest;
 import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.DataSourceInformation;
 import energy.eddie.cim.v0_82.pmd.*;
 import energy.eddie.dataneeds.duration.RelativeDuration;
 import energy.eddie.dataneeds.needs.AccountingPointDataNeed;
@@ -60,10 +60,9 @@ class IntermediatePermissionMarketDocumentTest {
         LocalDate start = today.minusDays(10);
         LocalDate end = today.minusDays(5);
 
-        var dataSourceInformation = mock(DataSourceInformation.class);
-        when(dataSourceInformation.countryCode()).thenReturn("AT");
-        when(dataSourceInformation.permissionAdministratorId()).thenReturn("paID");
-        when(dataSourceInformation.regionConnectorId()).thenReturn("rc");
+        var dataSourceInformation = new DataSourceInformation().withCountryCode("AT")
+                                                               .withPermissionAdministratorId("paID")
+                                                               .withRegionConnectorId("rc");
 
         var permissionRequest = mock(PermissionRequest.class);
         when(permissionRequest.permissionId()).thenReturn("pid", "pid");
@@ -103,10 +102,9 @@ class IntermediatePermissionMarketDocumentTest {
         LocalDate end = today.minusDays(5);
         var timeInterval = new EsmpTimeInterval(start, end, ZoneOffset.UTC);
 
-        var dataSourceInformation = mock(DataSourceInformation.class);
-        when(dataSourceInformation.countryCode()).thenReturn(countryCode);
-        when(dataSourceInformation.permissionAdministratorId()).thenReturn("paID");
-        when(dataSourceInformation.regionConnectorId()).thenReturn("rc");
+        var dataSourceInformation = new DataSourceInformation().withCountryCode(countryCode)
+                                                               .withPermissionAdministratorId("paID")
+                                                               .withRegionConnectorId("rc");
 
         var permissionRequest = mock(PermissionRequest.class);
         when(permissionRequest.permissionId()).thenReturn("pid", "pid");
@@ -192,10 +190,9 @@ class IntermediatePermissionMarketDocumentTest {
         var start = today.minusDays(10);
         var end = today.minusDays(5);
 
-        var dataSourceInformation = mock(DataSourceInformation.class);
-        when(dataSourceInformation.countryCode()).thenReturn("AT");
-        when(dataSourceInformation.permissionAdministratorId()).thenReturn("paID");
-        when(dataSourceInformation.regionConnectorId()).thenReturn("rc");
+        var dataSourceInformation = new DataSourceInformation().withCountryCode("AT")
+                                                               .withPermissionAdministratorId("paID")
+                                                               .withRegionConnectorId("rc");
 
         var permissionRequest = mock(PermissionRequest.class);
         when(permissionRequest.permissionId()).thenReturn("pid", "pid");

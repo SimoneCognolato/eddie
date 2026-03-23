@@ -53,12 +53,15 @@
         "string"
       ]
     },
-    "additionalInformation": {
+    "extension": {
       "description": "Any additional information about the permission request, does not follow any schema.",
       "type": [
-        "object",
-        "null"
-      ]
+        "null",
+        "array"
+      ],
+      "items": {
+        "$ref": "shared.json#/$defs/keyValuePair"
+      }
     }
   },
   "required": [
@@ -67,8 +70,6 @@
     "dataNeedId",
     "dataSourceInformation",
     "timestamp",
-    "status",
-    "message",
-    "additionalInformation"
+    "status"
   ]
 }

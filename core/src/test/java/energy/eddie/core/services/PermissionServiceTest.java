@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.core.services;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
 import energy.eddie.api.agnostic.ConnectionStatusMessageProvider;
-import energy.eddie.api.agnostic.DataSourceInformation;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.Status;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -40,16 +40,18 @@ class PermissionServiceTest {
                     .then(() -> {
                         service.registerProvider(provider1);
 
-                        sink1.tryEmitNext(new ConnectionStatusMessage("one",
-                                                                      "one",
-                                                                      "one",
-                                                                      mock(DataSourceInformation.class),
-                                                                      PermissionProcessStatus.CREATED));
-                        sink1.tryEmitNext(new ConnectionStatusMessage("three",
-                                                                      "three",
-                                                                      "three",
-                                                                      mock(DataSourceInformation.class),
-                                                                      PermissionProcessStatus.INVALID));
+                        sink1.tryEmitNext(new ConnectionStatusMessage().withConnectionId("one")
+                                                                       .withPermissionId("one")
+                                                                       .withDataNeedId("one")
+                                                                       .withDataSourceInformation(mock(
+                                                                               DataSourceInformation.class))
+                                                                       .withStatus(Status.CREATED));
+                        sink1.tryEmitNext(new ConnectionStatusMessage().withConnectionId("three")
+                                                                       .withPermissionId("three")
+                                                                       .withDataNeedId("three")
+                                                                       .withDataSourceInformation(mock(
+                                                                               DataSourceInformation.class))
+                                                                       .withStatus(Status.INVALID));
                     })
                     // Then
                     .expectNextCount(2)
@@ -57,16 +59,18 @@ class PermissionServiceTest {
                     .then(() -> {
                         service.registerProvider(provider2);
 
-                        sink2.tryEmitNext(new ConnectionStatusMessage("two",
-                                                                      "two",
-                                                                      "two",
-                                                                      mock(DataSourceInformation.class),
-                                                                      PermissionProcessStatus.VALIDATED));
-                        sink1.tryEmitNext(new ConnectionStatusMessage("four",
-                                                                      "four",
-                                                                      "four",
-                                                                      mock(DataSourceInformation.class),
-                                                                      PermissionProcessStatus.INVALID));
+                        sink2.tryEmitNext(new ConnectionStatusMessage().withConnectionId("two")
+                                                                       .withPermissionId("two")
+                                                                       .withDataNeedId("two")
+                                                                       .withDataSourceInformation(mock(
+                                                                               DataSourceInformation.class))
+                                                                       .withStatus(Status.VALIDATED));
+                        sink1.tryEmitNext(new ConnectionStatusMessage().withConnectionId("four")
+                                                                       .withPermissionId("four")
+                                                                       .withDataNeedId("four")
+                                                                       .withDataSourceInformation(mock(
+                                                                               DataSourceInformation.class))
+                                                                       .withStatus(Status.INVALID));
                     })
                     .expectNextCount(2)
                     // Then

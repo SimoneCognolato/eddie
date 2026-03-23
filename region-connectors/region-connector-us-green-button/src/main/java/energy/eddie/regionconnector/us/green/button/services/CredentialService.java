@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.us.green.button.services;
@@ -50,7 +50,7 @@ public class CredentialService {
         if (creds.refreshToken() == null) {
             return Mono.error(new NoRefreshTokenException());
         }
-        var companyId = permissionRequest.dataSourceInformation().permissionAdministratorId();
+        var companyId = permissionRequest.dataSourceInformation().getPermissionAdministratorId();
         try {
             var oAuthTokenClient = factory.create(companyId, permissionRequest.jumpOffUrl().orElseThrow());
             var res = oAuthTokenClient.accessToken(new AccessTokenWithRefreshTokenRequest(creds.refreshToken()));
@@ -79,7 +79,7 @@ public class CredentialService {
             UsGreenButtonPermissionRequest permissionRequest,
             String code
     ) throws MissingClientSecretException, MissingClientIdException, MissingApiTokenException {
-        var companyId = permissionRequest.dataSourceInformation().permissionAdministratorId();
+        var companyId = permissionRequest.dataSourceInformation().getPermissionAdministratorId();
         var oAuthTokenClient = factory.create(companyId, permissionRequest.jumpOffUrl().orElseThrow());
         var accessTokenRequest = new AccessTokenWithCodeRequest(code, config.redirectUri());
 

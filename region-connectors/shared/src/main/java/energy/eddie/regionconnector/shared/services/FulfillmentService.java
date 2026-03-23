@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.services;
@@ -25,13 +25,13 @@ public class FulfillmentService {
 
     public void tryFulfillPermissionRequest(PermissionRequest permissionRequest) {
         LOGGER.atInfo()
-              .addArgument(() -> permissionRequest.dataSourceInformation().regionConnectorId())
+              .addArgument(() -> permissionRequest.dataSourceInformation().getRegionConnectorId())
               .addArgument(permissionRequest::permissionId)
               .log("{}: Fulfilling permission request {}");
         outbox.commit(permissionEventCtor.create(permissionRequest.permissionId(),
                                                  PermissionProcessStatus.FULFILLED));
         LOGGER.atInfo()
-              .addArgument(() -> permissionRequest.dataSourceInformation().regionConnectorId())
+              .addArgument(() -> permissionRequest.dataSourceInformation().getRegionConnectorId())
               .addArgument(permissionRequest::permissionId)
               .log("{}: Permission request {} fulfilled");
     }

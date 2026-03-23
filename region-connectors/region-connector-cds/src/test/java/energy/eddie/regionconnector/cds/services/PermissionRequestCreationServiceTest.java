@@ -69,7 +69,7 @@ class PermissionRequestCreationServiceTest {
         assertEquals(List.of(new AttributeError("cdsId", "Unknown permission administrator")), malformedEvent.errors());
         var createdEvent = assertInstanceOf(CreatedEvent.class, eventCaptor.getAllValues().getFirst());
         assertAll(
-                () -> assertEquals("0", createdEvent.getDataSourceInformation().permissionAdministratorId()),
+                () -> assertEquals("0", createdEvent.getDataSourceInformation().getPermissionAdministratorId()),
                 () -> assertEquals("cid", createdEvent.connectionId()),
                 () -> assertEquals("dnid", createdEvent.dataNeedId())
         );
