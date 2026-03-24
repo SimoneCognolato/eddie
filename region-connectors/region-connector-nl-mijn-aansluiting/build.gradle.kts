@@ -129,7 +129,7 @@ val eancodeboekVerifyTask = tasks.register<Verify>("verifyEANCodeboekOpenApiSpec
 
 openApiGenerate {
     generatorName.set("java")
-    inputSpec.set(eanCodeboekOpenApiFileLocation.get().asFile.absolutePath)
+    inputSpec.set(eanCodeboekOpenApiFileLocation.get().asFile.toURI().toString())
     outputDir.set(generatedSwaggerJavaDir)
     modelPackage.set("energy.eddie.regionconnector.nl.mijn.aansluiting.client.model")
     library.set("webclient")
