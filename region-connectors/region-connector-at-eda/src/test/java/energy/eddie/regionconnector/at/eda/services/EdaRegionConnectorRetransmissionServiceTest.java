@@ -5,7 +5,7 @@ package energy.eddie.regionconnector.at.eda.services;
 
 import energy.eddie.api.agnostic.retransmission.RetransmissionRequest;
 import energy.eddie.api.agnostic.retransmission.result.*;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
 import energy.eddie.regionconnector.at.eda.EdaAdapter;
 import energy.eddie.regionconnector.at.eda.EdaRegionConnectorMetadata;

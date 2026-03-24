@@ -4,7 +4,7 @@
 package energy.eddie.regionconnector.shared.cim.v0_82.pmd;
 
 import energy.eddie.api.agnostic.process.model.PermissionRequest;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.cim.v0_82.pmd.*;
 import energy.eddie.dataneeds.needs.AccountingPointDataNeed;
 import energy.eddie.dataneeds.needs.CESUJoinRequestDataNeed;

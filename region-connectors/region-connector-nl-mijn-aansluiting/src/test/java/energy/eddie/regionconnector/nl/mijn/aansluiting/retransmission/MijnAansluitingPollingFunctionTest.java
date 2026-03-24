@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2025-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.nl.mijn.aansluiting.retransmission;
@@ -9,7 +9,7 @@ import energy.eddie.api.agnostic.retransmission.result.DataNotAvailable;
 import energy.eddie.api.agnostic.retransmission.result.Failure;
 import energy.eddie.api.agnostic.retransmission.result.RetransmissionResult;
 import energy.eddie.api.agnostic.retransmission.result.Success;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.nl.mijn.aansluiting.permission.request.MijnAansluitingPermissionRequest;
 import energy.eddie.regionconnector.nl.mijn.aansluiting.services.PollingService;
 import org.assertj.core.api.InstanceOfAssertFactories;

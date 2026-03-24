@@ -3,9 +3,9 @@
 
 package energy.eddie.core.services.agnostic;
 
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
 import energy.eddie.api.agnostic.opaque.RegionConnectorOpaqueEnvelopeService;
 import energy.eddie.api.agnostic.outbound.OpaqueEnvelopeOutboundConnector;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

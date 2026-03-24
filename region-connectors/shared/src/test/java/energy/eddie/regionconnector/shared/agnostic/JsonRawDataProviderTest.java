@@ -1,11 +1,11 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.agnostic;
 
 import energy.eddie.api.agnostic.IdentifiablePayload;
 import energy.eddie.api.agnostic.process.model.PermissionRequest;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.shared.permission.requests.SimplePermissionRequest;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;

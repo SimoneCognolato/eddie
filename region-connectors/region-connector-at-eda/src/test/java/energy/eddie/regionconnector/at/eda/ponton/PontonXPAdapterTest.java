@@ -8,7 +8,7 @@ import de.ponton.xp.adapter.api.domainvalues.*;
 import de.ponton.xp.adapter.api.domainvalues.internal.StatusMetaDataImpl;
 import de.ponton.xp.adapter.api.messages.OutboundMessageStatusUpdate;
 import de.ponton.xp.adapter.api.messages.internal.OutboundMessageStatusUpdateImpl;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.eda.SimplePermissionRequest;
 import energy.eddie.regionconnector.at.eda.TransmissionException;
 import energy.eddie.regionconnector.at.eda.dto.*;

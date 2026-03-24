@@ -3,8 +3,8 @@
 
 package energy.eddie.core.web;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.core.security.JwtIssuerFilter;
 import energy.eddie.core.services.PermissionService;
 import org.junit.jupiter.api.Test;

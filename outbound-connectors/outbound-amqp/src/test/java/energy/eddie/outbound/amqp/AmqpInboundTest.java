@@ -5,7 +5,7 @@ package energy.eddie.outbound.amqp;
 
 import com.rabbitmq.client.amqp.Connection;
 import com.rabbitmq.client.amqp.Publisher;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.cim.serde.MessageSerde;
 import energy.eddie.cim.serde.SerializationException;
 import energy.eddie.cim.serde.XmlMessageSerde;

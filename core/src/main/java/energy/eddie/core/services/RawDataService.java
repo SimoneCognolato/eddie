@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.core.services;
 
-import energy.eddie.api.agnostic.RawDataMessage;
 import energy.eddie.api.agnostic.RawDataProvider;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.regionconnector.shared.agnostic.OnRawDataMessagesEnabled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

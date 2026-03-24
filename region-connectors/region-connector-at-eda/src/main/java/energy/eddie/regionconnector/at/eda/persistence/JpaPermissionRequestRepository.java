@@ -3,7 +3,7 @@
 
 package energy.eddie.regionconnector.at.eda.persistence;
 
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequest;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestProjection;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
@@ -153,7 +153,7 @@ public interface JpaPermissionRequestRepository extends PagingAndSortingReposito
      * This method returns all permission requests that are associated with the given metering point, where:
      * <ul style="bullet">
      *     <li>the date is between start and end of the permission request</li>
-     *     <li>the state is either {@link energy.eddie.api.v0.PermissionProcessStatus#SENT_TO_PERMISSION_ADMINISTRATOR} or after {@link energy.eddie.api.v0.PermissionProcessStatus#ACCEPTED} </li>
+     *     <li>the state is either {@link PermissionProcessStatus#SENT_TO_PERMISSION_ADMINISTRATOR} or after {@link PermissionProcessStatus#ACCEPTED} </li>
      * </ul>
      * For more info about the states consult "permission-process-model.md"
      *

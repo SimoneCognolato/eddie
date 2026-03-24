@@ -3,10 +3,10 @@
 
 package energy.eddie.outbound.kafka;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.RawDataMessage;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.cim.serde.MessageSerde;
 import energy.eddie.cim.serde.SerdeFactory;
 import energy.eddie.cim.serde.SerdeInitializationException;

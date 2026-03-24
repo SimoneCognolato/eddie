@@ -1,12 +1,15 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.cim.serde;
 
 
+import energy.eddie.cim.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.SimpleDataSourceInformation;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.dataformat.xml.XmlMapper;
 import tools.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 
@@ -26,7 +29,11 @@ class ObjectMapperCreator {
             case XML -> XmlMapper.builder();
             case JSON -> JsonMapper.builder();
         };
+
+        var simpleModule = new SimpleModule()
+                .addAbstractTypeMapping(DataSourceInformation.class, SimpleDataSourceInformation.class);
         return builder.addModule(new JakartaXmlBindAnnotationModule())
+                      .addModule(simpleModule)
                       .build();
     }
 }

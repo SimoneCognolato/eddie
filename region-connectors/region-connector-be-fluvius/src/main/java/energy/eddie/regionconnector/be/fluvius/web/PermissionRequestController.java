@@ -3,7 +3,7 @@
 
 package energy.eddie.regionconnector.be.fluvius.web;
 
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.dataneeds.exceptions.DataNeedNotFoundException;
 import energy.eddie.dataneeds.exceptions.UnsupportedDataNeedException;
 import energy.eddie.regionconnector.be.fluvius.dtos.CreatedPermissionRequest;

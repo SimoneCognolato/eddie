@@ -3,7 +3,7 @@
 
 package energy.eddie.regionconnector.nl.mijn.aansluiting.web;
 
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.dataneeds.exceptions.DataNeedNotFoundException;
 import energy.eddie.dataneeds.exceptions.UnsupportedDataNeedException;
 import energy.eddie.regionconnector.nl.mijn.aansluiting.dtos.CreatedPermissionRequest;

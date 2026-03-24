@@ -1,13 +1,13 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.simulation.providers;
 
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
 import energy.eddie.api.agnostic.ConnectionStatusMessageProvider;
 import energy.eddie.api.cim.config.CommonInformationModelConfiguration;
 import energy.eddie.api.v0_82.PermissionMarketDocumentProvider;
 import energy.eddie.api.v0_82.ValidatedHistoricalDataEnvelopeProvider;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
 import energy.eddie.cim.v0_82.pmd.PermissionEnvelope;
 import energy.eddie.cim.v0_82.vhd.ValidatedHistoricalDataEnvelope;
 import energy.eddie.regionconnector.simulation.dtos.SimulatedMeterReading;

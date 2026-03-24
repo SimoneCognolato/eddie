@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.cim.v0_82.ap;
 
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.cim.v0_82.ap.AccountingPointMarketDocumentComplexType;
 import energy.eddie.regionconnector.shared.cim.v0_82.DocumentType;
 import energy.eddie.regionconnector.shared.permission.requests.SimplePermissionRequest;

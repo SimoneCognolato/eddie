@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.dk.energinet.services;
 
 import energy.eddie.api.agnostic.process.model.events.PermissionEvent;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.dk.energinet.exceptions.ApiResponseException;
 import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
 import jakarta.annotation.Nullable;
@@ -20,8 +20,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
-import static energy.eddie.api.v0.PermissionProcessStatus.REVOKED;
-import static energy.eddie.api.v0.PermissionProcessStatus.UNFULFILLABLE;
+import static energy.eddie.cim.agnostic.PermissionProcessStatus.REVOKED;
+import static energy.eddie.cim.agnostic.PermissionProcessStatus.UNFULFILLABLE;
 import static energy.eddie.regionconnector.dk.energinet.filter.EnerginetResponseStatusCodes.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;

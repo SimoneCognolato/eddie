@@ -5,7 +5,7 @@ package energy.eddie.aiida.adapters.datasource.inbound.ack.opaque;
 
 import energy.eddie.aiida.adapters.datasource.inbound.ack.BaseAckFormatterStrategy;
 import energy.eddie.aiida.models.record.InboundRecord;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.cim.v1_12.ack.AcknowledgementEnvelope;
 import energy.eddie.cim.v1_12.ack.AcknowledgementMarketDocument;
 import energy.eddie.cim.v1_12.ack.MessageDocumentHeader;

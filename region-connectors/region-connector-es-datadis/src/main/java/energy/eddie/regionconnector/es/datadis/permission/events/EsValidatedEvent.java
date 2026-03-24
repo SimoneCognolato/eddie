@@ -3,7 +3,7 @@
 
 package energy.eddie.regionconnector.es.datadis.permission.events;
 
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.es.datadis.dtos.AllowedGranularity;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;

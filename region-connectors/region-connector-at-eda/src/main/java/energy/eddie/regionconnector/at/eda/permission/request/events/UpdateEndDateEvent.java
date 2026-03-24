@@ -4,7 +4,7 @@
 package energy.eddie.regionconnector.at.eda.permission.request.events;
 
 import energy.eddie.api.agnostic.process.model.events.InternalPermissionEvent;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import jakarta.persistence.Entity;
 
 import java.time.LocalDate;

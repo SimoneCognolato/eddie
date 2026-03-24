@@ -3,7 +3,7 @@
 
 package energy.eddie.regionconnector.nl.mijn.aansluiting.permission;
 
-import energy.eddie.api.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.DataSourceInformation;
 import energy.eddie.regionconnector.nl.mijn.aansluiting.MijnAansluitingRegionConnectorMetadata;
 import jakarta.persistence.Embeddable;
 

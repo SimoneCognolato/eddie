@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: 2023-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.at.api;
 
 import energy.eddie.api.agnostic.process.model.persistence.PermissionRequestRepository;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import jakarta.annotation.Nullable;
 
 import java.time.LocalDate;
@@ -44,8 +44,8 @@ public interface AtPermissionRequestRepository extends PermissionRequestReposito
     );
 
     /**
-     * This method returns all {@link energy.eddie.api.v0.PermissionProcessStatus#ACCEPTED} and
-     * {@link energy.eddie.api.v0.PermissionProcessStatus#FULFILLED} permission requests that are associated with the
+     * This method returns all {@link PermissionProcessStatus#ACCEPTED} and
+     * {@link PermissionProcessStatus#FULFILLED} permission requests that are associated with the
      * given metering point and where the date is between start and end of the permission request
      *
      * @param meteringPointId for which to get permission requests

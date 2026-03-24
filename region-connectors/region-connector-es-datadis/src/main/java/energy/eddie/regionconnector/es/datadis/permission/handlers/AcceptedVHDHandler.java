@@ -4,7 +4,7 @@
 package energy.eddie.regionconnector.es.datadis.permission.handlers;
 
 import energy.eddie.api.agnostic.Granularity;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.es.datadis.dtos.AllowedGranularity;
 import energy.eddie.regionconnector.es.datadis.permission.events.EsAcceptedEventForVHD;
 import energy.eddie.regionconnector.es.datadis.permission.events.EsGranularityEvent;

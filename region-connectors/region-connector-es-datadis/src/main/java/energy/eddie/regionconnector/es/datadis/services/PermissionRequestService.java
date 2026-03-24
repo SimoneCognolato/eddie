@@ -8,7 +8,7 @@ import energy.eddie.api.agnostic.data.needs.*;
 import energy.eddie.api.agnostic.data.needs.MultipleDataNeedCalculationResult.CalculationResult;
 import energy.eddie.api.agnostic.data.needs.MultipleDataNeedCalculationResult.InvalidDataNeedCombination;
 import energy.eddie.api.agnostic.process.model.validation.AttributeError;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.dataneeds.exceptions.DataNeedNotFoundException;
 import energy.eddie.dataneeds.exceptions.UnsupportedDataNeedException;
 import energy.eddie.dataneeds.needs.DataNeed;

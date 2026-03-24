@@ -3,8 +3,8 @@
 
 package energy.eddie.outbound.kafka;
 
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
 import energy.eddie.api.agnostic.outbound.OutboundConnector;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.cim.serde.MessageSerde;
 import energy.eddie.cim.serde.SerdeFactory;
 import energy.eddie.cim.serde.SerdeInitializationException;

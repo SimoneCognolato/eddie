@@ -12,7 +12,7 @@ import energy.eddie.api.agnostic.data.needs.DataNeedCalculationService;
 import energy.eddie.api.agnostic.data.needs.DataNeedNotFoundResult;
 import energy.eddie.api.agnostic.data.needs.DataNeedNotSupportedResult;
 import energy.eddie.api.agnostic.process.model.PermissionStateTransitionException;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.dataneeds.exceptions.DataNeedNotFoundException;
 import energy.eddie.dataneeds.exceptions.UnsupportedDataNeedException;
 import energy.eddie.dataneeds.needs.DataNeed;
@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static energy.eddie.api.v0.PermissionProcessStatus.*;
+import static energy.eddie.cim.agnostic.PermissionProcessStatus.*;
 import static energy.eddie.regionconnector.aiida.AiidaRegionConnectorMetadata.REGION_CONNECTOR_ID;
 import static energy.eddie.regionconnector.aiida.web.PermissionRequestController.PATH_HANDSHAKE_PERMISSION_REQUEST;
 import static energy.eddie.regionconnector.shared.utils.CommonPaths.ALL_REGION_CONNECTORS_BASE_URL_PATH;

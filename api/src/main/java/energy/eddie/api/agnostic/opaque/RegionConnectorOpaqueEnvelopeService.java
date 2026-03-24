@@ -3,6 +3,8 @@
 
 package energy.eddie.api.agnostic.opaque;
 
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
+
 public interface RegionConnectorOpaqueEnvelopeService {
     /**
      * This method is called when an opaque envelope arrives at the region connector.
