@@ -6,6 +6,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>EDDIE Button</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Source remote eddie-components when running with Thymeleaf -->
     <!--/*/
@@ -28,7 +29,7 @@
         margin-top: 1.5rem;
         display: grid;
         justify-items: start;
-        gap: 0.5rem;
+        gap: 1rem;
       }
 
       span + input,
@@ -39,14 +40,28 @@
     </style>
   </head>
   <body>
+    <p>
+      The demo button can be used to test the EDDIE button and region connector
+      elements during development.
+    </p>
+    <!-- prettier-ignore -->
+    <p>
+      Input fields apply attributes documented in the
+      <a href="https://architecture.eddie.energy/framework/1-running/eddie-button/eddie-button.html">Operation Manual</a>.
+    </p>
     <form>
       <label>
-        <span>Data need</span>
+        <span>Data need (required)</span>
         <select autocomplete="off" multiple name="data-need-id"></select>
+        <small>
+          Multiple data needs can be selected, but not all region connectors
+          support multiple data needs.
+        </small>
       </label>
       <label>
-        <span>Connection ID</span>
+        <span>Connection ID (required)</span>
         <input type="text" name="connection-id" value="1" />
+        <small>For the eligible party to identify generated requests.</small>
       </label>
       <label>
         <span>Permission administrator</span>
@@ -67,6 +82,10 @@
       <label>
         <span>Core URL</span>
         <input type="text" name="core-url" th:value="${publicUrl}" />
+        <small>
+          Overrides the core URL in case your EDDIE instance is not on the same
+          host as the button.
+        </small>
       </label>
     </form>
 
