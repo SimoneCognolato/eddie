@@ -8,7 +8,7 @@ import at.ebutilities.schemata.customerprocesses.ecmplist._01p10.MPListData;
 import at.ebutilities.schemata.customerprocesses.ecmplist._01p10.MPTimeData;
 import at.ebutilities.schemata.customerprocesses.ecmplist._01p10.ProcessDirectory;
 import energy.eddie.api.agnostic.data.needs.EnergyDirection;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.eda.dto.IdentifiableECMPList;
 import energy.eddie.regionconnector.at.eda.permission.request.EdaPermissionRequestBuilder;
 import energy.eddie.regionconnector.at.eda.permission.request.events.UpdateEndDateEvent;

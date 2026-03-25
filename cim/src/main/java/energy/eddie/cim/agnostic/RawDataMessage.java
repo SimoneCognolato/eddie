@@ -1,11 +1,8 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
-package energy.eddie.api.agnostic;
+package energy.eddie.cim.agnostic;
 
-import energy.eddie.api.agnostic.process.model.PermissionRequest;
-
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 /**
@@ -26,21 +23,4 @@ public record RawDataMessage(
         ZonedDateTime timestamp,
         String rawPayload
 ) implements MessageWithHeaders {
-    /**
-     * Utility constructor to create a RawDataMessage from a permission request and payload. Will always use the current
-     * ZonedDateTime for {@code timestamp}.
-     *
-     * @param permissionRequest used to populate all fields except timestamp and rawPayload
-     * @param rawPayload        the payload
-     */
-    public RawDataMessage(PermissionRequest permissionRequest, String rawPayload) {
-        this(
-                permissionRequest.permissionId(),
-                permissionRequest.connectionId(),
-                permissionRequest.dataNeedId(),
-                permissionRequest.dataSourceInformation(),
-                ZonedDateTime.now(ZoneOffset.UTC),
-                rawPayload
-        );
-    }
 }

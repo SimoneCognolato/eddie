@@ -6,7 +6,7 @@ package energy.eddie.regionconnector.at.eda.ponton;
 import de.ponton.xp.adapter.api.ConnectionException;
 import de.ponton.xp.adapter.api.domainvalues.InboundStatusEnum;
 import de.ponton.xp.adapter.api.messages.OutboundMessageStatusUpdate;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.eda.EdaAdapter;
 import energy.eddie.regionconnector.at.eda.TransmissionException;
 import energy.eddie.regionconnector.at.eda.dto.*;

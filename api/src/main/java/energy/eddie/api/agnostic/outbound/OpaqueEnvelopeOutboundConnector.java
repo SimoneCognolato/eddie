@@ -3,7 +3,7 @@
 
 package energy.eddie.api.agnostic.outbound;
 
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import reactor.core.publisher.Flux;
 
 /**

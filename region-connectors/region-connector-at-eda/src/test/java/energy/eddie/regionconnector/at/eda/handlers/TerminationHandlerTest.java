@@ -4,7 +4,7 @@
 package energy.eddie.regionconnector.at.eda.handlers;
 
 import energy.eddie.api.agnostic.data.needs.EnergyDirection;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;
 import energy.eddie.regionconnector.at.eda.EdaAdapter;
 import energy.eddie.regionconnector.at.eda.TransmissionException;
@@ -27,7 +27,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import static energy.eddie.api.v0.PermissionProcessStatus.FAILED_TO_TERMINATE;
+import static energy.eddie.cim.agnostic.PermissionProcessStatus.FAILED_TO_TERMINATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

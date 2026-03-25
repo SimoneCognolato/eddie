@@ -150,7 +150,7 @@ The following is an example of a peristable event.
 
 ```java
 import energy.eddie.api.agnostic.process.model.events.PermissionEvent;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import jakarta.persistence.*;
 
 import java.time.ZoneOffset;

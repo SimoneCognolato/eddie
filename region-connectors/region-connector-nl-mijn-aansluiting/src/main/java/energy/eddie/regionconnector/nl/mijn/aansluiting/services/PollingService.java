@@ -4,7 +4,7 @@
 package energy.eddie.regionconnector.nl.mijn.aansluiting.services;
 
 import energy.eddie.api.agnostic.data.needs.EnergyType;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.dataneeds.needs.ValidatedHistoricalDataDataNeed;
 import energy.eddie.dataneeds.services.DataNeedsService;
 import energy.eddie.regionconnector.nl.mijn.aansluiting.client.ApiClient;

@@ -5,7 +5,7 @@ package energy.eddie.regionconnector.nl.mijn.aansluiting.services;
 
 import energy.eddie.api.agnostic.Granularity;
 import energy.eddie.api.agnostic.data.needs.EnergyType;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.dataneeds.duration.RelativeDuration;
 import energy.eddie.dataneeds.needs.AccountingPointDataNeed;
 import energy.eddie.dataneeds.needs.ValidatedHistoricalDataDataNeed;
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static energy.eddie.api.v0.PermissionProcessStatus.*;
+import static energy.eddie.cim.agnostic.PermissionProcessStatus.*;
 import static energy.eddie.regionconnector.nl.mijn.aansluiting.MijnAansluitingRegionConnectorMetadata.NL_ZONE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;

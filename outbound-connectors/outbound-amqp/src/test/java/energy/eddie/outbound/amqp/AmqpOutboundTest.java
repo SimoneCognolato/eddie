@@ -4,9 +4,9 @@
 package energy.eddie.outbound.amqp;
 
 import com.rabbitmq.client.amqp.Connection;
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
-import energy.eddie.api.agnostic.RawDataMessage;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.cim.serde.XmlMessageSerde;
 import energy.eddie.cim.v0_82.ap.AccountingPointEnvelope;
 import energy.eddie.cim.v0_82.pmd.MessageDocumentHeaderComplexType;

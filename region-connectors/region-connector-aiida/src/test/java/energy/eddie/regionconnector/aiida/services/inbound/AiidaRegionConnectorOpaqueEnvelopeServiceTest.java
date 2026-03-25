@@ -4,7 +4,7 @@
 package energy.eddie.regionconnector.aiida.services.inbound;
 
 import energy.eddie.api.agnostic.aiida.AiidaSchema;
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.regionconnector.aiida.services.MqttService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

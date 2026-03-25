@@ -1,11 +1,12 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.fi.fingrid.services;
 
 import energy.eddie.api.agnostic.IdentifiablePayload;
-import energy.eddie.api.agnostic.RawDataMessage;
+import energy.eddie.api.agnostic.RawDataMessageFactory;
 import energy.eddie.api.agnostic.RawDataProvider;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import energy.eddie.regionconnector.fi.fingrid.client.model.CustomerDataResponse;
 import energy.eddie.regionconnector.fi.fingrid.client.model.TimeSeriesResponse;
 import energy.eddie.regionconnector.fi.fingrid.permission.events.MeterReadingEvent;
@@ -74,7 +75,8 @@ public class EnergyDataService implements RawDataProvider {
                 .mapNotNull(id -> {
                     try {
                         var permissionRequest = id.permissionRequest();
-                        return new RawDataMessage(permissionRequest, objectMapper.writeValueAsString(id.payload()));
+                        return RawDataMessageFactory.create(permissionRequest,
+                                                            objectMapper.writeValueAsString(id.payload()));
                     } catch (Exception e) {
                         LOGGER.error("Error while serializing {} data", id.payload(), e);
                         return null;

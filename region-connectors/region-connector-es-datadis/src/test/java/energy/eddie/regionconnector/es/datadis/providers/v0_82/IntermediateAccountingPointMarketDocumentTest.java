@@ -5,8 +5,8 @@ package energy.eddie.regionconnector.es.datadis.providers.v0_82;
 
 import energy.eddie.api.agnostic.Granularity;
 import energy.eddie.api.cim.config.PlainCommonInformationModelConfiguration;
-import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.cim.CommonInformationModelVersions;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.cim.v0_82.ap.*;
 import energy.eddie.regionconnector.es.datadis.ContractDetailsProvider;
 import energy.eddie.regionconnector.es.datadis.DatadisPermissionRequestBuilder;

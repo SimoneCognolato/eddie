@@ -1,10 +1,8 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
-package energy.eddie.api.agnostic;
+package energy.eddie.cim.agnostic;
 
-import energy.eddie.api.agnostic.process.model.PermissionRequest;
-import energy.eddie.api.v0.PermissionProcessStatus;
 import jakarta.annotation.Nullable;
 import tools.jackson.databind.JsonNode;
 
@@ -34,16 +32,6 @@ public record ConnectionStatusMessage(
         String message,
         @Nullable JsonNode additionalInformation
 ) implements MessageWithHeaders {
-    public ConnectionStatusMessage(PermissionRequest pr) {
-        this(
-                pr.connectionId(),
-                pr.permissionId(),
-                pr.dataNeedId(),
-                pr.dataSourceInformation(),
-                pr.status()
-        );
-    }
-
     public ConnectionStatusMessage(
             String connectionId,
             String permissionId,

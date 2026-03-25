@@ -3,8 +3,8 @@
 
 package energy.eddie.outbound.kafka.agnostic;
 
-import energy.eddie.api.agnostic.opaque.OpaqueEnvelope;
 import energy.eddie.api.agnostic.outbound.OpaqueEnvelopeOutboundConnector;
+import energy.eddie.cim.agnostic.OpaqueEnvelope;
 import energy.eddie.outbound.shared.TopicStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

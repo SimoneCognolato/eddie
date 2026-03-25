@@ -3,13 +3,16 @@
 
 package energy.eddie.outbound.shared;
 
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
+import energy.eddie.cim.agnostic.RawDataMessage;
+
 public class TopicConfiguration {
     private final String eddieId;
 
     public TopicConfiguration(String eddieId) {this.eddieId = eddieId;}
 
     /**
-     * Endpoint for {@link energy.eddie.api.agnostic.RawDataMessage}.
+     * Endpoint for {@link RawDataMessage}.
      * Used to emit messages to the eligible party.
      */
     public String rawDataMessage() {
@@ -19,7 +22,7 @@ public class TopicConfiguration {
     }
 
     /**
-     * Endpoint for {@link energy.eddie.api.agnostic.ConnectionStatusMessage}.
+     * Endpoint for {@link ConnectionStatusMessage}.
      * Used to emit messages to the eligible party.
      */
     public String connectionStatusMessage() {

@@ -284,7 +284,7 @@ More information can be found in [the internal architecture section](./internal-
 package energy.eddie.regionconnector.foo.bar.permission.events;
 
 import energy.eddie.api.agnostic.process.model.events.PermissionEvent;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import jakarta.persistence.*;
 
 import java.time.ZoneOffset;
@@ -378,7 +378,7 @@ package energy.eddie.regionconnector.foo.bar.permission.request;
 
 import energy.eddie.api.agnostic.Granularity;
 import energy.eddie.api.agnostic.process.model.PermissionRequest;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 
@@ -425,7 +425,7 @@ This is often just a simple POJO with static attributes, since a lot of times th
 ```java
 package energy.eddie.regionconnector.foo.bar.permission.request;
 
-import energy.eddie.api.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.DataSourceInformation;
 import energy.eddie.regionconnector.foo.bar.FooBarRegionConnectorMetadata;
 
 public class FooBarDataSourceInformation implements DataSourceInformation {

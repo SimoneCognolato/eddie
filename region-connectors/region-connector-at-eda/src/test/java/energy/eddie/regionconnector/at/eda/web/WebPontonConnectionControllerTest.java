@@ -4,7 +4,7 @@
 package energy.eddie.regionconnector.at.eda.web;
 
 import de.ponton.xp.adapter.api.domainvalues.InboundStatusEnum;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.dataneeds.needs.AccountingPointDataNeed;
 import energy.eddie.regionconnector.at.eda.SimplePermissionRequest;
 import energy.eddie.regionconnector.at.eda.config.AtConfiguration;

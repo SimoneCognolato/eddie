@@ -1,10 +1,13 @@
+// SPDX-FileCopyrightText: 2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-License-Identifier: Apache-2.0
+
 package energy.eddie.regionconnector.de.eta.service;
 
-import energy.eddie.api.v0.PermissionProcessStatus;
-import energy.eddie.regionconnector.de.eta.config.DeEtaPlusConfiguration;
-import energy.eddie.regionconnector.de.eta.auth.EtaAuthService;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.regionconnector.de.eta.auth.AuthCallback;
 import energy.eddie.regionconnector.de.eta.auth.AuthTokenResponse;
+import energy.eddie.regionconnector.de.eta.auth.EtaAuthService;
+import energy.eddie.regionconnector.de.eta.config.DeEtaPlusConfiguration;
 import energy.eddie.regionconnector.de.eta.permission.request.DePermissionRequest;
 import energy.eddie.regionconnector.de.eta.permission.request.DePermissionRequestBuilder;
 import energy.eddie.regionconnector.de.eta.permission.request.events.AcceptedEvent;
@@ -14,11 +17,7 @@ import energy.eddie.regionconnector.shared.event.sourcing.Outbox;
 import energy.eddie.regionconnector.shared.exceptions.PermissionNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 

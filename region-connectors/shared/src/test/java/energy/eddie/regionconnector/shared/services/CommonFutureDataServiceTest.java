@@ -1,17 +1,17 @@
-// SPDX-FileCopyrightText: 2024-2025 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.services;
 
-import energy.eddie.api.agnostic.DataSourceInformation;
 import energy.eddie.api.agnostic.data.needs.AccountingPointDataNeedResult;
 import energy.eddie.api.agnostic.data.needs.DataNeedCalculationService;
 import energy.eddie.api.agnostic.data.needs.Timeframe;
 import energy.eddie.api.agnostic.data.needs.ValidatedHistoricalDataDataNeedResult;
 import energy.eddie.api.agnostic.process.model.MeterReadingPermissionRequest;
 import energy.eddie.api.agnostic.process.model.persistence.StatusPermissionRequestRepository;
-import energy.eddie.api.v0.PermissionProcessStatus;
 import energy.eddie.api.v0.RegionConnectorMetadata;
+import energy.eddie.cim.agnostic.DataSourceInformation;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.dataneeds.needs.DataNeed;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

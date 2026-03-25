@@ -5,7 +5,7 @@ package energy.eddie.regionconnector.at.eda.handlers;
 
 import energy.eddie.api.agnostic.data.needs.EnergyDirection;
 import energy.eddie.api.agnostic.process.model.events.PermissionEvent;
-import energy.eddie.api.v0.PermissionProcessStatus;
+import energy.eddie.cim.agnostic.PermissionProcessStatus;
 import energy.eddie.dataneeds.needs.AccountingPointDataNeed;
 import energy.eddie.dataneeds.services.DataNeedsService;
 import energy.eddie.regionconnector.at.api.AtPermissionRequestRepository;

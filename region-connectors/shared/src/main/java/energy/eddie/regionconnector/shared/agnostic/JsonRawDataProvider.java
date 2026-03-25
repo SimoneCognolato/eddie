@@ -1,11 +1,12 @@
-// SPDX-FileCopyrightText: 2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2024-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.regionconnector.shared.agnostic;
 
 import energy.eddie.api.agnostic.IdentifiablePayload;
-import energy.eddie.api.agnostic.RawDataMessage;
+import energy.eddie.api.agnostic.RawDataMessageFactory;
 import energy.eddie.api.agnostic.RawDataProvider;
+import energy.eddie.cim.agnostic.RawDataMessage;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ public class JsonRawDataProvider implements RawDataProvider {
     private RawDataMessage createRawDataMessage(IdentifiablePayload<?, ?> pair) {
         try {
             String rawString = objectMapper.writeValueAsString(pair.payload());
-            return new RawDataMessage(pair.permissionRequest(), rawString);
+            return RawDataMessageFactory.create(pair.permissionRequest(), rawString);
         } catch (JacksonException e) {
             LOGGER.warn("Error serializing metering data for region-connector {}", regionConnector, e);
             return null;

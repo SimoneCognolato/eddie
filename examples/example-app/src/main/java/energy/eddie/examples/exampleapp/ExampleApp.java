@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: 2023-2024 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
+// SPDX-FileCopyrightText: 2023-2026 The EDDIE Developers <eddie.developers@fh-hagenberg.at>
 // SPDX-License-Identifier: Apache-2.0
 
 package energy.eddie.examples.exampleapp;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import energy.eddie.api.agnostic.ConnectionStatusMessage;
 import energy.eddie.api.agnostic.ConnectionStatusMessageMixin;
+import energy.eddie.cim.agnostic.ConnectionStatusMessage;
 import energy.eddie.examples.exampleapp.kafka.KafkaListener;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
